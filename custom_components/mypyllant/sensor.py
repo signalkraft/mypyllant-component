@@ -28,13 +28,12 @@ async def async_setup_entry(
     hass: HomeAssistant, config: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up the sensor platform."""
-    name: str = config.data[CONF_NAME]
     coordinator: DataUpdateCoordinator = hass.data[DOMAIN][config.entry_id][
         "coordinator"
     ]
 
     sensors: list[SensorEntity] = []
-    sensors.append(MyPyllantOutdoorTemperatureSensor(name, coordinator))
+    sensors.append(MyPyllantOutdoorTemperatureSensor(coordinator))
 
     async_add_entities(sensors)
 
