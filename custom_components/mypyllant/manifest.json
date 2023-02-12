@@ -1,0 +1,11 @@
+{
+  "codeowners": ["@signalkraft"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/signalkraft/myPyllant",
+  "domain": "mypyllant",
+  "iot_class": "cloud_polling",
+  "name": "myPyllant",
+  "requirements": ["myPyllant==0.0.5"],
+  "version": "0.0.5"
+}
