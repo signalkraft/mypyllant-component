@@ -71,12 +71,12 @@ class MyPyllantUpdateCoordinator(DataUpdateCoordinator):
         )
 
     async def _async_update_data(self):
-        if self.api.session_expires < datetime.now() + timedelta(seconds=600):
-            _LOGGER.warning(f"Refreshing session for {self.api.username}")
+        if self.api.oauth_session_expires < datetime.now() + timedelta(seconds=600):
+            _LOGGER.info(f"Refreshing session for {self.api.username}")
             await self.hass.async_add_executor_job(self.api.refresh_token)
         else:
-            delta = self.api.session_expires - (datetime.now() + timedelta(seconds=600))
-            _LOGGER.warning(
+            delta = self.api.oauth_session_expires - (datetime.now() + timedelta(seconds=600))
+            _LOGGER.info(
                 f"Waiting {delta.seconds}s until refresh session for {self.api.username}"
             )
         data = [
