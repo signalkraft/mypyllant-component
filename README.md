@@ -6,6 +6,13 @@
 
 Home Assistant component that interfacts with the myVAILLANT API.
 
-Alpha, tested only with an aroTHERM plus heatpump, sensoCOMFORT VRC 720, and sensoNET VR 921.
+**Alpha, tested only with an aroTHERM plus heatpump, sensoCOMFORT VRC 720, and sensoNET VR 921.**
 
 Not affiliated with Vaillant, the developers take no responsibility for anything that happens to your Vaillant devices because of this library.
+
+## Installation
+1. [Install HACS](https://hacs.xyz/docs/setup/download)
+1. Add `https://github.com/signalkraft/mypyllant-component` as a [custom repository in HACS > Integrations](https://hacs.xyz/docs/faq/custom_repositories)
+1. Open the myVAILLANT integration in HACS and install it
+1. Go to Settings > Integrations and add myVAILLANT
+1. Sign in with the email & password you use in the myVAILLANT app
