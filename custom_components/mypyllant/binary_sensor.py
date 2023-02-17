@@ -16,7 +16,7 @@ from homeassistant.helpers.update_coordinator import (
 
 
 from .const import DOMAIN
-from . import MyPyllantUpdateCoordinator
+from . import SystemCoordinator
 from myPyllant.models import System, Circuit
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,8 +26,8 @@ async def async_setup_entry(
     hass: HomeAssistant, config: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up the sensor platform."""
-    coordinator: MyPyllantUpdateCoordinator = hass.data[DOMAIN][config.entry_id][
-        "coordinator"
+    coordinator: SystemCoordinator = hass.data[DOMAIN][config.entry_id][
+        "system_coordinator"
     ]
 
     sensors: list[BinarySensorEntity] = []
@@ -44,7 +44,7 @@ class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):
     def __init__(
         self,
         system_index: int,
-        coordinator: MyPyllantUpdateCoordinator,
+        coordinator: SystemCoordinator,
     ):
         super().__init__(coordinator)
         self.system_index = system_index
@@ -85,7 +85,7 @@ class CircuitEntity(CoordinatorEntity, BinarySensorEntity):
         self,
         system_index: int,
         circuit_index: int,
-        coordinator: MyPyllantUpdateCoordinator,
+        coordinator: SystemCoordinator,
     ):
         super().__init__(coordinator)
         self.system_index = system_index
@@ -116,7 +116,7 @@ class ControlError(SystemControlEntity):
     def __init__(
         self,
         system_index: int,
-        coordinator: MyPyllantUpdateCoordinator,
+        coordinator: SystemCoordinator,
     ):
         super().__init__(system_index, coordinator)
         self.entity_id = f"{DOMAIN}.control_error_{system_index}"
@@ -142,7 +142,7 @@ class ControlOnline(SystemControlEntity):
     def __init__(
         self,
         system_index: int,
-        coordinator: MyPyllantUpdateCoordinator,
+        coordinator: SystemCoordinator,
     ):
         super().__init__(system_index, coordinator)
         self.entity_id = f"{DOMAIN}.control_online_{system_index}"
@@ -169,7 +169,7 @@ class CircuitIsCoolingAllowed(CircuitEntity):
         self,
         system_index: int,
         circuit_index: int,
-        coordinator: MyPyllantUpdateCoordinator,
+        coordinator: SystemCoordinator,
     ):
         super().__init__(system_index, circuit_index, coordinator)
         self.entity_id = f"{DOMAIN}.circuit_is_cooling_allowed_{system_index}"
