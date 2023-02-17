@@ -464,7 +464,7 @@ class DomesticHotWaterOperationModeSensor(DomesticHotWaterSensor):
 
     @property
     def native_value(self):
-        return self.domestic_hot_water.operation_mode
+        return self.domestic_hot_water.operation_mode.display_value
 
     @property
     def entity_category(self) -> EntityCategory | None:
@@ -482,7 +482,7 @@ class DomesticHotWaterCurrentSpecialFunctionSensor(DomesticHotWaterSensor):
 
     @property
     def native_value(self):
-        return self.domestic_hot_water.current_special_function
+        return self.domestic_hot_water.current_special_function.display_value
 
     @property
     def entity_category(self) -> EntityCategory | None:
