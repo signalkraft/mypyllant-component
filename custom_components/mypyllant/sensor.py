@@ -87,6 +87,9 @@ async def async_setup_entry(
                 DomesticHotWaterTankTemperatureSensor(index, dhw_index, system_coordinator)
             )
             sensors.append(
+                DomesticHotWaterSetPointSensor(index, dhw_index, system_coordinator)
+            )
+            sensors.append(
                 DomesticHotWaterOperationModeSensor(index, dhw_index, system_coordinator)
             )
             sensors.append(
@@ -457,6 +460,24 @@ class DomesticHotWaterTankTemperatureSensor(DomesticHotWaterSensor):
         return f"{DOMAIN}_dhw_tank_temperature_{self.system_index}_{self.dhw_index}"
 
 
+class DomesticHotWaterSetPointSensor(DomesticHotWaterSensor):
+    _attr_native_unit_of_measurement = TEMP_CELSIUS
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def name(self):
+        return f"Setpoint Domestic Hot Water {self.domestic_hot_water.index}"
+
+    @property
+    def native_value(self):
+        return self.domestic_hot_water.set_point
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_dhw_set_point_{self.system_index}_{self.dhw_index}"
+
+
 class DomesticHotWaterOperationModeSensor(DomesticHotWaterSensor):
     @property
     def name(self):
@@ -467,7 +488,7 @@ class DomesticHotWaterOperationModeSensor(DomesticHotWaterSensor):
         return self.domestic_hot_water.operation_mode.display_value
 
     @property
-    def entity_category(self) -> EntityCategory | None:
+    def entity_category(self) -> EntityCategory:
         return EntityCategory.DIAGNOSTIC
 
     @property
@@ -485,7 +506,7 @@ class DomesticHotWaterCurrentSpecialFunctionSensor(DomesticHotWaterSensor):
         return self.domestic_hot_water.current_special_function.display_value
 
     @property
-    def entity_category(self) -> EntityCategory | None:
+    def entity_category(self) -> EntityCategory:
         return EntityCategory.DIAGNOSTIC
 
     @property
