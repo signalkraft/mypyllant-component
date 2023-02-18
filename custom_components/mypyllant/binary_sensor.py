@@ -123,7 +123,7 @@ class ControlError(SystemControlEntity):
 
     @property
     def is_on(self) -> bool:
-        return self.system.status["error"]
+        return self.system.status_error
 
     @property
     def name(self) -> str:
@@ -149,7 +149,7 @@ class ControlOnline(SystemControlEntity):
 
     @property
     def is_on(self) -> bool:
-        return self.system.status["online"]
+        return self.system.status_online
 
     @property
     def name(self) -> str:

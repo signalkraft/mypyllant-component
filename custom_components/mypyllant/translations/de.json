@@ -1,0 +1,28 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "password": "Passwort",
+          "username": "Benutzername"
+        },
+        "title": "Login Information",
+        "description": "Aus der myVAILLANT App"
+      }
+    },
+    "error": {
+      "cannot_connect": "Konnte nicht verbinden, bitte später noch einmal versuchen",
+      "authentication_failed": "Login fehlgeschlagen, stimmen Benutzername & Passwort?",
+      "unknown": "Unerwarteter Fehler, siehe Logs"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "update_interval": "Intervall zwischen Updates in Sekunden"
+        }
+      }
+    }
+  }
+}

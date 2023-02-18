@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import datetime
+
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import TEMP_CELSIUS, PERCENTAGE, PRESSURE_BAR, ENERGY_WATT_HOUR
@@ -7,7 +9,6 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
-    DataUpdateCoordinator,
 )
 
 from homeassistant.components.sensor import (
@@ -16,20 +17,30 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 
-from myPyllant.models import System, Zone, Circuit, DomesticHotWater, Device, DeviceData, DeviceDataBucket
+from myPyllant.models import (
+    System,
+    Zone,
+    Circuit,
+    DomesticHotWater,
+    Device,
+    DeviceData,
+    DeviceDataBucket,
+)
 
 
 import logging
 
-_LOGGER = logging.getLogger(__name__)
-
+from . import SystemCoordinator, HistoricalDataCoordinator
 from .const import DOMAIN
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 DATA_UNIT_MAP = {
     "CONSUMED_ELECTRICAL_ENERGY": ENERGY_WATT_HOUR,
     "EARNED_ENVIRONMENT_ENERGY": ENERGY_WATT_HOUR,
-    "HEAT_GENERATED": ENERGY_WATT_HOUR
+    "HEAT_GENERATED": ENERGY_WATT_HOUR,
 }
 
 
@@ -44,20 +55,24 @@ async def async_setup_entry(
     hass: HomeAssistant, config: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up the sensor platform."""
-    system_coordinator: DataUpdateCoordinator = hass.data[DOMAIN][config.entry_id][
+    system_coordinator: SystemCoordinator = hass.data[DOMAIN][config.entry_id][
         "system_coordinator"
     ]
-    data_coordinator: DataUpdateCoordinator = hass.data[DOMAIN][config.entry_id][
+    data_coordinator: HistoricalDataCoordinator = hass.data[DOMAIN][config.entry_id][
         "data_coordinator"
     ]
     sensors: list[SensorEntity] = []
     for index, system in enumerate(system_coordinator.data):
+        _LOGGER.debug(f"Creating System sensors for {system}")
         sensors.append(SystemOutdoorTemperatureSensor(index, system_coordinator))
         sensors.append(SystemWaterPressureSensor(index, system_coordinator))
         sensors.append(SystemModeSensor(index, system_coordinator))
-        for zone_index, _ in enumerate(system.zones):
+        for zone_index, zone in enumerate(system.zones):
+            _LOGGER.debug(f"Creating Zone sensors for {zone}")
             sensors.append(
-                ZoneDesiredRoomTemperatureSetpointSensor(index, zone_index, system_coordinator)
+                ZoneDesiredRoomTemperatureSetpointSensor(
+                    index, zone_index, system_coordinator
+                )
             )
             sensors.append(
                 ZoneCurrentRoomTemperatureSensor(index, zone_index, system_coordinator)
@@ -66,38 +81,48 @@ async def async_setup_entry(
             sensors.append(
                 ZoneHeatingOperatingModeSensor(index, zone_index, system_coordinator)
             )
-            sensors.append(ZoneHeatingStateSensor(index, zone_index, system_coordinator))
+            sensors.append(
+                ZoneHeatingStateSensor(index, zone_index, system_coordinator)
+            )
             sensors.append(
                 ZoneCurrentSpecialFunctionSensor(index, zone_index, system_coordinator)
             )
 
-        for circuit_index, _ in enumerate(system.circuits):
+        for circuit_index, circuit in enumerate(system.circuits):
+            _LOGGER.debug(f"Creating Circuit sensors for {circuit}")
             sensors.append(
                 CircuitFlowTemperatureSensor(index, circuit_index, system_coordinator)
             )
-            sensors.append(CircuitHeatingCurveSensor(index, circuit_index, system_coordinator))
+            sensors.append(
+                CircuitHeatingCurveSensor(index, circuit_index, system_coordinator)
+            )
             sensors.append(
                 CircuitMinFlowTemperatureSetpointSensor(
                     index, circuit_index, system_coordinator
                 )
             )
             sensors.append(CircuitStateSensor(index, circuit_index, system_coordinator))
-        for dhw_index, _ in enumerate(system.domestic_hot_water):
+        for dhw_index, dhw in enumerate(system.domestic_hot_water):
+            _LOGGER.debug(f"Creating Domestic Hot Water sensors for {dhw}")
             sensors.append(
-                DomesticHotWaterTankTemperatureSensor(index, dhw_index, system_coordinator)
+                DomesticHotWaterTankTemperatureSensor(
+                    index, dhw_index, system_coordinator
+                )
             )
             sensors.append(
                 DomesticHotWaterSetPointSensor(index, dhw_index, system_coordinator)
             )
             sensors.append(
-                DomesticHotWaterOperationModeSensor(index, dhw_index, system_coordinator)
+                DomesticHotWaterOperationModeSensor(
+                    index, dhw_index, system_coordinator
+                )
             )
             sensors.append(
                 DomesticHotWaterCurrentSpecialFunctionSensor(
                     index, dhw_index, system_coordinator
                 )
             )
-    for device_index, device_data_list in enumerate(data_coordinator.data['device_data']):
+    for device_index, device_data_list in enumerate(data_coordinator.data):
         for da_index, _ in enumerate(device_data_list):
             sensors.append(DataSensor(device_index, da_index, data_coordinator))
 
@@ -105,7 +130,9 @@ async def async_setup_entry(
 
 
 class SystemSensor(CoordinatorEntity, SensorEntity):
-    def __init__(self, index, coordinator) -> None:
+    coordinator: SystemCoordinator
+
+    def __init__(self, index: int, coordinator: SystemCoordinator) -> None:
         super().__init__(coordinator)
         self.index = index
 
@@ -118,8 +145,8 @@ class SystemSensor(CoordinatorEntity, SensorEntity):
         return {"identifiers": {(DOMAIN, "system", self.system.id)}}
 
     @property
-    def available(self) -> bool:
-        return self.system.status["online"]
+    def available(self) -> bool | None:
+        return self.system.status_online
 
 
 class SystemOutdoorTemperatureSensor(SystemSensor):
@@ -175,7 +202,11 @@ class SystemModeSensor(SystemSensor):
 
 
 class ZoneEntity(CoordinatorEntity, SensorEntity):
-    def __init__(self, system_index, zone_index, coordinator) -> None:
+    coordinator: SystemCoordinator
+
+    def __init__(
+        self, system_index: int, zone_index: int, coordinator: SystemCoordinator
+    ) -> None:
         super().__init__(coordinator)
         self.system_index = system_index
         self.zone_index = zone_index
@@ -193,8 +224,8 @@ class ZoneEntity(CoordinatorEntity, SensorEntity):
         return {"identifiers": {(DOMAIN, "zone", str(self.zone.index))}}
 
     @property
-    def available(self) -> bool:
-        return self.system.status["online"] and self.zone.active
+    def available(self) -> bool | None:
+        return self.system.status_online and self.zone.active
 
 
 class ZoneDesiredRoomTemperatureSetpointSensor(ZoneEntity):
@@ -263,6 +294,7 @@ class ZoneHeatingOperatingModeSensor(ZoneEntity):
     @property
     def native_value(self):
         return self.zone.heating_operation_mode.display_value
+
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_zone_heating_operating_mode_{self.system_index}_{self.zone_index}"
@@ -309,7 +341,11 @@ class ZoneCurrentSpecialFunctionSensor(ZoneEntity):
 
 
 class CircuitSensor(CoordinatorEntity, SensorEntity):
-    def __init__(self, system_index, circuit_index, coordinator) -> None:
+    coordinator: SystemCoordinator
+
+    def __init__(
+        self, system_index: int, circuit_index: int, coordinator: SystemCoordinator
+    ) -> None:
         super().__init__(coordinator)
         self.system_index = system_index
         self.circuit_index = circuit_index
@@ -327,8 +363,8 @@ class CircuitSensor(CoordinatorEntity, SensorEntity):
         return {"identifiers": {(DOMAIN, "circuit", self.circuit.index)}}
 
     @property
-    def available(self) -> bool:
-        return self.system.status["online"]
+    def available(self) -> bool | None:
+        return self.system.status_online
 
 
 class CircuitFlowTemperatureSensor(CircuitSensor):
@@ -416,7 +452,11 @@ class CircuitHeatingCurveSensor(CircuitSensor):
 
 
 class DomesticHotWaterSensor(CoordinatorEntity, SensorEntity):
-    def __init__(self, system_index, dhw_index, coordinator) -> None:
+    coordinator: SystemCoordinator
+
+    def __init__(
+        self, system_index: int, dhw_index: int, coordinator: SystemCoordinator
+    ) -> None:
         super().__init__(coordinator)
         self.system_index = system_index
         self.dhw_index = dhw_index
@@ -438,8 +478,8 @@ class DomesticHotWaterSensor(CoordinatorEntity, SensorEntity):
         }
 
     @property
-    def available(self) -> bool:
-        return self.system.status["online"]
+    def available(self) -> bool | None:
+        return self.system.status_online
 
 
 class DomesticHotWaterTankTemperatureSensor(DomesticHotWaterSensor):
@@ -515,28 +555,33 @@ class DomesticHotWaterCurrentSpecialFunctionSensor(DomesticHotWaterSensor):
 
 
 class DataSensor(CoordinatorEntity, SensorEntity):
+    coordinator: HistoricalDataCoordinator
     _attr_state_class = SensorStateClass.TOTAL
 
-    def __init__(self, device_index, da_index, coordinator) -> None:
+    def __init__(
+        self, device_index: int, da_index: int, coordinator: HistoricalDataCoordinator
+    ) -> None:
         super().__init__(coordinator)
         self.device_index = device_index
         self.da_index = da_index
-        self._attr_native_unit_of_measurement = DATA_UNIT_MAP[self.device_data.energy_type]
+        self._attr_native_unit_of_measurement = DATA_UNIT_MAP[
+            self.device_data.energy_type
+        ]
         self._attr_device_class = DATA_DEVICE_CLASS_MAP[self.device_data.energy_type]
 
     @property
     def name(self):
         name = self.device.name_display
-        om = self.device_data.operation_mode.replace('_', ' ').title()
-        et = self.device_data.energy_type.replace('_', ' ').title()
+        om = self.device_data.operation_mode.replace("_", " ").title()
+        et = self.device_data.energy_type.replace("_", " ").title()
         return f"{name} {et} {om}"
 
     @property
     def device_data(self) -> DeviceData:
-        return self.coordinator.data['device_data'][self.device_index][self.da_index]
+        return self.coordinator.data[self.device_index][self.da_index]
 
     @property
-    def last_reset(self) -> DeviceData:
+    def last_reset(self) -> datetime.datetime:
         return self.data_bucket.start_date
 
     @property
@@ -556,11 +601,7 @@ class DataSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def device_info(self):
-        return {
-            "identifiers": {
-                (DOMAIN, "system", self.device.system.id)
-            }
-        }
+        return {"identifiers": {(DOMAIN, "system", self.device.system.id)}}
 
     @property
     def native_value(self):

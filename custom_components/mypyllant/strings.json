@@ -1,0 +1,28 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "password": "Password",
+          "username": "Username"
+        },
+        "title": "Login Information",
+        "description": "Same as myVAILLANT app"
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect, please try again",
+      "authentication_failed": "Authentication failed, check your username and password and try again",
+      "unknown": "Unexpected error"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "update_interval": "Seconds between scans"
+        }
+      }
+    }
+  }
+}

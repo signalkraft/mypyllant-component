@@ -17,7 +17,12 @@ from homeassistant.helpers.entity import DeviceInfo
 
 from .const import DOMAIN
 from . import SystemCoordinator
-from myPyllant.models import System, DomesticHotWater, DHWOperationMode, DHWCurrentSpecialFunction
+from myPyllant.models import (
+    System,
+    DomesticHotWater,
+    DHWOperationMode,
+    DHWCurrentSpecialFunction,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,7 +47,9 @@ async def async_setup_entry(
 class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
     coordinator: SystemCoordinator
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
-    _attr_operation_list = [d.display_value for d in DHWOperationMode] + [DHWCurrentSpecialFunction.CYLINDER_BOOST.display_value]
+    _attr_operation_list = [d.display_value for d in DHWOperationMode] + [
+        DHWCurrentSpecialFunction.CYLINDER_BOOST.display_value
+    ]
 
     def __init__(self, system_index, dhw_index, coordinator) -> None:
         """Initialize entity."""
@@ -79,11 +86,14 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
 
     @property
     def supported_features(self) -> WaterHeaterEntityFeature:
-        return WaterHeaterEntityFeature.TARGET_TEMPERATURE | WaterHeaterEntityFeature.OPERATION_MODE
+        return (
+            WaterHeaterEntityFeature.TARGET_TEMPERATURE
+            | WaterHeaterEntityFeature.OPERATION_MODE
+        )
 
     @property
-    def available(self) -> bool:
-        return self.system.status["online"]
+    def available(self) -> bool | None:
+        return self.system.status_online
 
     @property
     def target_temperature(self) -> float:
@@ -100,10 +110,13 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
     @property
     def max_temp(self) -> float:
         self.domestic_hot_water.max_set_point
-    
+
     @property
     def current_operation(self) -> str:
-        if self.domestic_hot_water.current_special_function == DHWCurrentSpecialFunction.CYLINDER_BOOST:
+        if (
+            self.domestic_hot_water.current_special_function
+            == DHWCurrentSpecialFunction.CYLINDER_BOOST
+        ):
             return str(DHWCurrentSpecialFunction.CYLINDER_BOOST.display_value)
         return str(self.domestic_hot_water.operation_mode.display_value)
 
@@ -113,14 +126,19 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
             self.domestic_hot_water, int(target_temp)
         )
 
-    async def async_set_operation_mode(self, operation_mode: str, **kwargs: Any) -> None:
-        enum_value = operation_mode.upper().replace(' ', '_')
+    async def async_set_operation_mode(
+        self, operation_mode: str, **kwargs: Any
+    ) -> None:
+        enum_value = operation_mode.upper().replace(" ", "_")
         if enum_value == str(DHWCurrentSpecialFunction.CYLINDER_BOOST):
             # Boost was requested
             await self.coordinator.api.boost_domestic_hot_water(
                 self.domestic_hot_water,
             )
-        elif self.domestic_hot_water.current_special_function == DHWCurrentSpecialFunction.CYLINDER_BOOST:
+        elif (
+            self.domestic_hot_water.current_special_function
+            == DHWCurrentSpecialFunction.CYLINDER_BOOST
+        ):
             # Something other than boost was requested, but boost mode is currently active
             await self.coordinator.api.cancel_hot_water_boost(
                 self.domestic_hot_water,

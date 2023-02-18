@@ -6,6 +6,6 @@
   "domain": "mypyllant",
   "iot_class": "cloud_polling",
   "name": "myVAILLANT",
-  "requirements": ["myPyllant==0.0.7"],
+  "requirements": ["myPyllant==0.0.8"],
   "version": "0.0.7"
 }

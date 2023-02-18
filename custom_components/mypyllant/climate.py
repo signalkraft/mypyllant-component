@@ -23,13 +23,18 @@ from homeassistant.helpers.update_coordinator import (
 
 from . import SystemCoordinator
 from .const import DOMAIN, DEFAULT_QUICK_VETO_DURATION
-from myPyllant.models import System, Zone, ZoneHeatingOperatingMode, ZoneCurrentSpecialFunction
+from myPyllant.models import (
+    System,
+    Zone,
+    ZoneHeatingOperatingMode,
+    ZoneCurrentSpecialFunction,
+)
 
 
 _LOGGER = logging.getLogger(__name__)
 
 HVAC_MODE_MAP = {
-    HVACMode.OFF:  ZoneHeatingOperatingMode.OFF,
+    HVACMode.OFF: ZoneHeatingOperatingMode.OFF,
     HVACMode.HEAT_COOL: ZoneHeatingOperatingMode.MANUAL,
     HVACMode.AUTO: ZoneHeatingOperatingMode.TIME_CONTROLLED,
 }
@@ -119,7 +124,9 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     @property
     def supported_features(self) -> ClimateEntityFeature:
         """Return the list of supported features."""
-        return ClimateEntityFeature.TARGET_TEMPERATURE | ClimateEntityFeature.PRESET_MODE
+        return (
+            ClimateEntityFeature.TARGET_TEMPERATURE | ClimateEntityFeature.PRESET_MODE
+        )
 
     @property
     def target_temperature(self) -> float:
@@ -135,7 +142,9 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def hvac_mode(self) -> HVACMode:
-        return [k for k, v in HVAC_MODE_MAP.items() if v == self.zone.heating_operation_mode][0]
+        return [
+            k for k, v in HVAC_MODE_MAP.items() if v == self.zone.heating_operation_mode
+        ][0]
 
     async def async_set_hvac_mode(self, hvac_mode):
         await self.coordinator.api.set_zone_heating_operating_mode(
@@ -156,22 +165,28 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def preset_mode(self) -> PRESET_BOOST | PRESET_NONE:
-        return [k for k, v in PRESET_MAP.items() if v == self.zone.current_special_function][0]
+        return [
+            k for k, v in PRESET_MAP.items() if v == self.zone.current_special_function
+        ][0]
 
     async def async_set_preset_mode(self, preset_mode):
         requested_mode = PRESET_MAP[preset_mode]
         if requested_mode != self.zone.current_special_function:
             if requested_mode == ZoneCurrentSpecialFunction.NONE:
-                if self.zone.current_special_function == ZoneCurrentSpecialFunction.QUICK_VETO:
+                if (
+                    self.zone.current_special_function
+                    == ZoneCurrentSpecialFunction.QUICK_VETO
+                ):
                     # If quick veto is set, we cancel that
                     await self.coordinator.api.cancel_quick_veto_zone_temperature(
                         self.zone
                     )
-                elif self.zone.current_special_function == ZoneCurrentSpecialFunction.HOLIDAY:
+                elif (
+                    self.zone.current_special_function
+                    == ZoneCurrentSpecialFunction.HOLIDAY
+                ):
                     # If holiday mode is set, we cancel that instead
-                    await self.coordinator.api.cancel_holiday(
-                        self.system
-                    )
+                    await self.coordinator.api.cancel_holiday(self.system)
             if requested_mode == ZoneCurrentSpecialFunction.QUICK_VETO:
                 await self.coordinator.api.quick_veto_zone_temperature(
                     self.zone,
@@ -179,8 +194,6 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                     DEFAULT_QUICK_VETO_DURATION,
                 )
             if requested_mode == ZoneCurrentSpecialFunction.HOLIDAY:
-                await self.coordinator.api.set_holiday(
-                    self.system
-                )
+                await self.coordinator.api.set_holiday(self.system)
 
             await self.coordinator.async_request_refresh_delayed()

@@ -8,11 +8,10 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import DOMAIN, MIN_TIME_BETWEEN_UPDATES
+from .const import DOMAIN, OPTION_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
 
 from myPyllant.api import MyPyllantAPI
 from myPyllant.models import System, DeviceDataBucketResolution, DeviceData
-from myPyllant.utils import datetime_format
 
 import logging
 
@@ -29,16 +28,25 @@ PLATFORMS: list[Platform] = [
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     username = entry.data.get("username")
     password = entry.data.get("password")
+    update_interval = entry.options.get(OPTION_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
 
+    _LOGGER.debug(f"Creating API and logging in with {username}")
     api = MyPyllantAPI(username, password)
     await api.login()
-    system_coordinator = SystemCoordinator(hass, api, entry)
+    system_coordinator = SystemCoordinator(
+        hass, api, entry, timedelta(seconds=update_interval)
+    )
+    _LOGGER.debug(f"Refreshing SystemCoordinator")
     await system_coordinator.async_refresh()
-    data_coordinator = HistoricalDataCoordinator(hass, api, entry)
+    data_coordinator = HistoricalDataCoordinator(hass, api, entry, timedelta(hours=1))
+    _LOGGER.debug(f"Refreshing HistoricalDataCoordinator")
     await data_coordinator.async_refresh()
 
     hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = {"system_coordinator": system_coordinator, "data_coordinator": data_coordinator}
+    hass.data[DOMAIN][entry.entry_id] = {
+        "system_coordinator": system_coordinator,
+        "data_coordinator": data_coordinator,
+    }
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
@@ -48,7 +56,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
-        await hass.data[DOMAIN][entry.entry_id]["system_coordinator"].api.session.close()
+        await hass.data[DOMAIN][entry.entry_id][
+            "system_coordinator"
+        ].api.session.close()
         hass.data[DOMAIN].pop(entry.entry_id)
 
     return unload_ok
@@ -57,13 +67,13 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 class MyPyllantCoordinator(DataUpdateCoordinator):
     api: MyPyllantAPI
     data: List[System]
-    update_interval = MIN_TIME_BETWEEN_UPDATES
 
     def __init__(
         self,
         hass: HomeAssistant,
         api: MyPyllantAPI,
         entry: ConfigEntry,
+        update_interval: timedelta,
     ) -> None:
         self.api = api
         self.hass = hass
@@ -73,16 +83,18 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
             hass,
             _LOGGER,
             name="myVAILLANT",
-            update_interval=self.update_interval,
+            update_interval=update_interval,
         )
 
     async def _refresh_session(self):
         if self.api.oauth_session_expires < datetime.now() + timedelta(seconds=600):
-            _LOGGER.info(f"Refreshing token for {self.api.username}")
+            _LOGGER.debug(f"Refreshing token for {self.api.username}")
             await self.api.refresh_token()
         else:
-            delta = self.api.oauth_session_expires - (datetime.now() + timedelta(seconds=600))
-            _LOGGER.info(
+            delta = self.api.oauth_session_expires - (
+                datetime.now() + timedelta(seconds=600)
+            )
+            _LOGGER.debug(
                 f"Waiting {delta.seconds}s until token refresh for {self.api.username}"
             )
 
@@ -96,7 +108,10 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
 
 
 class SystemCoordinator(MyPyllantCoordinator):
-    async def _async_update_data(self):
+    data: List[System]
+
+    async def _async_update_data(self) -> List[System]:
+        _LOGGER.debug(f"Starting async update data for SystemCoordinator")
         await self._refresh_session()
         data = [
             s
@@ -106,16 +121,21 @@ class SystemCoordinator(MyPyllantCoordinator):
 
 
 class HistoricalDataCoordinator(MyPyllantCoordinator):
-    update_interval = timedelta(hours=1)
+    data: List[List[DeviceData]]
 
-    async def _async_update_data(self):
+    async def _async_update_data(self) -> List[List[DeviceData]]:
+        _LOGGER.debug(f"Starting async update data for HistoricalDataCoordinator")
         await self._refresh_session()
-        data = {'device_data': []}
+        data = []
         start = datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
         end = start + timedelta(days=1)
-        async for system in await self.hass.async_add_executor_job(self.api.get_systems):
+        _LOGGER.debug(f"Getting data from {start} to {end}")
+        async for system in await self.hass.async_add_executor_job(
+            self.api.get_systems
+        ):
             async for device in self.api.get_devices_by_system(system):
-                device_data = self.api.get_data_by_device(device, DeviceDataBucketResolution.HOUR, start, end)
-                data['device_data'].append([da async for da in device_data])
-
+                device_data = self.api.get_data_by_device(
+                    device, DeviceDataBucketResolution.HOUR, start, end
+                )
+                data.append([da async for da in device_data])
         return data
