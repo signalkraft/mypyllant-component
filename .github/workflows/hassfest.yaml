@@ -8,12 +8,13 @@ on:
 
 jobs:
   validate:
+    name: Hassfest validate
     runs-on: "ubuntu-latest"
     steps:
       - uses: "actions/checkout@v2"
       - uses: home-assistant/actions/hassfest@master
   hacs:
-    name: HACS Action
+    name: HACS validate
     runs-on: "ubuntu-latest"
     steps:
       - name: HACS Action
