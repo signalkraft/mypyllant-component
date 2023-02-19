@@ -69,7 +69,7 @@ class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):
     def device_info(self) -> DeviceInfo | None:
         if self.control:
             return DeviceInfo(
-                identifiers={(DOMAIN, "system", self.system.id)},
+                identifiers={(DOMAIN, f"system{self.system.id}")},
                 name=self.control["name"],
                 manufacturer="Vaillant",
                 model=self.control["name"],
@@ -103,7 +103,7 @@ class CircuitEntity(CoordinatorEntity, BinarySensorEntity):
     @property
     def device_info(self) -> DeviceInfo | None:
         return DeviceInfo(
-            identifiers={(DOMAIN, "circuit", self.circuit.index)},
+            identifiers={(DOMAIN, f"circuit{self.circuit.index}")},
             name=f"Circuit {self.circuit.index}",
             manufacturer="Vaillant",
         )

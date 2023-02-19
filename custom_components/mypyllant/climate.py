@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 import logging
-from typing import Any, List
+from typing import Any
 
 from homeassistant.components.climate import (
     PRESET_AWAY,
@@ -90,7 +90,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     @property
     def device_info(self) -> DeviceInfo:
         return DeviceInfo(
-            identifiers={(DOMAIN, "zone", str(self.zone.index))},
+            identifiers={(DOMAIN, f"zone{self.zone.index}")},
             name=self.zone.name,
             manufacturer="Vaillant",
         )

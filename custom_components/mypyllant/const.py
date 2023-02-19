@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 DOMAIN = "mypyllant"
 OPTION_UPDATE_INTERVAL = "update_interval"
 DEFAULT_UPDATE_INTERVAL = 60

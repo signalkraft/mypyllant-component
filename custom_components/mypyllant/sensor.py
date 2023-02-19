@@ -135,7 +135,7 @@ class SystemSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, "system", self.system.id)}}
+        return {"identifiers": {(DOMAIN, f"system{self.system.id}")}}
 
     @property
     def available(self) -> bool | None:
@@ -214,7 +214,7 @@ class ZoneEntity(CoordinatorEntity, SensorEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, "zone", str(self.zone.index))}}
+        return {"identifiers": {(DOMAIN, f"zone{self.zone.index}")}}
 
     @property
     def available(self) -> bool | None:
@@ -353,7 +353,7 @@ class CircuitSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, "circuit", self.circuit.index)}}
+        return {"identifiers": {(DOMAIN, f"circuit{self.circuit.index}")}}
 
     @property
     def available(self) -> bool | None:
@@ -466,7 +466,7 @@ class DomesticHotWaterSensor(CoordinatorEntity, SensorEntity):
     def device_info(self):
         return {
             "identifiers": {
-                (DOMAIN, "domestic_hot_water", str(self.domestic_hot_water.index))
+                (DOMAIN, f"domestic_hot_water{self.domestic_hot_water.index}")
             }
         }
 
@@ -594,7 +594,7 @@ class DataSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, "system", self.device.system.id)}}
+        return {"identifiers": {(DOMAIN, f"system{self.device.system.id}")}}
 
     @property
     def native_value(self):

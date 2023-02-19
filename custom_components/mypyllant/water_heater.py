@@ -33,7 +33,7 @@ async def async_setup_entry(
         "system_coordinator"
     ]
 
-    dhws: List[WaterHeaterEntity] = []
+    dhws: list[WaterHeaterEntity] = []
 
     for index, system in enumerate(coordinator.data):
         for dhw_index, dhw in enumerate(system.domestic_hot_water):
@@ -68,7 +68,7 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
     def device_info(self) -> DeviceInfo:
         return DeviceInfo(
             identifiers={
-                (DOMAIN, "domestic_hot_water", str(self.domestic_hot_water.index))
+                (DOMAIN, f"domestic_hot_water{self.domestic_hot_water.index}")
             },
             name=self.name,
             manufacturer="Vaillant",
@@ -103,11 +103,11 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
 
     @property
     def min_temp(self) -> float:
-        self.domestic_hot_water.min_set_point
+        return self.domestic_hot_water.min_set_point
 
     @property
     def max_temp(self) -> float:
-        self.domestic_hot_water.max_set_point
+        return self.domestic_hot_water.max_set_point
 
     @property
     def current_operation(self) -> str:
@@ -144,11 +144,11 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
             if enum_value != self.domestic_hot_water.operation_mode:
                 await self.coordinator.api.set_domestic_hot_water_operation_mode(
                     self.domestic_hot_water,
-                    enum_value,
+                    DHWOperationMode(enum_value),
                 )
         else:
             await self.coordinator.api.set_domestic_hot_water_operation_mode(
                 self.domestic_hot_water,
-                enum_value,
+                DHWOperationMode(enum_value),
             )
         await self.coordinator.async_request_refresh_delayed()
