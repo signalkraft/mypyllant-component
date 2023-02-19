@@ -24,15 +24,16 @@ Not affiliated with Vaillant, the developers take no responsibility for anything
 ### HACS
 
 1. [Install HACS](https://hacs.xyz/docs/setup/download)
-2. Add `https://github.com/signalkraft/mypyllant-component` as a [custom repository in HACS > Integrations](https://hacs.xyz/docs/faq/custom_repositories)
-3. Open the myVAILLANT integration in HACS and install it
-4. Go to Settings > Integrations and add myVAILLANT
-5. Sign in with the email & password you use in the myVAILLANT app
+2. [Add this repository as a custom repository in HACS > Integrations](https://my.home-assistant.io/redirect/hacs_repository/?owner=signalkraft&repository=mypyllant-component&category=integration)
+3. Search for the myVAILLANT integration in HACS and install it
+4. Restart Home Assistant
+5. [Add myVaillant integration](https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant)
+6. Sign in with the email & password you use in the myVAILLANT app
 
 ### Manual
 
 1. Download [the latest release](https://github.com/signalkraft/mypyllant-component/releases/tag/v0.0.10)
 2. Extract the `custom_components` folder to your Home Assistant's config folder, the resulting folder structure should be `config/custom_components/mypyllant`
 3. Restart Home Assistant
-4. Go to Settings > Integrations and add myVAILLANT
+4. [Add myVaillant integration](https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant), or go to Settings > Integrations and add myVAILLANT
 5. Sign in with the email & password you use in the myVAILLANT app
