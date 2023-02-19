@@ -9,7 +9,10 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: "actions/checkout@v2"
+      - uses: actions/checkout@v3
+      - name: "Refresh tags"
+        id: tag
+        run: git fetch --tags --force # Is currently required for v3 due to https://github.com/actions/checkout/issues/290
       - name: Create GitHub release
         uses: Roang-zero1/github-create-release-action@v3
         with:
