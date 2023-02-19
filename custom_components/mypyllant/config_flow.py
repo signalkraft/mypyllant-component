@@ -3,15 +3,14 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import voluptuous as vol
-
 from homeassistant import config_entries, exceptions
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.config_validation import positive_int
 from myPyllant.api import MyPyllantAPI
+import voluptuous as vol
 
-from .const import DOMAIN, OPTION_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
+from .const import DEFAULT_UPDATE_INTERVAL, DOMAIN, OPTION_UPDATE_INTERVAL
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -10,14 +10,11 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
-)
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from myPyllant.models import Circuit, System
 
-
-from .const import DOMAIN
 from . import SystemCoordinator
-from myPyllant.models import System, Circuit
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -1,19 +1,18 @@
 from __future__ import annotations
+
 import asyncio
 from datetime import datetime, timedelta
+import logging
 from typing import List
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-
-from .const import DOMAIN, OPTION_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
-
 from myPyllant.api import MyPyllantAPI
-from myPyllant.models import System, DeviceDataBucketResolution, DeviceData
+from myPyllant.models import DeviceData, DeviceDataBucketResolution, System
 
-import logging
+from .const import DEFAULT_UPDATE_INTERVAL, DOMAIN, OPTION_UPDATE_INTERVAL
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -66,7 +65,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 class MyPyllantCoordinator(DataUpdateCoordinator):
     api: MyPyllantAPI
-    data: List[System]
+    data: list[System]
 
     def __init__(
         self,
@@ -108,9 +107,9 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
 
 
 class SystemCoordinator(MyPyllantCoordinator):
-    data: List[System]
+    data: list[System]
 
-    async def _async_update_data(self) -> List[System]:
+    async def _async_update_data(self) -> list[System]:
         _LOGGER.debug(f"Starting async update data for SystemCoordinator")
         await self._refresh_session()
         data = [
@@ -121,9 +120,9 @@ class SystemCoordinator(MyPyllantCoordinator):
 
 
 class HistoricalDataCoordinator(MyPyllantCoordinator):
-    data: List[List[DeviceData]]
+    data: list[list[DeviceData]]
 
-    async def _async_update_data(self) -> List[List[DeviceData]]:
+    async def _async_update_data(self) -> list[list[DeviceData]]:
         _LOGGER.debug(f"Starting async update data for HistoricalDataCoordinator")
         await self._refresh_session()
         data = []

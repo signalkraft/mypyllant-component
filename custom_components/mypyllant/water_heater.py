@@ -9,20 +9,18 @@ from homeassistant.components.water_heater import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
-)
 from homeassistant.helpers.entity import DeviceInfo
-
-from .const import DOMAIN
-from . import SystemCoordinator
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from myPyllant.models import (
-    System,
-    DomesticHotWater,
-    DHWOperationMode,
     DHWCurrentSpecialFunction,
+    DHWOperationMode,
+    DomesticHotWater,
+    System,
 )
+
+from . import SystemCoordinator
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 

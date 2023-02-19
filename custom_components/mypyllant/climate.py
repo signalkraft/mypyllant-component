@@ -5,31 +5,28 @@ import logging
 from typing import Any, List
 
 from homeassistant.components.climate import (
+    PRESET_AWAY,
+    PRESET_BOOST,
+    PRESET_NONE,
     ClimateEntity,
     ClimateEntityFeature,
     HVACMode,
-    PRESET_BOOST,
-    PRESET_NONE,
-    PRESET_AWAY,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
-)
-
-from . import SystemCoordinator
-from .const import DOMAIN, DEFAULT_QUICK_VETO_DURATION
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from myPyllant.models import (
     System,
     Zone,
-    ZoneHeatingOperatingMode,
     ZoneCurrentSpecialFunction,
+    ZoneHeatingOperatingMode,
 )
 
+from . import SystemCoordinator
+from .const import DEFAULT_QUICK_VETO_DURATION, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -54,7 +51,7 @@ async def async_setup_entry(
         "system_coordinator"
     ]
 
-    climates: List[ClimateEntity] = []
+    climates: list[ClimateEntity] = []
 
     for index, system in enumerate(coordinator.data):
         for zone_index, zone in enumerate(system.zones):
