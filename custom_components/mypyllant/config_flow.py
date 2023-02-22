@@ -3,12 +3,13 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from myPyllant.api import MyPyllantAPI
+import voluptuous as vol
+
 from homeassistant import config_entries, exceptions
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.config_validation import positive_int
-from myPyllant.api import MyPyllantAPI
-import voluptuous as vol
 
 from .const import DEFAULT_UPDATE_INTERVAL, DOMAIN, OPTION_UPDATE_INTERVAL
 
@@ -29,11 +30,13 @@ DATA_SCHEMA = vol.Schema({vol.Required("username"): str, vol.Required("password"
 
 
 async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
+    api = MyPyllantAPI(data["username"], data["password"])
     try:
-        async with MyPyllantAPI(data["username"], data["password"]) as api:
-            await api.login()
+        await api.login()
     except:
         raise AuthenticationFailed
+    finally:
+        await api.aiohttp_session.close()
 
     return {"title": data["username"]}
 

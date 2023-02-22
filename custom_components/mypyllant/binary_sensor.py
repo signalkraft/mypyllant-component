@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import logging
 
+from myPyllant.models import Circuit, System
+
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
@@ -11,7 +13,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from myPyllant.models import Circuit, System
 
 from . import SystemCoordinator
 from .const import DOMAIN
@@ -58,7 +59,7 @@ class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):
         return None
 
     @property
-    def name(self) -> System:
+    def name(self) -> str | None:
         return self.control["name"] if self.control else None
 
     @property
@@ -70,9 +71,9 @@ class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):
         if self.control:
             return DeviceInfo(
                 identifiers={(DOMAIN, f"system{self.system.id}")},
-                name=self.control["name"],
+                name=self.name,
                 manufacturer="Vaillant",
-                model=self.control["name"],
+                model=self.name,
             )
         return None
 

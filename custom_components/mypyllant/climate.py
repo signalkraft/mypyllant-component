@@ -4,13 +4,22 @@ from collections.abc import Mapping
 import logging
 from typing import Any
 
+from myPyllant.models import (
+    System,
+    Zone,
+    ZoneCurrentSpecialFunction,
+    ZoneHeatingOperatingMode,
+)
+
 from homeassistant.components.climate import (
-    PRESET_AWAY,
-    PRESET_BOOST,
-    PRESET_NONE,
     ClimateEntity,
     ClimateEntityFeature,
     HVACMode,
+)
+from homeassistant.components.climate.const import (
+    PRESET_AWAY,
+    PRESET_BOOST,
+    PRESET_NONE,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
@@ -18,12 +27,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from myPyllant.models import (
-    System,
-    Zone,
-    ZoneCurrentSpecialFunction,
-    ZoneHeatingOperatingMode,
-)
 
 from . import SystemCoordinator
 from .const import DEFAULT_QUICK_VETO_DURATION, DOMAIN

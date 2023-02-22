@@ -4,12 +4,13 @@ import asyncio
 from datetime import datetime, timedelta
 import logging
 
+from myPyllant.api import MyPyllantAPI
+from myPyllant.models import DeviceData, DeviceDataBucketResolution, System
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from myPyllant.api import MyPyllantAPI
-from myPyllant.models import DeviceData, DeviceDataBucketResolution, System
 
 from .const import DEFAULT_UPDATE_INTERVAL, DOMAIN, OPTION_UPDATE_INTERVAL
 

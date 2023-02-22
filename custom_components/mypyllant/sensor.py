@@ -3,6 +3,16 @@ from __future__ import annotations
 import datetime
 import logging
 
+from myPyllant.models import (
+    Circuit,
+    Device,
+    DeviceData,
+    DeviceDataBucket,
+    DomesticHotWater,
+    System,
+    Zone,
+)
+
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -14,15 +24,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from myPyllant.models import (
-    Circuit,
-    Device,
-    DeviceData,
-    DeviceDataBucket,
-    DomesticHotWater,
-    System,
-    Zone,
-)
 
 from . import HistoricalDataCoordinator, SystemCoordinator
 from .const import DOMAIN
@@ -150,7 +151,10 @@ class SystemOutdoorTemperatureSensor(SystemSensor):
 
     @property
     def native_value(self):
-        return round(self.coordinator.data[self.index].outdoor_temperature, 2)
+        if self.system.outdoor_temperature:
+            return round(self.system.outdoor_temperature, 2)
+        else:
+            return None
 
     @property
     def unique_id(self) -> str:
@@ -165,7 +169,10 @@ class SystemWaterPressureSensor(SystemSensor):
 
     @property
     def native_value(self):
-        return round(self.system.water_pressure, 1)
+        if self.system.water_pressure:
+            return round(self.system.water_pressure, 1)
+        else:
+            return None
 
     @property
     def unique_id(self) -> str:
@@ -181,9 +188,13 @@ class SystemModeSensor(SystemSensor):
 
     @property
     def native_value(self):
-        return self.system.system_control_state["control_state"]["general"][
-            "system_mode"
-        ]
+        try:
+            return self.system.system_control_state["control_state"]["general"][
+                "system_mode"
+            ]
+        except KeyError as e:
+            _LOGGER.error("Could not get system mode from control state", exc_info=e)
+            return None
 
     @property
     def unique_id(self) -> str:
@@ -431,7 +442,10 @@ class CircuitHeatingCurveSensor(CircuitSensor):
 
     @property
     def native_value(self):
-        return self.circuit.heating_curve
+        if self.circuit.heating_curve:
+            return round(self.circuit.heating_curve, 2)
+        else:
+            return None
 
     @property
     def entity_category(self) -> EntityCategory | None:
@@ -575,15 +589,18 @@ class DataSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def last_reset(self) -> datetime.datetime:
-        return self.data_bucket.start_date
+        return self.data_bucket.start_date if self.data_bucket else None
 
     @property
     def device(self) -> Device:
         return self.device_data.device
 
     @property
-    def data_bucket(self) -> DeviceDataBucket:
-        return self.device_data.data[-1]
+    def data_bucket(self) -> DeviceDataBucket | None:
+        if len(self.device_data.data):
+            return self.device_data.data[-1]
+        else:
+            return None
 
     @property
     def unique_id(self) -> str:
@@ -598,4 +615,4 @@ class DataSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def native_value(self):
-        return self.data_bucket.value
+        return self.data_bucket.value if self.data_bucket else None
