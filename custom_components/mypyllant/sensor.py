@@ -25,7 +25,7 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from . import HistoricalDataCoordinator, SystemCoordinator
+from . import DailyDataCoordinator, HourlyDataCoordinator, SystemCoordinator
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -52,8 +52,11 @@ async def async_setup_entry(
     system_coordinator: SystemCoordinator = hass.data[DOMAIN][config.entry_id][
         "system_coordinator"
     ]
-    data_coordinator: HistoricalDataCoordinator = hass.data[DOMAIN][config.entry_id][
-        "data_coordinator"
+    hourly_data_coordinator: HourlyDataCoordinator = hass.data[DOMAIN][config.entry_id][
+        "hourly_data_coordinator"
+    ]
+    daily_data_coordinator: DailyDataCoordinator = hass.data[DOMAIN][config.entry_id][
+        "daily_data_coordinator"
     ]
     sensors: list[SensorEntity] = []
     for index, system in enumerate(system_coordinator.data):
@@ -116,9 +119,12 @@ async def async_setup_entry(
                     index, dhw_index, system_coordinator
                 )
             )
-    for device_index, device_data_list in enumerate(data_coordinator.data):
+    for device_index, device_data_list in enumerate(hourly_data_coordinator.data):
         for da_index, _ in enumerate(device_data_list):
-            sensors.append(DataSensor(device_index, da_index, data_coordinator))
+            sensors.append(DataSensor(device_index, da_index, hourly_data_coordinator))
+
+    for system_id in daily_data_coordinator.data.keys():
+        sensors.append(EfficiencySensor(system_id, daily_data_coordinator))
 
     async_add_entities(sensors)
 
@@ -562,11 +568,11 @@ class DomesticHotWaterCurrentSpecialFunctionSensor(DomesticHotWaterSensor):
 
 
 class DataSensor(CoordinatorEntity, SensorEntity):
-    coordinator: HistoricalDataCoordinator
+    coordinator: HourlyDataCoordinator
     _attr_state_class = SensorStateClass.TOTAL
 
     def __init__(
-        self, device_index: int, da_index: int, coordinator: HistoricalDataCoordinator
+        self, device_index: int, da_index: int, coordinator: HourlyDataCoordinator
     ) -> None:
         super().__init__(coordinator)
         self.device_index = device_index
@@ -616,3 +622,52 @@ class DataSensor(CoordinatorEntity, SensorEntity):
     @property
     def native_value(self):
         return self.data_bucket.value if self.data_bucket else None
+
+
+class EfficiencySensor(CoordinatorEntity, SensorEntity):
+    coordinator: DailyDataCoordinator
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_name = "Heating Energy Efficiency"
+
+    def __init__(self, system_id: str, coordinator: DailyDataCoordinator) -> None:
+        super().__init__(coordinator)
+        self.system_id = system_id
+
+    @property
+    def device_data_list(self) -> list[DeviceData]:
+        return self.coordinator.data[self.system_id]
+
+    @property
+    def energy_consumed(self) -> float:
+        return sum(
+            [
+                v.data[-1].value
+                for v in self.device_data_list
+                if v.energy_type == "CONSUMED_ELECTRICAL_ENERGY" and len(v.data)
+            ]
+        )
+
+    @property
+    def heat_energy_generated(self) -> float:
+        return sum(
+            [
+                v.data[-1].value
+                for v in self.device_data_list
+                if v.energy_type == "HEAT_GENERATED" and len(v.data)
+            ]
+        )
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_heating_energy_efficiency_{self.system_id}"
+
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, f"system{self.system_id}")}}
+
+    @property
+    def native_value(self) -> float | None:
+        if self.energy_consumed:
+            return round(self.heat_energy_generated / self.energy_consumed, 1)
+        else:
+            return None

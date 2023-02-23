@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.0.16
+
+* Added energy efficiency sensor
+
 ## v0.0.15
 
 * Fallback for None values in sensors

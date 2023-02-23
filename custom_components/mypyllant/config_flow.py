@@ -33,7 +33,7 @@ async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
     api = MyPyllantAPI(data["username"], data["password"])
     try:
         await api.login()
-    except:
+    except Exception:
         raise AuthenticationFailed
     finally:
         await api.aiohttp_session.close()

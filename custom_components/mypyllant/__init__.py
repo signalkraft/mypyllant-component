@@ -35,16 +35,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     system_coordinator = SystemCoordinator(
         hass, api, entry, timedelta(seconds=update_interval)
     )
-    _LOGGER.debug(f"Refreshing SystemCoordinator")
+    _LOGGER.debug("Refreshing SystemCoordinator")
     await system_coordinator.async_refresh()
-    data_coordinator = HistoricalDataCoordinator(hass, api, entry, timedelta(hours=1))
-    _LOGGER.debug(f"Refreshing HistoricalDataCoordinator")
-    await data_coordinator.async_refresh()
+
+    hourly_data_coordinator = HourlyDataCoordinator(
+        hass, api, entry, timedelta(hours=1)
+    )
+    _LOGGER.debug("Refreshing HourlyDataCoordinator")
+    await hourly_data_coordinator.async_refresh()
+
+    daily_data_coordinator = DailyDataCoordinator(hass, api, entry, timedelta(hours=1))
+    _LOGGER.debug("Refreshing DailyDataCoordinator")
+    await daily_data_coordinator.async_refresh()
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {
         "system_coordinator": system_coordinator,
-        "data_coordinator": data_coordinator,
+        "hourly_data_coordinator": hourly_data_coordinator,
+        "daily_data_coordinator": daily_data_coordinator,
     }
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -57,7 +65,13 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if unload_ok:
         await hass.data[DOMAIN][entry.entry_id][
             "system_coordinator"
-        ].api.session.close()
+        ].api.aiohttp_session.close()
+        await hass.data[DOMAIN][entry.entry_id][
+            "hourly_data_coordinator"
+        ].api.aiohttp_session.close()
+        await hass.data[DOMAIN][entry.entry_id][
+            "daily_data_coordinator"
+        ].api.aiohttp_session.close()
         hass.data[DOMAIN].pop(entry.entry_id)
 
     return unload_ok
@@ -110,7 +124,7 @@ class SystemCoordinator(MyPyllantCoordinator):
     data: list[System]
 
     async def _async_update_data(self) -> list[System]:
-        _LOGGER.debug(f"Starting async update data for SystemCoordinator")
+        _LOGGER.debug("Starting async update data for SystemCoordinator")
         await self._refresh_session()
         data = [
             s
@@ -119,11 +133,11 @@ class SystemCoordinator(MyPyllantCoordinator):
         return data
 
 
-class HistoricalDataCoordinator(MyPyllantCoordinator):
+class HourlyDataCoordinator(MyPyllantCoordinator):
     data: list[list[DeviceData]]
 
     async def _async_update_data(self) -> list[list[DeviceData]]:
-        _LOGGER.debug(f"Starting async update data for HistoricalDataCoordinator")
+        _LOGGER.debug("Starting async update data for HourlyDataCoordinator")
         await self._refresh_session()
         data = []
         start = datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
@@ -137,4 +151,26 @@ class HistoricalDataCoordinator(MyPyllantCoordinator):
                     device, DeviceDataBucketResolution.HOUR, start, end
                 )
                 data.append([da async for da in device_data])
+        return data
+
+
+class DailyDataCoordinator(MyPyllantCoordinator):
+    data: dict[str, list[DeviceData]]
+
+    async def _async_update_data(self) -> dict[str, list[DeviceData]]:
+        _LOGGER.debug("Starting async update data for DailyDataCoordinator")
+        await self._refresh_session()
+        data = {}
+        start = datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
+        end = start + timedelta(days=1)
+        _LOGGER.debug(f"Getting data from {start} to {end}")
+        async for system in await self.hass.async_add_executor_job(
+            self.api.get_systems
+        ):
+            data[system.id] = []
+            async for device in self.api.get_devices_by_system(system):
+                device_data = self.api.get_data_by_device(
+                    device, DeviceDataBucketResolution.DAY, start, end
+                )
+                data[system.id] += [da async for da in device_data]
         return data
