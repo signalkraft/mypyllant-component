@@ -1,12 +1,12 @@
 {
+  "domain": "mypyllant",
+  "name": "myVAILLANT",
   "codeowners": ["@signalkraft"],
   "config_flow": true,
   "documentation": "https://github.com/signalkraft/myPyllant",
-  "domain": "mypyllant",
+  "iot_class": "cloud_polling",
   "integration_type": "hub",
   "issue_tracker": "https://github.com/signalkraft/issues",
-  "name": "myVAILLANT",
-  "iot_class": "cloud_polling",
   "requirements": ["myPyllant==0.0.15"],
   "version": "0.0.15"
 }
