@@ -1,6 +1,6 @@
 # myPyllant Home Assistant Component
 
-[![PyPI](https://img.shields.io/pypi/v/myPyllant)](https://pypi.org/project/myPyllant/)
+[![Validate with hassfest](https://github.com/signalkraft/mypyllant-component/actions/workflows/hassfest.yaml/badge.svg)](https://github.com/signalkraft/mypyllant-component/actions/workflows/hassfest.yaml)
 
 Home Assistant component that interfacts with the myVAILLANT API using the [myPyllant library](https://github.com/signalkraft/mypyllant).
 
@@ -16,19 +16,18 @@ Not affiliated with Vaillant, the developers take no responsibility for anything
 
 * Supports climate & hot water controls, as well as sensor information
 * Control operating modes, target temperature, and presets such as holiday more or quick veto
-* Track sensor information of devices, such as temperature, humidity, operating mode, or energy usage
-* See diagnostic information, such as the current heating curve, or water pressure
+* Track sensor information of devices, such as temperature, humidity, operating mode, energy usage, or energy efficiency
+* See diagnostic information, such as the current heating curve, flow temperature, or water pressure
 
 ## Installation
 
 ### HACS
 
 1. [Install HACS](https://hacs.xyz/docs/setup/download)
-2. [Add this repository as a custom repository in HACS > Integrations](https://my.home-assistant.io/redirect/hacs_repository/?owner=signalkraft&repository=mypyllant-component&category=integration)
-3. Search for the myVAILLANT integration in HACS and install it
-4. Restart Home Assistant
-5. [Add myVaillant integration](https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant)
-6. Sign in with the email & password you use in the myVAILLANT app
+2. Search for the myVAILLANT integration in HACS and install it
+3. Restart Home Assistant
+4. [Add myVaillant integration](https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant)
+5. Sign in with the email & password you use in the myVAILLANT app
 
 ### Manual
 
