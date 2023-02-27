@@ -1,6 +1,8 @@
 # myPyllant Home Assistant Component
 
-[![Validate with hassfest](https://github.com/signalkraft/mypyllant-component/actions/workflows/hassfest.yaml/badge.svg)](https://github.com/signalkraft/mypyllant-component/actions/workflows/hassfest.yaml)
+[![GitHub Release](https://img.shields.io/github/release/signalkraft/mypyllant-component.svg)](https://github.com/custom-components/pyscript/releases)
+[![License](https://img.shields.io/github/license/signalkraft/mypyllant-component.svg)](LICENSE)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/signalkraft/mypyllant-component/hassfest.yaml)
 
 Home Assistant component that interfacts with the myVAILLANT API using the [myPyllant library](https://github.com/signalkraft/mypyllant).
 
