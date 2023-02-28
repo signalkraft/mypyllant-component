@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.0.18
+
+* Made `current_dhw_tank_temperature` optional on DHW
+
 ## v0.0.16
 
 * Added energy efficiency sensor
