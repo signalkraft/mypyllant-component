@@ -1,6 +1,6 @@
 # myPyllant Home Assistant Component
 
-[![GitHub Release](https://img.shields.io/github/release/signalkraft/mypyllant-component.svg)](https://github.com/custom-components/pyscript/releases)
+[![GitHub Release](https://img.shields.io/github/release/signalkraft/mypyllant-component.svg)](https://github.com/signalkraft/mypyllant-component/releases)
 [![License](https://img.shields.io/github/license/signalkraft/mypyllant-component.svg)](LICENSE)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/signalkraft/mypyllant-component/hassfest.yaml)
 
