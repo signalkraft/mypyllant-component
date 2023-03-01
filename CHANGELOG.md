@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.0.19
+
+* Made more fields optional to support other installations
+
 ## v0.0.18
 
 * Made `current_dhw_tank_temperature` optional on DHW
