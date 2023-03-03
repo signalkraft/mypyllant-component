@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.0.20
+
+* Updated underlying Python library for better debug logging
+
 ## v0.0.19
 
 * Made more fields optional to support other installations
