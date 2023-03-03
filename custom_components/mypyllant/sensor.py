@@ -59,8 +59,8 @@ async def async_setup_entry(
         "daily_data_coordinator"
     ]
     sensors: list[SensorEntity] = []
+    _LOGGER.debug(f"Creating system sensors for {system_coordinator.data}")
     for index, system in enumerate(system_coordinator.data):
-        _LOGGER.debug(f"Creating System sensors for {system}")
         sensors.append(SystemOutdoorTemperatureSensor(index, system_coordinator))
         sensors.append(SystemWaterPressureSensor(index, system_coordinator))
         sensors.append(SystemModeSensor(index, system_coordinator))
@@ -119,10 +119,13 @@ async def async_setup_entry(
                     index, dhw_index, system_coordinator
                 )
             )
+
+    _LOGGER.debug(f"Creating data sensors for {hourly_data_coordinator.data}")
     for device_index, device_data_list in enumerate(hourly_data_coordinator.data):
         for da_index, _ in enumerate(device_data_list):
             sensors.append(DataSensor(device_index, da_index, hourly_data_coordinator))
 
+    _LOGGER.debug(f"Creating efficiency sensor for {daily_data_coordinator.data}")
     for system_id in daily_data_coordinator.data.keys():
         sensors.append(EfficiencySensor(system_id, daily_data_coordinator))
 

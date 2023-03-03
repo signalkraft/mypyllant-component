@@ -36,10 +36,10 @@ def system_coordinator_mock(hass):
     zone = ZoneFactory.build(humidity=61.0).dict()
     del zone["system_id"]
 
-    circuit = CircuitFactory.build().dict()
+    circuit = CircuitFactory.build(heating_curve=0.8).dict()
     del circuit["system_id"]
 
-    dhw = DomesticHotWaterFactory.build().dict()
+    dhw = DomesticHotWaterFactory.build(current_dhw_tank_temperature=50).dict()
     del dhw["system_id"]
 
     system_data = {
