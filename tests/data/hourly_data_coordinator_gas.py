@@ -1,18 +1,18 @@
 import datetime
 
 from myPyllant.models import (
+    Circuit,
     Device,
     DeviceData,
     DeviceDataBucket,
-    System,
-    Zone,
-    DomesticHotWater,
-    ZoneCurrentSpecialFunction,
+    DeviceDataBucketResolution,
     DHWCurrentSpecialFunction,
     DHWOperationMode,
-    DeviceDataBucketResolution,
+    DomesticHotWater,
+    System,
+    Zone,
+    ZoneCurrentSpecialFunction,
     ZoneHeatingOperatingMode,
-    Circuit,
     ZoneHeatingState,
 )
 
