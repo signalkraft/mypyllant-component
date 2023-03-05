@@ -19,7 +19,13 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ENERGY_WATT_HOUR, PERCENTAGE, PRESSURE_BAR, TEMP_CELSIUS
+from homeassistant.const import (
+    ENERGY_KILO_WATT_HOUR,
+    ENERGY_WATT_HOUR,
+    PERCENTAGE,
+    PRESSURE_BAR,
+    TEMP_CELSIUS,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -35,13 +41,7 @@ DATA_UNIT_MAP = {
     "CONSUMED_ELECTRICAL_ENERGY": ENERGY_WATT_HOUR,
     "EARNED_ENVIRONMENT_ENERGY": ENERGY_WATT_HOUR,
     "HEAT_GENERATED": ENERGY_WATT_HOUR,
-}
-
-
-DATA_DEVICE_CLASS_MAP = {
-    "CONSUMED_ELECTRICAL_ENERGY": SensorDeviceClass.ENERGY,
-    "EARNED_ENVIRONMENT_ENERGY": SensorDeviceClass.ENERGY,
-    "HEAT_GENERATED": SensorDeviceClass.ENERGY,
+    "CONSUMED_PRIMARY_ENERGY": ENERGY_KILO_WATT_HOUR,
 }
 
 
@@ -580,10 +580,11 @@ class DataSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self.device_index = device_index
         self.da_index = da_index
-        self._attr_native_unit_of_measurement = DATA_UNIT_MAP[
-            self.device_data.energy_type
-        ]
-        self._attr_device_class = DATA_DEVICE_CLASS_MAP[self.device_data.energy_type]
+        if self.device_data.energy_type in DATA_UNIT_MAP:
+            self._attr_native_unit_of_measurement = DATA_UNIT_MAP[
+                self.device_data.energy_type
+            ]
+        self._attr_device_class = SensorDeviceClass.ENERGY
 
     @property
     def name(self):
