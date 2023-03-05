@@ -5,6 +5,8 @@ from myPyllant.models import Circuit, DomesticHotWater, System, Zone
 from pydantic_factories import ModelFactory
 import pytest
 
+from tests.data import hourly_data_coordinator_gas
+
 
 @pytest.fixture(autouse=True)
 def auto_enable_custom_integrations(enable_custom_integrations):
@@ -36,7 +38,7 @@ def system_coordinator_mock(hass):
     zone = ZoneFactory.build(humidity=61.0).dict()
     del zone["system_id"]
 
-    circuit = CircuitFactory.build(heating_curve=0.8).dict()
+    circuit = CircuitFactory.build(heating_curve=0.8, min_flow_temperature_setpoint=35.0).dict()
     del circuit["system_id"]
 
     dhw = DomesticHotWaterFactory.build(current_dhw_tank_temperature=50).dict()
@@ -82,3 +84,9 @@ def system_coordinator_mock(hass):
     }
     coordinator.data = [SystemFactory.build(id=system_id, **system_data)]
     yield coordinator
+
+
+@pytest.fixture
+def hourly_data_coordinator_mock(hass):
+    """Fixture to mock the hourly data coordinator."""
+    return Mock(data=hourly_data_coordinator_gas.data, hass=hass)

@@ -585,6 +585,7 @@ class DataSensor(CoordinatorEntity, SensorEntity):
                 self.device_data.energy_type
             ]
         self._attr_device_class = SensorDeviceClass.ENERGY
+        _LOGGER.debug(f'Finishing init of {self.name} = {self.native_value} with unique id {self.unique_id}')
 
     @property
     def name(self):

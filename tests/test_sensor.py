@@ -1,3 +1,5 @@
+import datetime
+
 from custom_components.mypyllant.sensor import (
     CircuitFlowTemperatureSensor,
     CircuitHeatingCurveSensor,
@@ -14,7 +16,7 @@ from custom_components.mypyllant.sensor import (
     ZoneCurrentSpecialFunctionSensor,
     ZoneDesiredRoomTemperatureSetpointSensor,
     ZoneHeatingOperatingModeSensor,
-    ZoneHumiditySensor,
+    ZoneHumiditySensor, DataSensor,
 )
 
 
@@ -89,4 +91,17 @@ async def test_domestic_hot_water_sensor(hass, system_coordinator_mock):
             0, 0, system_coordinator_mock
         ).native_value,
         float,
+    )
+
+
+async def test_data_sensor(hass, hourly_data_coordinator_mock):
+    assert isinstance(
+        DataSensor(0, 3, hourly_data_coordinator_mock).native_value,
+        float,
+    )
+    assert (
+        DataSensor(0, 3, hourly_data_coordinator_mock).name == 'ecoTEC Consumed Primary Energy Heating'
+    )
+    assert isinstance(
+        DataSensor(0, 3, hourly_data_coordinator_mock).last_reset, datetime.datetime
     )
