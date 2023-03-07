@@ -100,12 +100,12 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         )
 
     async def _refresh_session(self):
-        if self.api.oauth_session_expires < datetime.now() + timedelta(seconds=600):
+        if self.api.oauth_session_expires < datetime.now() + timedelta(seconds=180):
             _LOGGER.debug(f"Refreshing token for {self.api.username}")
             await self.api.refresh_token()
         else:
             delta = self.api.oauth_session_expires - (
-                datetime.now() + timedelta(seconds=600)
+                datetime.now() + timedelta(seconds=180)
             )
             _LOGGER.debug(
                 f"Waiting {delta.seconds}s until token refresh for {self.api.username}"
