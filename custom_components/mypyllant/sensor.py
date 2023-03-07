@@ -19,13 +19,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    ENERGY_KILO_WATT_HOUR,
-    ENERGY_WATT_HOUR,
-    PERCENTAGE,
-    PRESSURE_BAR,
-    TEMP_CELSIUS,
-)
+from homeassistant.const import ENERGY_WATT_HOUR, PERCENTAGE, PRESSURE_BAR, TEMP_CELSIUS
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -41,7 +35,7 @@ DATA_UNIT_MAP = {
     "CONSUMED_ELECTRICAL_ENERGY": ENERGY_WATT_HOUR,
     "EARNED_ENVIRONMENT_ENERGY": ENERGY_WATT_HOUR,
     "HEAT_GENERATED": ENERGY_WATT_HOUR,
-    "CONSUMED_PRIMARY_ENERGY": ENERGY_KILO_WATT_HOUR,
+    "CONSUMED_PRIMARY_ENERGY": ENERGY_WATT_HOUR,
 }
 
 
