@@ -12,7 +12,13 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import DEFAULT_UPDATE_INTERVAL, DOMAIN, OPTION_UPDATE_INTERVAL
+from .const import (
+    DEFAULT_COUNTRY,
+    DEFAULT_UPDATE_INTERVAL,
+    DOMAIN,
+    OPTION_COUNTRY,
+    OPTION_UPDATE_INTERVAL,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,10 +34,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     username = entry.data.get("username")
     password = entry.data.get("password")
     update_interval = entry.options.get(OPTION_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
+    country = entry.options.get(
+        OPTION_COUNTRY, entry.data.get("country", DEFAULT_COUNTRY)
+    )
 
-    _LOGGER.debug(f"Creating API and logging in with {username}")
-    api = MyPyllantAPI(username, password)
+    _LOGGER.debug(f"Creating API and logging in with {username} in realm {country}")
+    api = MyPyllantAPI(username, password, country)
     await api.login()
+
     system_coordinator = SystemCoordinator(
         hass, api, entry, timedelta(seconds=update_interval)
     )

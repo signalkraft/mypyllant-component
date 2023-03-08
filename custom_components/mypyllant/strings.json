@@ -4,7 +4,8 @@
       "user": {
         "data": {
           "password": "Password",
-          "username": "Username"
+          "username": "Username",
+          "country": "Country"
         },
         "title": "Login Information",
         "description": "Same as myVAILLANT app"

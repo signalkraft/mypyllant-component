@@ -39,7 +39,12 @@ async def test_user_flow_minimum_fields(hass):
     assert result["step_id"] == "user"
 
     result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], user_input={"username": "username", "password": "password"}
+        result["flow_id"],
+        user_input={
+            "username": "username",
+            "password": "password",
+            "country": "germany",
+        },
     )
 
     assert result["type"] == data_entry_flow.RESULT_TYPE_FORM

@@ -10,8 +10,16 @@ from homeassistant import config_entries, exceptions
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.config_validation import positive_int
+from homeassistant.helpers.selector import selector
 
-from .const import DEFAULT_UPDATE_INTERVAL, DOMAIN, OPTION_UPDATE_INTERVAL
+from .const import (
+    COUNTRIES,
+    DEFAULT_COUNTRY,
+    DEFAULT_UPDATE_INTERVAL,
+    DOMAIN,
+    OPTION_COUNTRY,
+    OPTION_UPDATE_INTERVAL,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -26,11 +34,23 @@ _LOGGER = logging.getLogger(__name__)
 # quite work as documented and always gave me the "Lokalise key references" string
 # (in square brackets), rather than the actual translated value. I did not attempt to
 # figure this out or look further into it.
-DATA_SCHEMA = vol.Schema({vol.Required("username"): str, vol.Required("password"): str})
+DATA_SCHEMA = vol.Schema(
+    {
+        vol.Required("username"): str,
+        vol.Required("password"): str,
+        vol.Required(OPTION_COUNTRY): selector(
+            {
+                "select": {
+                    "options": list(COUNTRIES.keys()),
+                }
+            }
+        ),
+    }
+)
 
 
 async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
-    api = MyPyllantAPI(data["username"], data["password"])
+    api = MyPyllantAPI(data["username"], data["password"], data["country"])
     try:
         await api.login()
     except Exception:
@@ -53,6 +73,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
+        config_country = self.config_entry.data.get(OPTION_COUNTRY, DEFAULT_COUNTRY)
+
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(
@@ -62,7 +84,19 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         default=self.config_entry.options.get(
                             OPTION_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
                         ),
-                    ): positive_int
+                    ): positive_int,
+                    vol.Required(
+                        OPTION_COUNTRY,
+                        default=self.config_entry.options.get(
+                            OPTION_COUNTRY, config_country
+                        ),
+                    ): selector(
+                        {
+                            "select": {
+                                "options": list(COUNTRIES.keys()),
+                            }
+                        }
+                    ),
                 }
             ),
         )
