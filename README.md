@@ -68,7 +68,7 @@ You can expect these entities, although names may vary based on your installed d
 2. Search for the myVAILLANT integration in HACS and install it
 3. Restart Home Assistant
 4. [Add myVaillant integration](https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant)
-5. Sign in with the email & password you use in the myVAILLANT app
+5. Sign in with the email, password & country you use in the myVAILLANT app
 
 ### Manual
 
