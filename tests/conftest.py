@@ -35,7 +35,7 @@ def system_coordinator_mock(hass):
     """Fixture to mock the update data coordinator."""
     coordinator = Mock(data={}, hass=hass)
     system_id = str(uuid4())
-    zone = ZoneFactory.build(humidity=61.0).dict()
+    zone = ZoneFactory.build(humidity=61.0, current_room_temperature=19.0).dict()
     del zone["system_id"]
 
     circuit = CircuitFactory.build(

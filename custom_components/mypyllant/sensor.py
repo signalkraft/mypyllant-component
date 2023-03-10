@@ -65,10 +65,16 @@ async def async_setup_entry(
                     index, zone_index, system_coordinator
                 )
             )
-            sensors.append(
-                ZoneCurrentRoomTemperatureSensor(index, zone_index, system_coordinator)
-            )
-            sensors.append(ZoneHumiditySensor(index, zone_index, system_coordinator))
+            if zone.current_room_temperature is not None:
+                sensors.append(
+                    ZoneCurrentRoomTemperatureSensor(
+                        index, zone_index, system_coordinator
+                    )
+                )
+            if zone.humidity is not None:
+                sensors.append(
+                    ZoneHumiditySensor(index, zone_index, system_coordinator)
+                )
             sensors.append(
                 ZoneHeatingOperatingModeSensor(index, zone_index, system_coordinator)
             )
@@ -84,22 +90,25 @@ async def async_setup_entry(
             sensors.append(
                 CircuitFlowTemperatureSensor(index, circuit_index, system_coordinator)
             )
-            sensors.append(
-                CircuitHeatingCurveSensor(index, circuit_index, system_coordinator)
-            )
-            sensors.append(
-                CircuitMinFlowTemperatureSetpointSensor(
-                    index, circuit_index, system_coordinator
+            if circuit.heating_curve is not None:
+                sensors.append(
+                    CircuitHeatingCurveSensor(index, circuit_index, system_coordinator)
                 )
-            )
+            if circuit.min_flow_temperature_setpoint is not None:
+                sensors.append(
+                    CircuitMinFlowTemperatureSetpointSensor(
+                        index, circuit_index, system_coordinator
+                    )
+                )
             sensors.append(CircuitStateSensor(index, circuit_index, system_coordinator))
         for dhw_index, dhw in enumerate(system.domestic_hot_water):
             _LOGGER.debug(f"Creating Domestic Hot Water sensors for {dhw}")
-            sensors.append(
-                DomesticHotWaterTankTemperatureSensor(
-                    index, dhw_index, system_coordinator
+            if dhw.current_dhw_tank_temperature:
+                sensors.append(
+                    DomesticHotWaterTankTemperatureSensor(
+                        index, dhw_index, system_coordinator
+                    )
                 )
-            )
             sensors.append(
                 DomesticHotWaterSetPointSensor(index, dhw_index, system_coordinator)
             )
