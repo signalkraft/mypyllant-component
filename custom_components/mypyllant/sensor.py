@@ -53,84 +53,105 @@ async def async_setup_entry(
         "daily_data_coordinator"
     ]
     sensors: list[SensorEntity] = []
-    _LOGGER.debug(f"Creating system sensors for {system_coordinator.data}")
-    for index, system in enumerate(system_coordinator.data):
-        sensors.append(SystemOutdoorTemperatureSensor(index, system_coordinator))
-        sensors.append(SystemWaterPressureSensor(index, system_coordinator))
-        sensors.append(SystemModeSensor(index, system_coordinator))
-        for zone_index, zone in enumerate(system.zones):
-            _LOGGER.debug(f"Creating Zone sensors for {zone}")
-            sensors.append(
-                ZoneDesiredRoomTemperatureSetpointSensor(
-                    index, zone_index, system_coordinator
-                )
-            )
-            if zone.current_room_temperature is not None:
+    if not system_coordinator.data:
+        _LOGGER.warning("No system data, skipping sensors")
+    else:
+        _LOGGER.debug(f"Creating system sensors for {system_coordinator.data}")
+        for index, system in enumerate(system_coordinator.data):
+            sensors.append(SystemOutdoorTemperatureSensor(index, system_coordinator))
+            sensors.append(SystemWaterPressureSensor(index, system_coordinator))
+            sensors.append(SystemModeSensor(index, system_coordinator))
+            for zone_index, zone in enumerate(system.zones):
+                _LOGGER.debug(f"Creating Zone sensors for {zone}")
                 sensors.append(
-                    ZoneCurrentRoomTemperatureSensor(
+                    ZoneDesiredRoomTemperatureSetpointSensor(
                         index, zone_index, system_coordinator
                     )
                 )
-            if zone.humidity is not None:
+                if zone.current_room_temperature is not None:
+                    sensors.append(
+                        ZoneCurrentRoomTemperatureSensor(
+                            index, zone_index, system_coordinator
+                        )
+                    )
+                if zone.humidity is not None:
+                    sensors.append(
+                        ZoneHumiditySensor(index, zone_index, system_coordinator)
+                    )
                 sensors.append(
-                    ZoneHumiditySensor(index, zone_index, system_coordinator)
+                    ZoneHeatingOperatingModeSensor(
+                        index, zone_index, system_coordinator
+                    )
                 )
-            sensors.append(
-                ZoneHeatingOperatingModeSensor(index, zone_index, system_coordinator)
-            )
-            sensors.append(
-                ZoneHeatingStateSensor(index, zone_index, system_coordinator)
-            )
-            sensors.append(
-                ZoneCurrentSpecialFunctionSensor(index, zone_index, system_coordinator)
-            )
+                sensors.append(
+                    ZoneHeatingStateSensor(index, zone_index, system_coordinator)
+                )
+                sensors.append(
+                    ZoneCurrentSpecialFunctionSensor(
+                        index, zone_index, system_coordinator
+                    )
+                )
 
-        for circuit_index, circuit in enumerate(system.circuits):
-            _LOGGER.debug(f"Creating Circuit sensors for {circuit}")
-            sensors.append(
-                CircuitFlowTemperatureSensor(index, circuit_index, system_coordinator)
-            )
-            if circuit.heating_curve is not None:
+            for circuit_index, circuit in enumerate(system.circuits):
+                _LOGGER.debug(f"Creating Circuit sensors for {circuit}")
                 sensors.append(
-                    CircuitHeatingCurveSensor(index, circuit_index, system_coordinator)
-                )
-            if circuit.min_flow_temperature_setpoint is not None:
-                sensors.append(
-                    CircuitMinFlowTemperatureSetpointSensor(
+                    CircuitFlowTemperatureSensor(
                         index, circuit_index, system_coordinator
                     )
                 )
-            sensors.append(CircuitStateSensor(index, circuit_index, system_coordinator))
-        for dhw_index, dhw in enumerate(system.domestic_hot_water):
-            _LOGGER.debug(f"Creating Domestic Hot Water sensors for {dhw}")
-            if dhw.current_dhw_tank_temperature:
+                if circuit.heating_curve is not None:
+                    sensors.append(
+                        CircuitHeatingCurveSensor(
+                            index, circuit_index, system_coordinator
+                        )
+                    )
+                if circuit.min_flow_temperature_setpoint is not None:
+                    sensors.append(
+                        CircuitMinFlowTemperatureSetpointSensor(
+                            index, circuit_index, system_coordinator
+                        )
+                    )
                 sensors.append(
-                    DomesticHotWaterTankTemperatureSensor(
+                    CircuitStateSensor(index, circuit_index, system_coordinator)
+                )
+            for dhw_index, dhw in enumerate(system.domestic_hot_water):
+                _LOGGER.debug(f"Creating Domestic Hot Water sensors for {dhw}")
+                if dhw.current_dhw_tank_temperature:
+                    sensors.append(
+                        DomesticHotWaterTankTemperatureSensor(
+                            index, dhw_index, system_coordinator
+                        )
+                    )
+                sensors.append(
+                    DomesticHotWaterSetPointSensor(index, dhw_index, system_coordinator)
+                )
+                sensors.append(
+                    DomesticHotWaterOperationModeSensor(
                         index, dhw_index, system_coordinator
                     )
                 )
-            sensors.append(
-                DomesticHotWaterSetPointSensor(index, dhw_index, system_coordinator)
-            )
-            sensors.append(
-                DomesticHotWaterOperationModeSensor(
-                    index, dhw_index, system_coordinator
+                sensors.append(
+                    DomesticHotWaterCurrentSpecialFunctionSensor(
+                        index, dhw_index, system_coordinator
+                    )
                 )
-            )
-            sensors.append(
-                DomesticHotWaterCurrentSpecialFunctionSensor(
-                    index, dhw_index, system_coordinator
+
+    if not hourly_data_coordinator.data:
+        _LOGGER.warning("No hourly data, skipping sensors")
+    else:
+        _LOGGER.debug(f"Creating data sensors for {hourly_data_coordinator.data}")
+        for device_index, device_data_list in enumerate(hourly_data_coordinator.data):
+            for da_index, _ in enumerate(device_data_list):
+                sensors.append(
+                    DataSensor(device_index, da_index, hourly_data_coordinator)
                 )
-            )
 
-    _LOGGER.debug(f"Creating data sensors for {hourly_data_coordinator.data}")
-    for device_index, device_data_list in enumerate(hourly_data_coordinator.data):
-        for da_index, _ in enumerate(device_data_list):
-            sensors.append(DataSensor(device_index, da_index, hourly_data_coordinator))
-
-    _LOGGER.debug(f"Creating efficiency sensor for {daily_data_coordinator.data}")
-    for system_id in daily_data_coordinator.data.keys():
-        sensors.append(EfficiencySensor(system_id, daily_data_coordinator))
+    if not daily_data_coordinator.data:
+        _LOGGER.warning("No daily data, skipping sensors")
+    else:
+        _LOGGER.debug(f"Creating efficiency sensor for {daily_data_coordinator.data}")
+        for system_id in daily_data_coordinator.data.keys():
+            sensors.append(EfficiencySensor(system_id, daily_data_coordinator))
 
     async_add_entities(sensors)
 

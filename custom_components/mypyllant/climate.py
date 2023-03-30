@@ -53,6 +53,9 @@ async def async_setup_entry(
     coordinator: SystemCoordinator = hass.data[DOMAIN][config.entry_id][
         "system_coordinator"
     ]
+    if not coordinator.data:
+        _LOGGER.warning("No system data, skipping climate")
+        return
 
     climates: list[ClimateEntity] = []
 
@@ -94,7 +97,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     def device_info(self) -> DeviceInfo:
         return DeviceInfo(
             identifiers={(DOMAIN, f"zone{self.zone.index}")},
-            name=self.zone.name,
+            name=self.name,
             manufacturer="Vaillant",
         )
 

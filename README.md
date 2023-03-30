@@ -95,3 +95,15 @@ pre-commit install
 pytest
 git commit ...
 ```
+
+### Debugging
+
+When debugging or reporting issues, turn on debug logging by adding this to your `configuration.yaml` and restarting Home Assistant:
+
+```yaml
+logger:
+  default: warning
+  logs:
+    custom_components.mypyllant: debug
+    myPyllant: debug
+```

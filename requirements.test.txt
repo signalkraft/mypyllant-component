@@ -11,4 +11,4 @@ pylint>=2.15.0
 pylint-strict-informational>=0.1
 pydantic-factories==1.17.2
 pytest-asyncio==0.20.2
-myPyllant==0.1.2
+myPyllant==0.1.3

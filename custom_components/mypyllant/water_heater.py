@@ -9,12 +9,11 @@ from myPyllant.models import (
 )
 
 from homeassistant.components.water_heater import (
-    UnitOfTemperature,
     WaterHeaterEntity,
     WaterHeaterEntityFeature,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_TEMPERATURE
+from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -33,6 +32,9 @@ async def async_setup_entry(
     coordinator: SystemCoordinator = hass.data[DOMAIN][config.entry_id][
         "system_coordinator"
     ]
+    if not coordinator.data:
+        _LOGGER.warning("No system data, skipping water hearer")
+        return
 
     dhws: list[WaterHeaterEntity] = []
 

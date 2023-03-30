@@ -27,6 +27,9 @@ async def async_setup_entry(
     coordinator: SystemCoordinator = hass.data[DOMAIN][config.entry_id][
         "system_coordinator"
     ]
+    if not coordinator.data:
+        _LOGGER.warning("No system data, skipping binary sensors")
+        return
 
     sensors: list[BinarySensorEntity] = []
     for index, system in enumerate(coordinator.data):
@@ -52,14 +55,14 @@ class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):
         return self.coordinator.data[self.system_index]
 
     @property
-    def control(self):
+    def control(self) -> dict | None:
         devices = [d for d in self.system.devices if d["type"] == "CONTROL"]
         if len(devices) > 0:
             return devices[0]
         return None
 
     @property
-    def name(self) -> str | None:
+    def control_name(self) -> str | None:
         return self.control["name"] if self.control else None
 
     @property
@@ -71,9 +74,9 @@ class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):
         if self.control:
             return DeviceInfo(
                 identifiers={(DOMAIN, f"system{self.system.id}")},
-                name=self.name,
+                name=self.control_name,
                 manufacturer="Vaillant",
-                model=self.name,
+                model=self.control_name,
             )
         return None
 
@@ -94,7 +97,7 @@ class CircuitEntity(CoordinatorEntity, BinarySensorEntity):
         return self.coordinator.data[self.system_index]
 
     @property
-    def name(self) -> str:
+    def circuit_name(self) -> str:
         return f"Circuit {self.circuit_index}"
 
     @property
@@ -105,7 +108,7 @@ class CircuitEntity(CoordinatorEntity, BinarySensorEntity):
     def device_info(self) -> DeviceInfo | None:
         return DeviceInfo(
             identifiers={(DOMAIN, f"circuit{self.circuit.index}")},
-            name=f"Circuit {self.circuit.index}",
+            name=self.circuit_name,
             manufacturer="Vaillant",
         )
 
@@ -125,7 +128,7 @@ class ControlError(SystemControlEntity):
 
     @property
     def name(self) -> str:
-        return f"Error {super().name}"
+        return f"Error {self.control_name}"
 
     @property
     def unique_id(self) -> str:
@@ -151,7 +154,7 @@ class ControlOnline(SystemControlEntity):
 
     @property
     def name(self) -> str:
-        return f"Online Status {super().name}"
+        return f"Online Status {self.control_name}"
 
     @property
     def unique_id(self) -> str:
@@ -178,7 +181,7 @@ class CircuitIsCoolingAllowed(CircuitEntity):
 
     @property
     def name(self) -> str:
-        return f"Cooling Allowed in {super().name}"
+        return f"Cooling Allowed in {self.circuit_name}"
 
     @property
     def unique_id(self) -> str:
