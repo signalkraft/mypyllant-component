@@ -150,8 +150,8 @@ class HourlyDataCoordinator(MyPyllantCoordinator):
         _LOGGER.debug("Starting async update data for HourlyDataCoordinator")
         await self._refresh_session()
         data = []
-        start = datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
-        end = start + timedelta(days=1)
+        start = datetime.now() - timedelta(hours=12)
+        end = datetime.now() + timedelta(hours=12)
         _LOGGER.debug(f"Getting data from {start} to {end}")
         async for system in await self.hass.async_add_executor_job(
             self.api.get_systems

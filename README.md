@@ -4,13 +4,18 @@
 [![License](https://img.shields.io/github/license/signalkraft/mypyllant-component.svg)](LICENSE)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/signalkraft/mypyllant-component/build-test.yaml)
 
-Home Assistant component that interfacts with the myVAILLANT API using the [myPyllant library](https://github.com/signalkraft/mypyllant).
+Home Assistant component that interfaces with the myVAILLANT API using the [myPyllant library](https://github.com/signalkraft/mypyllant).
 
 ![myPyllant](https://raw.githubusercontent.com/signalkraft/myPyllant/main/logo.png)
 
-**Alpha, tested on an aroTHERM plus heatpump, sensoCOMFORT VRC 720, and sensoNET VR 921.**
+Tested on:
 
-Not affiliated with Vaillant, the developers take no responsibility for anything that happens to your Vaillant devices because of this library.
+* aroTHERM plus heatpump + sensoCOMFORT VRC 720 + sensoNET VR 921
+* ECOTEC PLUS boiler + VR940F + sensoCOMFORT
+* ECOTEC PLUS boiler + VRT380f + sensoNET
+
+Not affiliated with Vaillant, the developers take no responsibility for anything that happens to your Vaillant devices 
+because of this library.
 
 ## Features
 
@@ -21,9 +26,48 @@ Not affiliated with Vaillant, the developers take no responsibility for anything
 * Track sensor information of devices, such as temperature, humidity, operating mode, energy usage, or energy efficiency
 * See diagnostic information, such as the current heating curve, flow temperature, or water pressure
 
+## Installation
+
+### HACS
+
+1. [Install HACS](https://hacs.xyz/docs/setup/download)
+2. Search for the myVAILLANT integration in HACS and install it
+3. Restart Home Assistant
+4. [Add myVaillant integration](https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant)
+5. Sign in with the email, password & country you use in the myVAILLANT app
+
+### Manual
+
+1. Download [the latest release](https://github.com/signalkraft/mypyllant-component/releases/tag/v0.0.10)
+2. Extract the `custom_components` folder to your Home Assistant's config folder, the resulting folder structure should be `config/custom_components/mypyllant`
+3. Restart Home Assistant
+4. [Add myVaillant integration](https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant), or go to Settings > Integrations and add myVAILLANT
+5. Sign in with the email & password you use in the myVAILLANT app
+
+## Known Issues
+
+### Delayed Hourly Data
+
+Hourly Data, such as energy consumption or generated heat, is shown with a delay of ~2 hours.
+
+The myVAILLANT API sometimes returns the latest datapoint at 0 and later refreshed the same time period to the 
+real value. For example when requesting data at 9:15am the period from 8-9am shows 0, when requesting again at 10:15am 
+the same period suddenly shows >0.
+
+To mitigate this problem, hourly datapoints are created ~2h after they show up in the API. The times reported in
+Home Assistant are therefore wrong. There's no way to fix this, apparently. In Home Assistant, sensor readings can only 
+be added "now" and not with a timestamp in the past.
+
+### Lack of Test Data for Different Systems
+
+Your HVAC system might differ from the ones in `Tested on` above.
+If you don't see any entities, or get an error during setup, please check `Debugging` below and create an issue.
+With debugging enabled, there's a chance to find the culprit in the data returned by the myVAILLANT API and fix it.
+
 ## Entities
 
-You can expect these entities, although names may vary based on your installed devices (in this example "aroTHERM plus" and "Hydraulic Station") or the naming of your heating zones (in this case "Zone 1"):
+You can expect these entities, although names may vary based on your installed devices (in this example "aroTHERM plus" 
+and "Hydraulic Station") or the naming of your heating zones (in this case "Zone 1"):
 
 | Entity                       | Unit   | Class   | Sample   |
 |------------------------------|--------|---------|----------|
@@ -60,24 +104,6 @@ You can expect these entities, although names may vary based on your installed d
 | System Mode |  |  | REGULAR |
 | Water Pressure | bar | pressure | 1.4 |
 
-## Installation
-
-### HACS
-
-1. [Install HACS](https://hacs.xyz/docs/setup/download)
-2. Search for the myVAILLANT integration in HACS and install it
-3. Restart Home Assistant
-4. [Add myVaillant integration](https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant)
-5. Sign in with the email, password & country you use in the myVAILLANT app
-
-### Manual
-
-1. Download [the latest release](https://github.com/signalkraft/mypyllant-component/releases/tag/v0.0.10)
-2. Extract the `custom_components` folder to your Home Assistant's config folder, the resulting folder structure should be `config/custom_components/mypyllant`
-3. Restart Home Assistant
-4. [Add myVaillant integration](https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant), or go to Settings > Integrations and add myVAILLANT
-5. Sign in with the email & password you use in the myVAILLANT app
-
 ## Contributing
 
 > **Warning**
@@ -98,7 +124,8 @@ git commit ...
 
 ### Debugging
 
-When debugging or reporting issues, turn on debug logging by adding this to your `configuration.yaml` and restarting Home Assistant:
+When debugging or reporting issues, turn on debug logging by adding this to your `configuration.yaml` 
+and restarting Home Assistant:
 
 ```yaml
 logger:

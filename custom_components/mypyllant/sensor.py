@@ -20,7 +20,7 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ENERGY_WATT_HOUR, PERCENTAGE, PRESSURE_BAR, TEMP_CELSIUS
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -139,9 +139,11 @@ async def async_setup_entry(
     if not hourly_data_coordinator.data:
         _LOGGER.warning("No hourly data, skipping sensors")
     else:
-        _LOGGER.debug(f"Creating data sensors for {hourly_data_coordinator.data}")
         for device_index, device_data_list in enumerate(hourly_data_coordinator.data):
             for da_index, _ in enumerate(device_data_list):
+                _LOGGER.debug(
+                    f"Creating data sensors for device {device_index} and hourly data {da_index}"
+                )
                 sensors.append(
                     DataSensor(device_index, da_index, hourly_data_coordinator)
                 )
@@ -149,8 +151,8 @@ async def async_setup_entry(
     if not daily_data_coordinator.data:
         _LOGGER.warning("No daily data, skipping sensors")
     else:
-        _LOGGER.debug(f"Creating efficiency sensor for {daily_data_coordinator.data}")
         for system_id in daily_data_coordinator.data.keys():
+            _LOGGER.debug(f"Creating efficiency sensor for System {system_id}")
             sensors.append(EfficiencySensor(system_id, daily_data_coordinator))
 
     async_add_entities(sensors)
@@ -625,7 +627,7 @@ class DataSensor(CoordinatorEntity, SensorEntity):
         return self.coordinator.data[self.device_index][self.da_index]
 
     @property
-    def last_reset(self) -> datetime.datetime:
+    def last_reset(self) -> datetime.datetime | None:
         return self.data_bucket.start_date if self.data_bucket else None
 
     @property
@@ -634,8 +636,9 @@ class DataSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def data_bucket(self) -> DeviceDataBucket | None:
-        if len(self.device_data.data):
-            return self.device_data.data[-1]
+        if len(self.device_data.data) > 1:
+            # Getting 2nd to last data entry, because the latest sometimes shows 0 instead of the real value
+            return self.device_data.data[-2]
         else:
             return None
 
@@ -653,6 +656,13 @@ class DataSensor(CoordinatorEntity, SensorEntity):
     @property
     def native_value(self):
         return self.data_bucket.value if self.data_bucket else None
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        super()._handle_coordinator_update()
+        _LOGGER.debug(
+            f"Updated DataSensor {self.unique_id} = {self.native_value}, from data {self.device_data.data}"
+        )
 
 
 class EfficiencySensor(CoordinatorEntity, SensorEntity):
