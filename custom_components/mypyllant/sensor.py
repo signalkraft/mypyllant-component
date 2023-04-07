@@ -95,10 +95,14 @@ async def async_setup_entry(
             for circuit_index, circuit in enumerate(system.circuits):
                 _LOGGER.debug(f"Creating Circuit sensors for {circuit}")
                 sensors.append(
-                    CircuitFlowTemperatureSensor(
-                        index, circuit_index, system_coordinator
-                    )
+                    CircuitStateSensor(index, circuit_index, system_coordinator)
                 )
+                if circuit.current_circuit_flow_temperature is not None:
+                    sensors.append(
+                        CircuitFlowTemperatureSensor(
+                            index, circuit_index, system_coordinator
+                        )
+                    )
                 if circuit.heating_curve is not None:
                     sensors.append(
                         CircuitHeatingCurveSensor(
@@ -111,9 +115,6 @@ async def async_setup_entry(
                             index, circuit_index, system_coordinator
                         )
                     )
-                sensors.append(
-                    CircuitStateSensor(index, circuit_index, system_coordinator)
-                )
             for dhw_index, dhw in enumerate(system.domestic_hot_water):
                 _LOGGER.debug(f"Creating Domestic Hot Water sensors for {dhw}")
                 if dhw.current_dhw_tank_temperature:
