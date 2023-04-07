@@ -39,7 +39,9 @@ def system_coordinator_mock(hass):
     del zone["system_id"]
 
     circuit = CircuitFactory.build(
-        heating_curve=0.8, min_flow_temperature_setpoint=35.0
+        heating_curve=0.8,
+        min_flow_temperature_setpoint=35.0,
+        current_circuit_flow_temperature=50.0,
     ).dict()
     del circuit["system_id"]
 
