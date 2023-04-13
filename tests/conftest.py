@@ -1,9 +1,10 @@
 from unittest.mock import Mock
 from uuid import uuid4
 
-from myPyllant.models import Circuit, DomesticHotWater, System, Zone
 from pydantic_factories import ModelFactory
 import pytest
+
+from myPyllant.models import Circuit, DomesticHotWater, System, SystemDevice, Zone
 
 from tests.data import hourly_data_coordinator_gas
 
@@ -62,28 +63,36 @@ def system_coordinator_mock(hass):
             }
         },
         "devices": [
-            {
-                "deviceId": "123456",
-                "serialNumber": "212213002026091401111111N8",
-                "articleNumber": "0020260914",
-                "name": "sensoCOMFORT",
-                "type": "CONTROL",
-                "systemId": system_id,
-                "diagnosticTroubleCodes": [],
-            },
-            {
-                "deviceId": "123457",
-                "serialNumber": "21222700100211180001111111N0",
-                "articleNumber": "0010021118",
-                "name": "aroTHERM plus",
-                "type": "HEAT_GENERATOR",
-                "operationalData": {
-                    "waterPressure": {"value": 1.3, "unit": "BAR", "stepSize": 0.1}
-                },
-                "systemId": system_id,
-                "diagnosticTroubleCodes": [],
-                "properties": ["EMF"],
-            },
+            SystemDevice(
+                **{
+                    "device_id": "deviceId3",
+                    "serial_number": "serialNumber3",
+                    "article_number": "0020260951",
+                    "name": "sensoHOME",
+                    "type": "CONTROL",
+                    "system_id": system_id,
+                    "diagnostic_trouble_codes": [],
+                }
+            ),
+            SystemDevice(
+                **{
+                    "device_id": "deviceId1",
+                    "serial_number": "serialNumber1",
+                    "article_number": "articleNumber1",
+                    "name": "ecoTEC",
+                    "type": "HEAT_GENERATOR",
+                    "operational_data": {
+                        "water_pressure": {
+                            "value": 1.2,
+                            "unit": "BAR",
+                            "step_size": 0.1,
+                        }
+                    },
+                    "system_id": system_id,
+                    "diagnostic_trouble_codes": [],
+                    "properties": ["EMF"],
+                }
+            ),
         ],
     }
     coordinator.data = [SystemFactory.build(id=system_id, **system_data)]

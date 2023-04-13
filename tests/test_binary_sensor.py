@@ -1,6 +1,5 @@
-from myPyllant.models import System
-
 from custom_components.mypyllant.binary_sensor import CircuitEntity, SystemControlEntity
+from myPyllant.models import System
 
 
 async def test_system_sensors(hass, system_coordinator_mock):

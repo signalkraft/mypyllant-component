@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from myPyllant.api import MyPyllantAPI
 import voluptuous as vol
 
 from homeassistant import config_entries, exceptions
@@ -11,13 +10,21 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.config_validation import positive_int
 from homeassistant.helpers.selector import selector
+from myPyllant.api import MyPyllantAPI
+from myPyllant.const import (
+    BRANDS,
+    COUNTRIES,
+    DEFAULT_BRAND,
+    DEFAULT_QUICK_VETO_DURATION,
+)
 
 from .const import (
-    COUNTRIES,
     DEFAULT_COUNTRY,
     DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
+    OPTION_BRAND,
     OPTION_COUNTRY,
+    OPTION_DEFAULT_QUICK_VETO_DURATION,
     OPTION_UPDATE_INTERVAL,
 )
 
@@ -45,12 +52,21 @@ DATA_SCHEMA = vol.Schema(
                 }
             }
         ),
+        vol.Required(OPTION_BRAND, default=DEFAULT_BRAND): selector(
+            {
+                "select": {
+                    "options": list(BRANDS.keys()),
+                }
+            }
+        ),
     }
 )
 
 
 async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
-    api = MyPyllantAPI(data["username"], data["password"], data["country"])
+    api = MyPyllantAPI(
+        data["username"], data["password"], data["country"], data["brand"]
+    )
     try:
         await api.login()
     except Exception:
@@ -74,6 +90,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_create_entry(title="", data=user_input)
 
         config_country = self.config_entry.data.get(OPTION_COUNTRY, DEFAULT_COUNTRY)
+        config_brand = self.config_entry.data.get(OPTION_BRAND, DEFAULT_BRAND)
 
         return self.async_show_form(
             step_id="init",
@@ -86,6 +103,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         ),
                     ): positive_int,
                     vol.Required(
+                        OPTION_DEFAULT_QUICK_VETO_DURATION,
+                        default=self.config_entry.options.get(
+                            OPTION_DEFAULT_QUICK_VETO_DURATION,
+                            DEFAULT_QUICK_VETO_DURATION,
+                        ),
+                    ): positive_int,
+                    vol.Required(
                         OPTION_COUNTRY,
                         default=self.config_entry.options.get(
                             OPTION_COUNTRY, config_country
@@ -94,6 +118,18 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         {
                             "select": {
                                 "options": list(COUNTRIES.keys()),
+                            }
+                        }
+                    ),
+                    vol.Required(
+                        OPTION_BRAND,
+                        default=self.config_entry.options.get(
+                            OPTION_BRAND, config_brand
+                        ),
+                    ): selector(
+                        {
+                            "select": {
+                                "options": list(BRANDS.keys()),
                             }
                         }
                     ),

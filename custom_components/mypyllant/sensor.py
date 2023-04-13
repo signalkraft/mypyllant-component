@@ -3,16 +3,6 @@ from __future__ import annotations
 import datetime
 import logging
 
-from myPyllant.models import (
-    Circuit,
-    Device,
-    DeviceData,
-    DeviceDataBucket,
-    DomesticHotWater,
-    System,
-    Zone,
-)
-
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -24,12 +14,21 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from myPyllant.models import (
+    Circuit,
+    Device,
+    DeviceData,
+    DeviceDataBucket,
+    DomesticHotWater,
+    System,
+    SystemDevice,
+    Zone,
+)
 
 from . import DailyDataCoordinator, HourlyDataCoordinator, SystemCoordinator
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
-
 
 DATA_UNIT_MAP = {
     "CONSUMED_ELECTRICAL_ENERGY": ENERGY_WATT_HOUR,
@@ -58,9 +57,25 @@ async def async_setup_entry(
     else:
         _LOGGER.debug(f"Creating system sensors for {system_coordinator.data}")
         for index, system in enumerate(system_coordinator.data):
-            sensors.append(SystemOutdoorTemperatureSensor(index, system_coordinator))
-            sensors.append(SystemWaterPressureSensor(index, system_coordinator))
-            sensors.append(SystemModeSensor(index, system_coordinator))
+            if system.outdoor_temperature is not None:
+                sensors.append(
+                    SystemOutdoorTemperatureSensor(index, system_coordinator)
+                )
+            if system.water_pressure is not None:
+                sensors.append(SystemWaterPressureSensor(index, system_coordinator))
+            if system.mode is not None:
+                sensors.append(SystemModeSensor(index, system_coordinator))
+
+            for device_index, device in enumerate(system.devices):
+                _LOGGER.debug(f"Creating SystemDevice sensors for {device}")
+
+                if "water_pressure" in device.operational_data:
+                    sensors.append(
+                        SystemDeviceWaterPressureSensor(
+                            index, device_index, system_coordinator
+                        )
+                    )
+
             for zone_index, zone in enumerate(system.zones):
                 _LOGGER.debug(f"Creating Zone sensors for {zone}")
                 sensors.append(
@@ -115,6 +130,7 @@ async def async_setup_entry(
                             index, circuit_index, system_coordinator
                         )
                     )
+
             for dhw_index, dhw in enumerate(system.domestic_hot_water):
                 _LOGGER.debug(f"Creating Domestic Hot Water sensors for {dhw}")
                 if dhw.current_dhw_tank_temperature:
@@ -198,7 +214,7 @@ class SystemOutdoorTemperatureSensor(SystemSensor):
 
 
 class SystemWaterPressureSensor(SystemSensor):
-    _attr_name = "Water Pressure"
+    _attr_name = "System Water Pressure"
     _attr_native_unit_of_measurement = PRESSURE_BAR
     _attr_device_class = SensorDeviceClass.PRESSURE
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -224,13 +240,7 @@ class SystemModeSensor(SystemSensor):
 
     @property
     def native_value(self):
-        try:
-            return self.system.system_control_state["control_state"]["general"][
-                "system_mode"
-            ]
-        except KeyError as e:
-            _LOGGER.error("Could not get system mode from control state", exc_info=e)
-            return None
+        return self.system.mode
 
     @property
     def unique_id(self) -> str:
@@ -713,3 +723,52 @@ class EfficiencySensor(CoordinatorEntity, SensorEntity):
             return round(self.heat_energy_generated / self.energy_consumed, 1)
         else:
             return None
+
+
+class SystemDeviceSensor(CoordinatorEntity, SensorEntity):
+    coordinator: SystemCoordinator
+
+    def __init__(
+        self, system_index: int, device_index: int, coordinator: SystemCoordinator
+    ) -> None:
+        super().__init__(coordinator)
+        self.system_index = system_index
+        self.device_index = device_index
+
+    @property
+    def system(self) -> System:
+        return self.coordinator.data[self.system_index]
+
+    @property
+    def device(self) -> SystemDevice:
+        return self.system.devices[self.device_index]
+
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, f"system{self.system.id}")}}
+
+    @property
+    def available(self) -> bool | None:
+        return self.system.status_online
+
+
+class SystemDeviceWaterPressureSensor(SystemDeviceSensor):
+    _attr_native_unit_of_measurement = PRESSURE_BAR
+    _attr_device_class = SensorDeviceClass.PRESSURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def name(self):
+        return f"Water Pressure {self.device.name}"
+
+    @property
+    def native_value(self):
+        return self.device.operational_data.get("water_pressure", {}).get("value")
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_water_pressure_{self.device.device_id}"
+
+    @property
+    def entity_category(self) -> EntityCategory | None:
+        return EntityCategory.DIAGNOSTIC

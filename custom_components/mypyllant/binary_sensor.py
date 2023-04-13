@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import logging
 
-from myPyllant.models import Circuit, System
-
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
@@ -13,6 +11,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from myPyllant.models import Circuit, System, SystemDevice
 
 from . import SystemCoordinator
 from .const import DOMAIN
@@ -55,15 +54,15 @@ class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):
         return self.coordinator.data[self.system_index]
 
     @property
-    def control(self) -> dict | None:
-        devices = [d for d in self.system.devices if d["type"] == "CONTROL"]
+    def control(self) -> SystemDevice | None:
+        devices = [d for d in self.system.devices if d.type == "CONTROL"]
         if len(devices) > 0:
             return devices[0]
         return None
 
     @property
     def control_name(self) -> str | None:
-        return self.control["name"] if self.control else None
+        return self.control.name if self.control else None
 
     @property
     def entity_category(self) -> EntityCategory | None:

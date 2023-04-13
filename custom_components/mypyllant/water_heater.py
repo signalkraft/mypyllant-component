@@ -1,13 +1,6 @@
 import logging
 from typing import Any
 
-from myPyllant.models import (
-    DHWCurrentSpecialFunction,
-    DHWOperationMode,
-    DomesticHotWater,
-    System,
-)
-
 from homeassistant.components.water_heater import (
     WaterHeaterEntity,
     WaterHeaterEntityFeature,
@@ -18,6 +11,12 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from myPyllant.models import (
+    DHWCurrentSpecialFunction,
+    DHWOperationMode,
+    DomesticHotWater,
+    System,
+)
 
 from . import SystemCoordinator
 from .const import DOMAIN

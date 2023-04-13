@@ -5,7 +5,8 @@
         "data": {
           "password": "Password",
           "username": "Username",
-          "country": "Country"
+          "country": "Country",
+          "brand": "Brand"
         },
         "title": "Login Information",
         "description": "Same as myVAILLANT app"
@@ -13,7 +14,7 @@
     },
     "error": {
       "cannot_connect": "Failed to connect, please try again",
-      "authentication_failed": "Authentication failed, check your username and password and try again",
+      "authentication_failed": "Authentication failed, check your username and password and make sure you selected the right country and device brand",
       "unknown": "Unexpected error"
     }
   },
@@ -21,8 +22,19 @@
     "step": {
       "init": {
         "data": {
-          "update_interval": "Seconds between scans"
+          "update_interval": "Seconds between scans",
+          "quick_veto_duration": "Default duration in hours for quick veto",
+          "country": "Country",
+          "brand": "Brand"
         }
+      }
+    }
+  },
+  "selector": {
+    "brand": {
+      "options": {
+        "vaillant": "Vaillant",
+        "sdbg": "Saunier Duval"
       }
     }
   }

@@ -19,6 +19,7 @@ from custom_components.mypyllant.sensor import (
     ZoneHeatingOperatingModeSensor,
     ZoneHumiditySensor,
 )
+from myPyllant.models import CircuitState
 
 
 async def test_system_sensors(hass, system_coordinator_mock):
@@ -56,7 +57,7 @@ async def test_zone_sensors(hass, system_coordinator_mock):
 
 async def test_circuit_sensors(hass, system_coordinator_mock):
     assert isinstance(
-        CircuitStateSensor(0, 0, system_coordinator_mock).native_value, str
+        CircuitStateSensor(0, 0, system_coordinator_mock).native_value, CircuitState
     )
     assert isinstance(
         CircuitFlowTemperatureSensor(0, 0, system_coordinator_mock).native_value, float

@@ -1,0 +1,71 @@
+set_quick_veto:
+  name: Set quick veto
+  description: Sets quick veto temperature with optional duration
+  target:
+    entity:
+      integration: mypyllant
+      domain: climate
+  fields:
+    temperature:
+      name: Temperature
+      description: Quick Veto Temperature
+      example: 21
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 30
+          mode: slider
+    duration_hours:
+      name: Duration
+      description: Optional duration in hours for the quick veto, default is 3 hours
+      example: 3
+      selector:
+        number:
+          min: 0
+          mode: box
+
+cancel_quick_veto:
+  name: Cancel quick veto
+  description: Cancels quick veto temperature and returns to normal schedule / manual setpoint
+  target:
+    entity:
+      integration: mypyllant
+      domain: climate
+
+set_holiday:
+  name: Set holiday
+  description: Set holiday / away mode with start / end or duration
+  target:
+    entity:
+      integration: mypyllant
+      domain: climate
+  fields:
+    start:
+      name: Start Date
+      description: Optional start date of the holiday, defaults to now
+      example: '"2023-01-10 14:00:00"'
+      selector:
+        datetime:
+    end:
+      name: End Date
+      description: Optional end date of the holiday, defaults to one year in the future
+      example: '"2023-01-01 0:00:00"'
+      selector:
+        datetime:
+    duration_hours:
+      name: Duration
+      description: Optional duration of the holiday in hours, defaults to one year
+      example: 72
+      selector:
+        number:
+          min: 1
+          mode: box
+
+cancel_holiday:
+  name: Cancel Holiday
+  description: Cancel holiday / away mode
+  target:
+    entity:
+      integration: mypyllant
+      domain: climate

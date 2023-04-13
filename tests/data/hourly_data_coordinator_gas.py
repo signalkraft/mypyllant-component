@@ -20,6 +20,7 @@ data = [
     [
         DeviceData(
             device=Device(
+                device_id="deviceId3",
                 system=System(
                     id="systemId1",
                     status={"online": True, "error": False},
@@ -666,6 +667,7 @@ data = [
         ),
         DeviceData(
             device=Device(
+                device_id="deviceId1",
                 system=System(
                     id="systemId1",
                     status={"online": True, "error": False},
@@ -1312,6 +1314,7 @@ data = [
         ),
         DeviceData(
             device=Device(
+                device_id="deviceId2",
                 system=System(
                     id="systemId1",
                     status={"online": True, "error": False},
@@ -1958,6 +1961,7 @@ data = [
         ),
         DeviceData(
             device=Device(
+                device_id="deviceId1",
                 system=System(
                     id="systemId1",
                     status={"online": True, "error": False},

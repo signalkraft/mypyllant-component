@@ -1,15 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from datetime import datetime, timedelta
 import logging
 from typing import Any
 
-from myPyllant.models import (
-    System,
-    Zone,
-    ZoneCurrentSpecialFunction,
-    ZoneHeatingOperatingMode,
-)
+import voluptuous as vol
 
 from homeassistant.components.climate import (
     ClimateEntity,
@@ -24,12 +20,28 @@ from homeassistant.components.climate.const import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_platform
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.template import as_datetime
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from myPyllant.const import DEFAULT_QUICK_VETO_DURATION
+from myPyllant.models import (
+    System,
+    Zone,
+    ZoneCurrentSpecialFunction,
+    ZoneHeatingOperatingMode,
+)
 
 from . import SystemCoordinator
-from .const import DEFAULT_QUICK_VETO_DURATION, DOMAIN
+from .const import (
+    DOMAIN,
+    OPTION_DEFAULT_QUICK_VETO_DURATION,
+    SERVICE_CANCEL_HOLIDAY,
+    SERVICE_CANCEL_QUICK_VETO,
+    SERVICE_SET_HOLIDAY,
+    SERVICE_SET_QUICK_VETO,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -53,6 +65,9 @@ async def async_setup_entry(
     coordinator: SystemCoordinator = hass.data[DOMAIN][config.entry_id][
         "system_coordinator"
     ]
+    default_quick_veto_duration = config.options.get(
+        OPTION_DEFAULT_QUICK_VETO_DURATION, DEFAULT_QUICK_VETO_DURATION
+    )
     if not coordinator.data:
         _LOGGER.warning("No system data, skipping climate")
         return
@@ -61,9 +76,51 @@ async def async_setup_entry(
 
     for index, system in enumerate(coordinator.data):
         for zone_index, zone in enumerate(system.zones):
-            climates.append(ZoneClimate(index, zone_index, coordinator))
+            climates.append(
+                ZoneClimate(index, zone_index, coordinator, default_quick_veto_duration)
+            )
 
     async_add_entities(climates)
+
+    if len(climates) > 0:
+        platform = entity_platform.async_get_current_platform()
+        _LOGGER.debug(f"Setting up climate entity services for {platform}")
+        # noinspection PyTypeChecker
+        # Wrapping the schema in vol.Schema() breaks entity_id passing
+        platform.async_register_entity_service(
+            SERVICE_SET_QUICK_VETO,
+            {
+                vol.Required("temperature"): vol.All(
+                    vol.Coerce(float), vol.Clamp(min=0, max=30)
+                ),
+                vol.Optional("duration_hours"): vol.All(
+                    vol.Coerce(int), vol.Clamp(min=1)
+                ),
+            },
+            "set_quick_veto",
+        )
+        platform.async_register_entity_service(
+            SERVICE_CANCEL_QUICK_VETO,
+            {},
+            "remove_quick_veto",
+        )
+        # noinspection PyTypeChecker
+        platform.async_register_entity_service(
+            SERVICE_SET_HOLIDAY,
+            {
+                vol.Optional("start"): vol.Coerce(as_datetime),
+                vol.Optional("end"): vol.Coerce(as_datetime),
+                vol.Optional("duration_hours"): vol.All(
+                    vol.Coerce(int), vol.Clamp(min=1)
+                ),
+            },
+            "set_holiday",
+        )
+        platform.async_register_entity_service(
+            SERVICE_CANCEL_HOLIDAY,
+            {},
+            "cancel_holiday",
+        )
 
 
 class ZoneClimate(CoordinatorEntity, ClimateEntity):
@@ -79,11 +136,13 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         system_index: int,
         zone_index: int,
         coordinator: SystemCoordinator,
+        default_quick_veto_duration: int,
     ) -> None:
         super().__init__(coordinator)
         self.system_index = system_index
         self.zone_index = zone_index
         self.entity_id = f"{DOMAIN}.zone_{zone_index}"
+        self.default_quick_veto_duration = default_quick_veto_duration
 
     @property
     def system(self) -> System:
@@ -114,15 +173,42 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         attr = {"time_windows": self.zone.time_windows}
         return attr
 
-    async def set_quick_veto(self, **kwargs):
-        temperature = kwargs.get("temperature")
-        duration = kwargs.get("duration", DEFAULT_QUICK_VETO_DURATION)
-        await self.coordinator.api.quick_veto_zone_temperature(
-            self.zone, temperature, duration
+    async def set_holiday(self, **kwargs):
+        _LOGGER.debug(
+            f"Setting holiday mode on System {self.system.id} with params {kwargs}"
         )
+        start = kwargs.get("start")
+        end = kwargs.get("end")
+        duration_hours = kwargs.get("duration_hours")
+        if duration_hours:
+            if end:
+                raise ValueError(
+                    "Can't set end and duration_hours arguments at the same time for set_holiday"
+                )
+            if not start:
+                start = datetime.now()
+            end = start + timedelta(hours=duration_hours)
+        await self.coordinator.api.set_holiday(self.system, start, end)
+        await self.coordinator.async_request_refresh_delayed()
 
-    async def remove_quick_veto(self, **kwargs):
+    async def cancel_holiday(self):
+        _LOGGER.debug(f"Canceling holiday on System {self.system.id}")
+        await self.coordinator.api.cancel_holiday(self.system)
+        await self.coordinator.async_request_refresh_delayed()
+
+    async def set_quick_veto(self, **kwargs):
+        _LOGGER.debug(f"Setting quick veto on {self.zone.name} with params {kwargs}")
+        temperature = kwargs.get("temperature")
+        duration_hours = kwargs.get("duration_hours")
+        await self.coordinator.api.quick_veto_zone_temperature(
+            self.zone, temperature, duration_hours, self.default_quick_veto_duration
+        )
+        await self.coordinator.async_request_refresh_delayed()
+
+    async def remove_quick_veto(self):
+        _LOGGER.debug(f"Removing quick veto on {self.zone.name}")
         await self.coordinator.api.cancel_quick_veto_zone_temperature(self.zone)
+        await self.coordinator.async_request_refresh_delayed()
 
     @property
     def supported_features(self) -> ClimateEntityFeature:
@@ -157,12 +243,15 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         await self.coordinator.async_request_refresh_delayed()
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
-        """Set new target temperature."""
+        """
+        Set new target temperature
+        """
+        _LOGGER.debug(f"Setting temperature on {self.zone.name} with params {kwargs}")
         temperature = kwargs.get(ATTR_TEMPERATURE)
 
         if temperature and temperature != self.target_temperature:
             await self.coordinator.api.quick_veto_zone_temperature(
-                self.zone, temperature, DEFAULT_QUICK_VETO_DURATION
+                self.zone, temperature
             )
             await self.coordinator.async_request_refresh_delayed()
 
@@ -173,6 +262,12 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         ][0]
 
     async def async_set_preset_mode(self, preset_mode):
+        """
+        When setting a new preset, sometimes the old one needs to be canceled
+
+        :param preset_mode:
+        :return:
+        """
         requested_mode = PRESET_MAP[preset_mode]
         if requested_mode != self.zone.current_special_function:
             if requested_mode == ZoneCurrentSpecialFunction.NONE:
@@ -194,7 +289,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                 await self.coordinator.api.quick_veto_zone_temperature(
                     self.zone,
                     self.zone.manual_mode_setpoint,
-                    DEFAULT_QUICK_VETO_DURATION,
+                    default_duration=self.default_quick_veto_duration,
                 )
             if requested_mode == ZoneCurrentSpecialFunction.HOLIDAY:
                 await self.coordinator.api.set_holiday(self.system)

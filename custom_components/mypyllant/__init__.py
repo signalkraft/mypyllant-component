@@ -4,18 +4,19 @@ import asyncio
 from datetime import datetime, timedelta
 import logging
 
-from myPyllant.api import MyPyllantAPI
-from myPyllant.models import DeviceData, DeviceDataBucketResolution, System
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from myPyllant.api import MyPyllantAPI
+from myPyllant.const import DEFAULT_BRAND
+from myPyllant.models import DeviceData, DeviceDataBucketResolution, System
 
 from .const import (
     DEFAULT_COUNTRY,
     DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
+    OPTION_BRAND,
     OPTION_COUNTRY,
     OPTION_UPDATE_INTERVAL,
 )
@@ -35,11 +36,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     password = entry.data.get("password")
     update_interval = entry.options.get(OPTION_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
     country = entry.options.get(
-        OPTION_COUNTRY, entry.data.get("country", DEFAULT_COUNTRY)
+        OPTION_COUNTRY, entry.data.get(OPTION_COUNTRY, DEFAULT_COUNTRY)
     )
+    brand = entry.options.get(OPTION_BRAND, entry.data.get(OPTION_BRAND, DEFAULT_BRAND))
 
     _LOGGER.debug(f"Creating API and logging in with {username} in realm {country}")
-    api = MyPyllantAPI(username, password, country)
+    api = MyPyllantAPI(username, password, country, brand)
     await api.login()
 
     system_coordinator = SystemCoordinator(

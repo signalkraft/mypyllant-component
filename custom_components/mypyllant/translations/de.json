@@ -5,7 +5,8 @@
         "data": {
           "password": "Passwort",
           "username": "Benutzername",
-          "country": "Land"
+          "country": "Land",
+          "brand": "Hersteller"
         },
         "title": "Login Information",
         "description": "Aus der myVAILLANT App"
@@ -21,8 +22,19 @@
     "step": {
       "init": {
         "data": {
-          "update_interval": "Intervall zwischen Updates in Sekunden"
+          "update_interval": "Intervall zwischen Updates in Sekunden",
+          "quick_veto_duration": "Standard Dauer in Stunden für Quick Veto",
+          "country": "Land",
+          "brand": "Hersteller"
         }
+      }
+    }
+  },
+  "selector": {
+    "brand": {
+      "options": {
+        "vaillant": "Vaillant",
+        "sdbg": "Saunier Duval"
       }
     }
   }
