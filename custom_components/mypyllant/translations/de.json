@@ -13,7 +13,7 @@
       }
     },
     "error": {
-      "cannot_connect": "Konnte nicht verbinden, bitte später noch einmal versuchen",
+      "login_endpoint_invalid": "Kein Login möglich mit diesem Land und Hersteller",
       "authentication_failed": "Login fehlgeschlagen, stimmen Benutzername & Passwort?",
       "unknown": "Unerwarteter Fehler, siehe Logs"
     }
@@ -27,14 +27,6 @@
           "country": "Land",
           "brand": "Hersteller"
         }
-      }
-    }
-  },
-  "selector": {
-    "brand": {
-      "options": {
-        "vaillant": "Vaillant",
-        "sdbg": "Saunier Duval"
       }
     }
   }

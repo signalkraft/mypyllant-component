@@ -13,7 +13,7 @@
       }
     },
     "error": {
-      "cannot_connect": "Failed to connect, please try again",
+      "login_endpoint_invalid": "No login method was found for this combination of brand and country",
       "authentication_failed": "Authentication failed, check your username and password and make sure you selected the right country and device brand",
       "unknown": "Unexpected error"
     }
@@ -27,14 +27,6 @@
           "country": "Country",
           "brand": "Brand"
         }
-      }
-    }
-  },
-  "selector": {
-    "brand": {
-      "options": {
-        "vaillant": "Vaillant",
-        "sdbg": "Saunier Duval"
       }
     }
   }

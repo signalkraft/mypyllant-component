@@ -5,12 +5,12 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant import config_entries, exceptions
+from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers import selector
 from homeassistant.helpers.config_validation import positive_int
-from homeassistant.helpers.selector import selector
-from myPyllant.api import MyPyllantAPI
+from myPyllant.api import AuthenticationFailed, LoginEndpointInvalid, MyPyllantAPI
 from myPyllant.const import (
     BRANDS,
     COUNTRIES,
@@ -41,23 +41,32 @@ _LOGGER = logging.getLogger(__name__)
 # quite work as documented and always gave me the "Lokalise key references" string
 # (in square brackets), rather than the actual translated value. I did not attempt to
 # figure this out or look further into it.
+
+_COUNTRIES_OPTIONS = [
+    selector.SelectOptionDict(value=k, label=v) for k, v in COUNTRIES.items()
+]
+_BRANDS_OPTIONS = [
+    selector.SelectOptionDict(value=k, label=v) for k, v in BRANDS.items()
+]
+
 DATA_SCHEMA = vol.Schema(
     {
         vol.Required("username"): str,
         vol.Required("password"): str,
-        vol.Required(OPTION_COUNTRY): selector(
-            {
-                "select": {
-                    "options": list(COUNTRIES.keys()),
-                }
-            }
+        vol.Required(OPTION_COUNTRY): selector.SelectSelector(
+            selector.SelectSelectorConfig(
+                options=_COUNTRIES_OPTIONS,
+                mode=selector.SelectSelectorMode.DROPDOWN,
+            ),
         ),
-        vol.Required(OPTION_BRAND, default=DEFAULT_BRAND): selector(
-            {
-                "select": {
-                    "options": list(BRANDS.keys()),
-                }
-            }
+        vol.Required(
+            OPTION_BRAND,
+            default=DEFAULT_BRAND,
+        ): selector.SelectSelector(
+            selector.SelectSelectorConfig(
+                options=_BRANDS_OPTIONS,
+                mode=selector.SelectSelectorMode.LIST,
+            ),
         ),
     }
 )
@@ -67,12 +76,7 @@ async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
     api = MyPyllantAPI(
         data["username"], data["password"], data["country"], data["brand"]
     )
-    try:
-        await api.login()
-    except Exception:
-        raise AuthenticationFailed
-    finally:
-        await api.aiohttp_session.close()
+    await api.login()
 
     return {"title": data["username"]}
 
@@ -114,24 +118,22 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         default=self.config_entry.options.get(
                             OPTION_COUNTRY, config_country
                         ),
-                    ): selector(
-                        {
-                            "select": {
-                                "options": list(COUNTRIES.keys()),
-                            }
-                        }
+                    ): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=_COUNTRIES_OPTIONS,
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        ),
                     ),
                     vol.Required(
                         OPTION_BRAND,
                         default=self.config_entry.options.get(
                             OPTION_BRAND, config_brand
                         ),
-                    ): selector(
-                        {
-                            "select": {
-                                "options": list(BRANDS.keys()),
-                            }
-                        }
+                    ): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=_BRANDS_OPTIONS,
+                            mode=selector.SelectSelectorMode.LIST,
+                        ),
                     ),
                 }
             ),
@@ -157,10 +159,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 info = await validate_input(self.hass, user_input)
 
                 return self.async_create_entry(title=info["title"], data=user_input)
-            except CannotConnect:
-                errors["base"] = "cannot_connect"
             except AuthenticationFailed:
-                errors["host"] = "authentication_failed"
+                errors["base"] = "authentication_failed"
+            except LoginEndpointInvalid:
+                errors["country"] = "login_endpoint_invalid"
             except Exception as e:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception", exc_info=e)
                 errors["base"] = "unknown"
@@ -168,11 +170,3 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user", data_schema=DATA_SCHEMA, errors=errors
         )
-
-
-class CannotConnect(exceptions.HomeAssistantError):
-    """Error to indicate we cannot connect."""
-
-
-class AuthenticationFailed(exceptions.HomeAssistantError):
-    """Error to indicate there is an invalid hostname."""
