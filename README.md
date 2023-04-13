@@ -25,6 +25,7 @@ because of this library.
 * Control operating modes, target temperature, and presets such as holiday more or quick veto
 * Track sensor information of devices, such as temperature, humidity, operating mode, energy usage, or energy efficiency
 * See diagnostic information, such as the current heating curve, flow temperature, or water pressure
+* Custom services to set holiday mode or quick veto temperature overrides, and their duration
 
 ## Installation
 
@@ -103,6 +104,11 @@ and "Hydraulic Station") or the naming of your heating zones (in this case "Zone
 | Outdoor Temperature | °C | temperature | 2.29 |
 | System Mode |  |  | REGULAR |
 | Water Pressure | bar | pressure | 1.4 |
+
+## Services
+
+There are custom services to control holiday mode and quick veto temperatures for each climate zone.
+Search for "myvaillant" in Developer Tools > Services in your Home Assistant instance to get the full list plus an interactive UI.
 
 ## Contributing
 
