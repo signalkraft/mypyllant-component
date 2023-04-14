@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/github/license/signalkraft/mypyllant-component.svg)](LICENSE)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/signalkraft/mypyllant-component/build-test.yaml)
 
-Home Assistant component that interfaces with the myVAILLANT API using the [myPyllant library](https://github.com/signalkraft/mypyllant).
+Home Assistant component that interfaces with the myVAILLANT API (and branded versions of it, such as the MiGo app from Saunier Duval). Uses the [myPyllant library](https://github.com/signalkraft/mypyllant).
 
 ![myPyllant](https://raw.githubusercontent.com/signalkraft/myPyllant/main/logo.png)
 
@@ -14,7 +14,7 @@ Tested on:
 * ECOTEC PLUS boiler + VR940F + sensoCOMFORT
 * ECOTEC PLUS boiler + VRT380f + sensoNET
 
-Not affiliated with Vaillant, the developers take no responsibility for anything that happens to your Vaillant devices 
+Not affiliated with Vaillant, the developers take no responsibility for anything that happens to your devices 
 because of this library.
 
 ## Features
