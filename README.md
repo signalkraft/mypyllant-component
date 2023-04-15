@@ -36,15 +36,15 @@ because of this library.
 2. Search for the myVAILLANT integration in HACS and install it
 3. Restart Home Assistant
 4. [Add myVaillant integration](https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant)
-5. Sign in with the email, password & country you use in the myVAILLANT app
+5. Sign in with the email & password you used in the myVAILLANT app (or MiGo app for Saunier Duval)
 
 ### Manual
 
-1. Download [the latest release](https://github.com/signalkraft/mypyllant-component/releases/tag/v0.0.10)
+1. Download [the latest release](https://github.com/signalkraft/mypyllant-component/releases)
 2. Extract the `custom_components` folder to your Home Assistant's config folder, the resulting folder structure should be `config/custom_components/mypyllant`
 3. Restart Home Assistant
 4. [Add myVaillant integration](https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant), or go to Settings > Integrations and add myVAILLANT
-5. Sign in with the email & password you use in the myVAILLANT app
+5. Sign in with the email & password you used in the myVAILLANT app (or MiGo app for Saunier Duval)
 
 ## Known Issues
 
