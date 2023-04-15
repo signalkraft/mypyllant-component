@@ -8,11 +8,12 @@ Home Assistant component that interfaces with the myVAILLANT API (and branded ve
 
 ![myPyllant](https://raw.githubusercontent.com/signalkraft/myPyllant/main/logo.png)
 
-Tested on:
+## Tested Setups
 
-* aroTHERM plus heatpump + sensoCOMFORT VRC 720 + sensoNET VR 921
-* ECOTEC PLUS boiler + VR940F + sensoCOMFORT
-* ECOTEC PLUS boiler + VRT380f + sensoNET
+* Vaillant aroTHERM plus heatpump + sensoCOMFORT VRC 720 + sensoNET VR 921
+* Vaillant ECOTEC PLUS boiler + VR940F + sensoCOMFORT
+* Vaillant ECOTEC PLUS boiler + VRT380f + sensoNET
+* Saunier Duval DUOMAX F30 90 + MISET Radio + MiLink V3
 
 Not affiliated with Vaillant, the developers take no responsibility for anything that happens to your devices 
 because of this library.
