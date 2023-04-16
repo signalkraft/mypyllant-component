@@ -43,7 +43,8 @@ _LOGGER = logging.getLogger(__name__)
 # figure this out or look further into it.
 
 _COUNTRIES_OPTIONS = [
-    selector.SelectOptionDict(value=k, label=v) for k, v in COUNTRIES.items()
+    selector.SelectOptionDict(value=k, label=v)
+    for k, v in COUNTRIES[DEFAULT_BRAND].items()
 ]
 _BRANDS_OPTIONS = [
     selector.SelectOptionDict(value=k, label=v) for k, v in BRANDS.items()
@@ -72,13 +73,13 @@ DATA_SCHEMA = vol.Schema(
 )
 
 
-async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
+async def validate_input(hass: HomeAssistant, data: dict) -> str:
     api = MyPyllantAPI(
         data["username"], data["password"], data["country"], data["brand"]
     )
     await api.login()
 
-    return {"title": data["username"]}
+    return data["username"].lower()
 
 
 class OptionsFlowHandler(config_entries.OptionsFlow):
@@ -156,9 +157,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             try:
-                info = await validate_input(self.hass, user_input)
-
-                return self.async_create_entry(title=info["title"], data=user_input)
+                username = await validate_input(self.hass, user_input)
+                await self.async_set_unique_id(username)
+                self._abort_if_unique_id_configured()
+                return self.async_create_entry(title=username, data=user_input)
             except AuthenticationFailed:
                 errors["base"] = "authentication_failed"
             except LoginEndpointInvalid:
