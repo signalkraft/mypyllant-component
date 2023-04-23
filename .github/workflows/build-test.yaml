@@ -9,32 +9,36 @@ on:
 jobs:
   validate:
     name: Hassfest validate
-    runs-on: "ubuntu-latest"
+    runs-on: ubuntu-latest
     steps:
-      - uses: "actions/checkout@v2"
+      - uses: actions/checkout@v3
       - uses: home-assistant/actions/hassfest@master
   hacs:
     name: HACS validate
-    runs-on: "ubuntu-latest"
+    runs-on: ubuntu-latest
     steps:
       - name: HACS Action
-        uses: "hacs/action@main"
+        uses: hacs/action@main
         with:
-          category: "integration"
+          category: integration
   test:
     name: Run tests
-    runs-on: "ubuntu-latest"
+    runs-on: ubuntu-latest
     steps:
-      - uses: "actions/checkout@v2"
+      - uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
+          cache: pip
+          cache-dependency-path: requirements.test.txt
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.test.txt
       - uses: pre-commit/action@v3.0.0
+        env:
+          SKIP: pytest
       - name: Run pytest
         run: |
           pytest

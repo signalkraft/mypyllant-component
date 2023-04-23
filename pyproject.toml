@@ -1,0 +1,58 @@
+[tool.coverage.run]
+source = ["custom_components"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplemented()",
+    "if __name__ == '__main__':",
+    "main()",
+]
+show_missing = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = [".git"]
+addopts = """
+--strict
+--cov=custom_components"""
+asyncio_mode = "auto"
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+python_version = "3.10"
+pretty = true
+follow_imports = "silent"
+ignore_missing_imports = true
+warn_incomplete_stub = true
+warn_redundant_casts = true
+warn_unused_configs = true
+
+[tool.flake8]
+max-line-length = 88
+# E501: line too long
+# W503: Line break occurred before a binary operator
+# E203: Whitespace before ':'
+# D202 No blank lines allowed after function docstring
+# W504 line break after binary operator
+ignore = ["E501", "W503", "E203", "D202", "W504"]
+
+[tool.bandit]
+tests = [
+    "B108",
+    "B306",
+    "B307",
+    "B313",
+    "B314",
+    "B315",
+    "B316",
+    "B317",
+    "B318",
+    "B319",
+    "B320",
+    "B325",
+    "B602",
+    "B604",
+]

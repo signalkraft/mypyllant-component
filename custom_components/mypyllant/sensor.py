@@ -642,7 +642,7 @@ class DataSensor(CoordinatorEntity, SensorEntity):
         return self.data_bucket.start_date if self.data_bucket else None
 
     @property
-    def device(self) -> Device:
+    def device(self) -> Device | None:
         return self.device_data.device
 
     @property
@@ -655,9 +655,13 @@ class DataSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def unique_id(self) -> str:
-        dt = self.device.device_type.lower()
+        dt = self.device.device_type.lower() if self.device else "unknown"
         om = self.device_data.operation_mode.lower()
-        et = self.device_data.energy_type.lower()
+        et = (
+            self.device_data.energy_type.lower()
+            if self.device_data.energy_type
+            else "unknown"
+        )
         return f"{DOMAIN}_{dt}_{om}_{et}_{self.da_index}"
 
     @property

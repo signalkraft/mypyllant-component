@@ -1,12 +1,11 @@
 from __future__ import annotations
 
+import logging
 from collections.abc import Mapping
 from datetime import datetime, timedelta
-import logging
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant.components.climate import (
     ClimateEntity,
     ClimateEntityFeature,
@@ -222,11 +221,11 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         return self.zone.desired_room_temperature_setpoint
 
     @property
-    def current_temperature(self) -> float:
+    def current_temperature(self) -> float | None:
         return self.zone.current_room_temperature
 
     @property
-    def current_humidity(self) -> float:
+    def current_humidity(self) -> float | None:
         return self.zone.humidity
 
     @property

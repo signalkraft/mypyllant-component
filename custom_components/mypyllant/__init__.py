@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timedelta
 import logging
+from datetime import datetime, timedelta
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
@@ -91,7 +91,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 class MyPyllantCoordinator(DataUpdateCoordinator):
     api: MyPyllantAPI
-    data: list[System]
 
     def __init__(
         self,
@@ -172,7 +171,7 @@ class DailyDataCoordinator(MyPyllantCoordinator):
     async def _async_update_data(self) -> dict[str, list[DeviceData]]:
         _LOGGER.debug("Starting async update data for DailyDataCoordinator")
         await self._refresh_session()
-        data = {}
+        data: dict[str, list[DeviceData]] = {}
         start = datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
         end = start + timedelta(days=1)
         _LOGGER.debug(f"Getting data from {start} to {end}")

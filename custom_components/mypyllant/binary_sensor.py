@@ -122,7 +122,7 @@ class ControlError(SystemControlEntity):
         self.entity_id = f"{DOMAIN}.control_error_{system_index}"
 
     @property
-    def is_on(self) -> bool:
+    def is_on(self) -> bool | None:
         return self.system.status_error
 
     @property
@@ -148,7 +148,7 @@ class ControlOnline(SystemControlEntity):
         self.entity_id = f"{DOMAIN}.control_online_{system_index}"
 
     @property
-    def is_on(self) -> bool:
+    def is_on(self) -> bool | None:
         return self.system.status_online
 
     @property
@@ -175,7 +175,7 @@ class CircuitIsCoolingAllowed(CircuitEntity):
         self.entity_id = f"{DOMAIN}.circuit_is_cooling_allowed_{system_index}"
 
     @property
-    def is_on(self) -> bool:
+    def is_on(self) -> bool | None:
         return self.circuit.is_cooling_allowed
 
     @property

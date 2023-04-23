@@ -100,7 +100,7 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
         return self.domestic_hot_water.set_point
 
     @property
-    def current_temperature(self) -> float:
+    def current_temperature(self) -> float | None:
         return self.domestic_hot_water.current_dhw_tank_temperature
 
     @property
@@ -122,9 +122,10 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         target_temp = kwargs.get(ATTR_TEMPERATURE)
-        await self.coordinator.api.set_domestic_hot_water_temperature(
-            self.domestic_hot_water, int(target_temp)
-        )
+        if isinstance(target_temp, (int, float)):
+            await self.coordinator.api.set_domestic_hot_water_temperature(
+                self.domestic_hot_water, int(target_temp)
+            )
 
     async def async_set_operation_mode(
         self, operation_mode: str, **kwargs: Any

@@ -131,6 +131,17 @@ pytest
 git commit ...
 ```
 
+If you also need to modify the underlying [myPyllant library](https://github.com/signalkraft/mypyllant),
+clone & install it in editable mode in `mypyllant-component`:
+
+```shell
+# From the root of this repository
+git clone https://github.com/signalkraft/myPyllant.git ../myPyllant
+pip install -e ../myPyllant
+```
+
+Now you can modify `myPyllant/src` and directly develop against these changes in `mypyllant-component`.
+
 ### Debugging
 
 When debugging or reporting issues, turn on debug logging by adding this to your `configuration.yaml` 

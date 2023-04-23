@@ -1,5 +1,11 @@
 import datetime
+from unittest import mock
 
+import pytest as pytest
+from myPyllant.models import CircuitState
+from myPyllant.tests.test_api import get_test_data
+
+from custom_components.mypyllant import HourlyDataCoordinator, SystemCoordinator
 from custom_components.mypyllant.sensor import (
     CircuitFlowTemperatureSensor,
     CircuitHeatingCurveSensor,
@@ -19,92 +25,140 @@ from custom_components.mypyllant.sensor import (
     ZoneHeatingOperatingModeSensor,
     ZoneHumiditySensor,
 )
-from myPyllant.models import CircuitState
 
 
-async def test_system_sensors(hass, system_coordinator_mock):
-    assert isinstance(
-        SystemOutdoorTemperatureSensor(0, system_coordinator_mock).native_value, float
-    )
-    assert isinstance(
-        SystemWaterPressureSensor(0, system_coordinator_mock).native_value, float
-    )
-    assert isinstance(SystemModeSensor(0, system_coordinator_mock).native_value, str)
+@pytest.mark.parametrize("test_data", get_test_data())
+async def test_system_sensors(hass, mypyllant_aioresponses, mocked_api, test_data):
+    with mypyllant_aioresponses(test_data) as _:
+        system_coordinator = SystemCoordinator(
+            hass, mocked_api, mock.Mock(), datetime.timedelta(seconds=10)
+        )
+        system_coordinator.data = await system_coordinator._async_update_data()
+        if "outdoorTemperature" in str(test_data):
+            assert isinstance(
+                SystemOutdoorTemperatureSensor(0, system_coordinator).native_value,
+                float,
+            )
+        assert isinstance(
+            SystemWaterPressureSensor(0, system_coordinator).native_value, float
+        )
+        assert isinstance(SystemModeSensor(0, system_coordinator).native_value, str)
+        await mocked_api.aiohttp_session.close()
 
 
-async def test_zone_sensors(hass, system_coordinator_mock):
-    assert isinstance(
-        ZoneHumiditySensor(0, 0, system_coordinator_mock).native_value, float
-    )
-    assert isinstance(
-        ZoneCurrentRoomTemperatureSensor(0, 0, system_coordinator_mock).native_value,
-        float,
-    )
-    assert isinstance(
-        ZoneDesiredRoomTemperatureSetpointSensor(
-            0, 0, system_coordinator_mock
-        ).native_value,
-        float,
-    )
-    assert isinstance(
-        ZoneCurrentSpecialFunctionSensor(0, 0, system_coordinator_mock).native_value,
-        str,
-    )
-    assert isinstance(
-        ZoneHeatingOperatingModeSensor(0, 0, system_coordinator_mock).native_value, str
-    )
+@pytest.mark.parametrize("test_data", get_test_data())
+async def test_zone_sensors(hass, mypyllant_aioresponses, mocked_api, test_data):
+    with mypyllant_aioresponses(test_data) as _:
+        system_coordinator = SystemCoordinator(
+            hass, mocked_api, mock.Mock(), datetime.timedelta(seconds=10)
+        )
+        system_coordinator.data = await system_coordinator._async_update_data()
+        if "humidity" in str(test_data):
+            assert isinstance(
+                ZoneHumiditySensor(0, 0, system_coordinator).native_value, float
+            )
+        if "currentTemperature" in str(test_data):
+            assert isinstance(
+                ZoneCurrentRoomTemperatureSensor(0, 0, system_coordinator).native_value,
+                float,
+            )
+        assert isinstance(
+            ZoneDesiredRoomTemperatureSetpointSensor(
+                0, 0, system_coordinator
+            ).native_value,
+            float,
+        )
+        assert isinstance(
+            ZoneCurrentSpecialFunctionSensor(0, 0, system_coordinator).native_value,
+            str,
+        )
+        assert isinstance(
+            ZoneHeatingOperatingModeSensor(0, 0, system_coordinator).native_value, str
+        )
+        await mocked_api.aiohttp_session.close()
 
 
-async def test_circuit_sensors(hass, system_coordinator_mock):
-    assert isinstance(
-        CircuitStateSensor(0, 0, system_coordinator_mock).native_value, CircuitState
-    )
-    assert isinstance(
-        CircuitFlowTemperatureSensor(0, 0, system_coordinator_mock).native_value, float
-    )
-    assert isinstance(
-        CircuitHeatingCurveSensor(0, 0, system_coordinator_mock).native_value, float
-    )
-    assert isinstance(
-        CircuitMinFlowTemperatureSetpointSensor(
-            0, 0, system_coordinator_mock
-        ).native_value,
-        float,
-    )
+@pytest.mark.parametrize("test_data", get_test_data())
+async def test_circuit_sensors(hass, mypyllant_aioresponses, mocked_api, test_data):
+    with mypyllant_aioresponses(test_data) as _:
+        system_coordinator = SystemCoordinator(
+            hass, mocked_api, mock.Mock(), datetime.timedelta(seconds=10)
+        )
+        system_coordinator.data = await system_coordinator._async_update_data()
+        assert isinstance(
+            CircuitStateSensor(0, 0, system_coordinator).native_value, CircuitState
+        )
+        assert isinstance(
+            CircuitFlowTemperatureSensor(0, 0, system_coordinator).native_value, float
+        )
+        if "heatingCurve" in str(test_data):
+            assert isinstance(
+                CircuitHeatingCurveSensor(0, 0, system_coordinator).native_value, float
+            )
+        if "minFlowTemperatureSetpoint" in str(test_data):
+            assert isinstance(
+                CircuitMinFlowTemperatureSetpointSensor(
+                    0, 0, system_coordinator
+                ).native_value,
+                float,
+            )
+        await mocked_api.aiohttp_session.close()
 
 
-async def test_domestic_hot_water_sensor(hass, system_coordinator_mock):
-    assert isinstance(
-        DomesticHotWaterOperationModeSensor(0, 0, system_coordinator_mock).native_value,
-        str,
-    )
-    assert isinstance(
-        DomesticHotWaterSetPointSensor(0, 0, system_coordinator_mock).native_value,
-        float,
-    )
-    assert isinstance(
-        DomesticHotWaterCurrentSpecialFunctionSensor(
-            0, 0, system_coordinator_mock
-        ).native_value,
-        str,
-    )
-    assert isinstance(
-        DomesticHotWaterTankTemperatureSensor(
-            0, 0, system_coordinator_mock
-        ).native_value,
-        float,
-    )
+@pytest.mark.parametrize("test_data", get_test_data())
+async def test_domestic_hot_water_sensor(
+    hass, mypyllant_aioresponses, mocked_api, test_data
+):
+    with mypyllant_aioresponses(test_data) as _:
+        system_coordinator = SystemCoordinator(
+            hass, mocked_api, mock.Mock(), datetime.timedelta(seconds=10)
+        )
+        system_coordinator.data = await system_coordinator._async_update_data()
+        assert isinstance(
+            DomesticHotWaterOperationModeSensor(0, 0, system_coordinator).native_value,
+            str,
+        )
+        assert isinstance(
+            DomesticHotWaterSetPointSensor(0, 0, system_coordinator).native_value,
+            float,
+        )
+        assert isinstance(
+            DomesticHotWaterCurrentSpecialFunctionSensor(
+                0, 0, system_coordinator
+            ).native_value,
+            str,
+        )
+        if "currentDhwTankTemperature" in str(test_data):
+            assert isinstance(
+                DomesticHotWaterTankTemperatureSensor(
+                    0, 0, system_coordinator
+                ).native_value,
+                float,
+            )
+        await mocked_api.aiohttp_session.close()
 
 
-async def test_data_sensor(hass, hourly_data_coordinator_mock):
-    assert isinstance(
-        DataSensor(0, 3, hourly_data_coordinator_mock).native_value,
-        float,
-    )
-    assert (
-        DataSensor(0, 3, hourly_data_coordinator_mock).name
-        == "ecoTEC Consumed Primary Energy Heating"
-    )
-    assert isinstance(
-        DataSensor(0, 3, hourly_data_coordinator_mock).last_reset, datetime.datetime
-    )
+@pytest.mark.parametrize("test_data", get_test_data())
+async def test_data_sensor(hass, mypyllant_aioresponses, mocked_api, test_data):
+    with mypyllant_aioresponses(test_data) as _:
+        hourly_data_coordinator = HourlyDataCoordinator(
+            hass, mocked_api, mock.Mock(), datetime.timedelta(seconds=10)
+        )
+        hourly_data_coordinator.data = (
+            await hourly_data_coordinator._async_update_data()
+        )
+
+        data_sensor = DataSensor(0, 0, hourly_data_coordinator)
+        assert isinstance(
+            data_sensor.native_value,
+            float,
+        )
+        assert isinstance(
+            data_sensor.name,
+            str,
+        )
+        assert isinstance(
+            data_sensor.last_reset,
+            datetime.datetime,
+        )
+        await mocked_api.aiohttp_session.close()

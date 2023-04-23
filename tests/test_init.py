@@ -2,10 +2,11 @@
 import logging
 from unittest import mock
 
-from custom_components.mypyllant import DOMAIN
-from custom_components.mypyllant.config_flow import DATA_SCHEMA
 from homeassistant import data_entry_flow
 from homeassistant.config_entries import SOURCE_USER
+
+from custom_components.mypyllant import DOMAIN
+from custom_components.mypyllant.config_flow import DATA_SCHEMA
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -44,6 +45,7 @@ async def test_user_flow_minimum_fields(hass):
             "username": "username",
             "password": "password",
             "country": "germany",
+            "brand": "vaillant",
         },
     )
 
