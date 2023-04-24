@@ -157,7 +157,7 @@ class HourlyDataCoordinator(MyPyllantCoordinator):
         async for system in await self.hass.async_add_executor_job(
             self.api.get_systems
         ):
-            async for device in self.api.get_devices_by_system(system):
+            for device in system.devices:
                 device_data = self.api.get_data_by_device(
                     device, DeviceDataBucketResolution.HOUR, start, end
                 )
@@ -179,7 +179,7 @@ class DailyDataCoordinator(MyPyllantCoordinator):
             self.api.get_systems
         ):
             data[system.id] = []
-            async for device in self.api.get_devices_by_system(system):
+            for device in system.devices:
                 device_data = self.api.get_data_by_device(
                     device, DeviceDataBucketResolution.DAY, start, end
                 )

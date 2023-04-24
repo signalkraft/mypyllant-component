@@ -2,7 +2,8 @@ import datetime
 from unittest import mock
 
 import pytest as pytest
-from myPyllant.models import CircuitState
+from myPyllant.api import MyPyllantAPI
+from myPyllant.models import CircuitState, DeviceData
 from myPyllant.tests.test_api import get_test_data
 
 from custom_components.mypyllant import HourlyDataCoordinator, SystemCoordinator
@@ -16,7 +17,6 @@ from custom_components.mypyllant.sensor import (
     DomesticHotWaterOperationModeSensor,
     DomesticHotWaterSetPointSensor,
     DomesticHotWaterTankTemperatureSensor,
-    SystemModeSensor,
     SystemOutdoorTemperatureSensor,
     SystemWaterPressureSensor,
     ZoneCurrentRoomTemperatureSensor,
@@ -28,7 +28,9 @@ from custom_components.mypyllant.sensor import (
 
 
 @pytest.mark.parametrize("test_data", get_test_data())
-async def test_system_sensors(hass, mypyllant_aioresponses, mocked_api, test_data):
+async def test_system_sensors(
+    hass, mypyllant_aioresponses, mocked_api: MyPyllantAPI, test_data
+):
     with mypyllant_aioresponses(test_data) as _:
         system_coordinator = SystemCoordinator(
             hass, mocked_api, mock.Mock(), datetime.timedelta(seconds=10)
@@ -42,12 +44,13 @@ async def test_system_sensors(hass, mypyllant_aioresponses, mocked_api, test_dat
         assert isinstance(
             SystemWaterPressureSensor(0, system_coordinator).native_value, float
         )
-        assert isinstance(SystemModeSensor(0, system_coordinator).native_value, str)
         await mocked_api.aiohttp_session.close()
 
 
 @pytest.mark.parametrize("test_data", get_test_data())
-async def test_zone_sensors(hass, mypyllant_aioresponses, mocked_api, test_data):
+async def test_zone_sensors(
+    hass, mypyllant_aioresponses, mocked_api: MyPyllantAPI, test_data
+):
     with mypyllant_aioresponses(test_data) as _:
         system_coordinator = SystemCoordinator(
             hass, mocked_api, mock.Mock(), datetime.timedelta(seconds=10)
@@ -79,7 +82,9 @@ async def test_zone_sensors(hass, mypyllant_aioresponses, mocked_api, test_data)
 
 
 @pytest.mark.parametrize("test_data", get_test_data())
-async def test_circuit_sensors(hass, mypyllant_aioresponses, mocked_api, test_data):
+async def test_circuit_sensors(
+    hass, mypyllant_aioresponses, mocked_api: MyPyllantAPI, test_data
+):
     with mypyllant_aioresponses(test_data) as _:
         system_coordinator = SystemCoordinator(
             hass, mocked_api, mock.Mock(), datetime.timedelta(seconds=10)
@@ -107,7 +112,7 @@ async def test_circuit_sensors(hass, mypyllant_aioresponses, mocked_api, test_da
 
 @pytest.mark.parametrize("test_data", get_test_data())
 async def test_domestic_hot_water_sensor(
-    hass, mypyllant_aioresponses, mocked_api, test_data
+    hass, mypyllant_aioresponses, mocked_api: MyPyllantAPI, test_data
 ):
     with mypyllant_aioresponses(test_data) as _:
         system_coordinator = SystemCoordinator(
@@ -139,7 +144,9 @@ async def test_domestic_hot_water_sensor(
 
 
 @pytest.mark.parametrize("test_data", get_test_data())
-async def test_data_sensor(hass, mypyllant_aioresponses, mocked_api, test_data):
+async def test_data_sensor(
+    hass, mypyllant_aioresponses, mocked_api: MyPyllantAPI, test_data
+):
     with mypyllant_aioresponses(test_data) as _:
         hourly_data_coordinator = HourlyDataCoordinator(
             hass, mocked_api, mock.Mock(), datetime.timedelta(seconds=10)
@@ -149,6 +156,11 @@ async def test_data_sensor(hass, mypyllant_aioresponses, mocked_api, test_data):
         )
 
         data_sensor = DataSensor(0, 0, hourly_data_coordinator)
+        print(data_sensor.device_data)
+        assert isinstance(
+            data_sensor.device_data,
+            DeviceData,
+        )
         assert isinstance(
             data_sensor.native_value,
             float,

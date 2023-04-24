@@ -11,7 +11,7 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ENERGY_WATT_HOUR, PERCENTAGE, PRESSURE_BAR, TEMP_CELSIUS
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity import EntityCategory
+from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from myPyllant.models import (
@@ -21,7 +21,6 @@ from myPyllant.models import (
     DeviceDataBucket,
     DomesticHotWater,
     System,
-    SystemDevice,
     Zone,
 )
 
@@ -63,8 +62,9 @@ async def async_setup_entry(
                 )
             if system.water_pressure is not None:
                 sensors.append(SystemWaterPressureSensor(index, system_coordinator))
-            if system.mode is not None:
-                sensors.append(SystemModeSensor(index, system_coordinator))
+            # TODO find replacement value
+            # if system.mode is not None:
+            #     sensors.append(SystemModeSensor(index, system_coordinator))
 
             for device_index, device in enumerate(system.devices):
                 _LOGGER.debug(f"Creating SystemDevice sensors for {device}")
@@ -89,7 +89,7 @@ async def async_setup_entry(
                             index, zone_index, system_coordinator
                         )
                     )
-                if zone.humidity is not None:
+                if zone.current_room_humidity is not None:
                     sensors.append(
                         ZoneHumiditySensor(index, zone_index, system_coordinator)
                     )
@@ -133,7 +133,7 @@ async def async_setup_entry(
 
             for dhw_index, dhw in enumerate(system.domestic_hot_water):
                 _LOGGER.debug(f"Creating Domestic Hot Water sensors for {dhw}")
-                if dhw.current_dhw_tank_temperature:
+                if dhw.current_dhw_temperature:
                     sensors.append(
                         DomesticHotWaterTankTemperatureSensor(
                             index, dhw_index, system_coordinator
@@ -188,11 +188,11 @@ class SystemSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, f"system{self.system.id}")}}
-
-    @property
-    def available(self) -> bool | None:
-        return self.system.status_online
+        return {
+            "identifiers": {
+                (DOMAIN, f"device{self.system.primary_heat_generator.device_uuid}")
+            }
+        }
 
 
 class SystemOutdoorTemperatureSensor(SystemSensor):
@@ -204,7 +204,7 @@ class SystemOutdoorTemperatureSensor(SystemSensor):
     @property
     def native_value(self):
         if self.system.outdoor_temperature:
-            return round(self.system.outdoor_temperature, 2)
+            return round(self.system.outdoor_temperature, 1)
         else:
             return None
 
@@ -235,22 +235,6 @@ class SystemWaterPressureSensor(SystemSensor):
         return EntityCategory.DIAGNOSTIC
 
 
-class SystemModeSensor(SystemSensor):
-    _attr_name = "System Mode"
-
-    @property
-    def native_value(self):
-        return self.system.mode
-
-    @property
-    def unique_id(self) -> str:
-        return f"{DOMAIN}_system_mode_{self.index}"
-
-    @property
-    def entity_category(self) -> EntityCategory | None:
-        return EntityCategory.DIAGNOSTIC
-
-
 class ZoneEntity(CoordinatorEntity, SensorEntity):
     coordinator: SystemCoordinator
 
@@ -275,7 +259,7 @@ class ZoneEntity(CoordinatorEntity, SensorEntity):
 
     @property
     def available(self) -> bool | None:
-        return self.system.status_online and self.zone.active
+        return self.zone.is_active
 
 
 class ZoneDesiredRoomTemperatureSetpointSensor(ZoneEntity):
@@ -309,7 +293,7 @@ class ZoneCurrentRoomTemperatureSensor(ZoneEntity):
 
     @property
     def native_value(self):
-        return self.zone.current_room_temperature
+        return round(self.zone.current_room_temperature, 1)
 
     @property
     def unique_id(self) -> str:
@@ -329,7 +313,7 @@ class ZoneHumiditySensor(ZoneEntity):
 
     @property
     def native_value(self):
-        return self.zone.humidity
+        return self.zone.current_room_humidity
 
     @property
     def unique_id(self) -> str:
@@ -343,7 +327,7 @@ class ZoneHeatingOperatingModeSensor(ZoneEntity):
 
     @property
     def native_value(self):
-        return self.zone.heating_operation_mode.display_value
+        return self.zone.heating.operation_mode_heating.display_value
 
     @property
     def unique_id(self) -> str:
@@ -411,10 +395,6 @@ class CircuitSensor(CoordinatorEntity, SensorEntity):
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, f"circuit{self.circuit.index}")}}
-
-    @property
-    def available(self) -> bool | None:
-        return self.system.status_online
 
 
 class CircuitFlowTemperatureSensor(CircuitSensor):
@@ -530,10 +510,6 @@ class DomesticHotWaterSensor(CoordinatorEntity, SensorEntity):
             }
         }
 
-    @property
-    def available(self) -> bool | None:
-        return self.system.status_online
-
 
 class DomesticHotWaterTankTemperatureSensor(DomesticHotWaterSensor):
     _attr_native_unit_of_measurement = TEMP_CELSIUS
@@ -546,7 +522,7 @@ class DomesticHotWaterTankTemperatureSensor(DomesticHotWaterSensor):
 
     @property
     def native_value(self):
-        return self.domestic_hot_water.current_dhw_tank_temperature
+        return self.domestic_hot_water.current_dhw_temperature
 
     @property
     def unique_id(self) -> str:
@@ -564,7 +540,7 @@ class DomesticHotWaterSetPointSensor(DomesticHotWaterSensor):
 
     @property
     def native_value(self):
-        return self.domestic_hot_water.set_point
+        return self.domestic_hot_water.tapping_setpoint
 
     @property
     def unique_id(self) -> str:
@@ -578,7 +554,7 @@ class DomesticHotWaterOperationModeSensor(DomesticHotWaterSensor):
 
     @property
     def native_value(self):
-        return self.domestic_hot_water.operation_mode.display_value
+        return self.domestic_hot_water.operation_mode_dhw.display_value
 
     @property
     def entity_category(self) -> EntityCategory:
@@ -666,7 +642,12 @@ class DataSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, f"system{self.device.system.id}")}}
+        return DeviceInfo(
+            identifiers={(DOMAIN, f"device{self.device.device_uuid}")},
+            name=self.device.name_display,
+            manufacturer="Vaillant",
+            model=self.device.product_name,
+        )
 
     @property
     def native_value(self):
@@ -719,7 +700,14 @@ class EfficiencySensor(CoordinatorEntity, SensorEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, f"system{self.system_id}")}}
+        if len(self.device_data_list) > 0:
+            return {
+                "identifiers": {
+                    (DOMAIN, f"device{self.device_data_list[0].device.device_uuid}")
+                }
+            }
+        else:
+            return None
 
     @property
     def native_value(self) -> float | None:
@@ -744,16 +732,12 @@ class SystemDeviceSensor(CoordinatorEntity, SensorEntity):
         return self.coordinator.data[self.system_index]
 
     @property
-    def device(self) -> SystemDevice:
+    def device(self) -> Device:
         return self.system.devices[self.device_index]
 
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, f"system{self.system.id}")}}
-
-    @property
-    def available(self) -> bool | None:
-        return self.system.status_online
 
 
 class SystemDeviceWaterPressureSensor(SystemDeviceSensor):
@@ -771,7 +755,7 @@ class SystemDeviceWaterPressureSensor(SystemDeviceSensor):
 
     @property
     def unique_id(self) -> str:
-        return f"{DOMAIN}_water_pressure_{self.device.device_id}"
+        return f"{DOMAIN}_water_pressure_{self.device.device_uuid}"
 
     @property
     def entity_category(self) -> EntityCategory | None:

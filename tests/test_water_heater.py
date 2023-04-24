@@ -2,6 +2,7 @@ from datetime import timedelta
 from unittest import mock
 
 import pytest
+from myPyllant.api import MyPyllantAPI
 from myPyllant.tests.test_api import get_test_data
 
 from custom_components.mypyllant import SystemCoordinator
@@ -9,7 +10,9 @@ from custom_components.mypyllant.water_heater import DomesticHotWaterEntity
 
 
 @pytest.mark.parametrize("test_data", get_test_data())
-async def test_water_heater(hass, mypyllant_aioresponses, mocked_api, test_data):
+async def test_water_heater(
+    hass, mypyllant_aioresponses, mocked_api: MyPyllantAPI, test_data
+):
     with mypyllant_aioresponses(test_data) as _:
         system_coordinator = SystemCoordinator(
             hass, mocked_api, mock.Mock(), timedelta(seconds=10)

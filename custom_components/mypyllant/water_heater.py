@@ -92,24 +92,23 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
         )
 
     @property
-    def available(self) -> bool | None:
-        return self.system.status_online
-
-    @property
     def target_temperature(self) -> float:
-        return self.domestic_hot_water.set_point
+        return self.domestic_hot_water.tapping_setpoint
 
     @property
     def current_temperature(self) -> float | None:
-        return self.domestic_hot_water.current_dhw_tank_temperature
+        if isinstance(self.domestic_hot_water.current_dhw_temperature, float):
+            return round(self.domestic_hot_water.current_dhw_temperature, 1)
+        else:
+            return None
 
     @property
     def min_temp(self) -> float:
-        return self.domestic_hot_water.min_set_point
+        return self.domestic_hot_water.min_setpoint
 
     @property
     def max_temp(self) -> float:
-        return self.domestic_hot_water.max_set_point
+        return self.domestic_hot_water.max_setpoint
 
     @property
     def current_operation(self) -> str:
@@ -118,7 +117,7 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
             == DHWCurrentSpecialFunction.CYLINDER_BOOST
         ):
             return str(DHWCurrentSpecialFunction.CYLINDER_BOOST.display_value)
-        return str(self.domestic_hot_water.operation_mode.display_value)
+        return str(self.domestic_hot_water.operation_mode_dhw.display_value)
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         target_temp = kwargs.get(ATTR_TEMPERATURE)
@@ -144,7 +143,7 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
             await self.coordinator.api.cancel_hot_water_boost(
                 self.domestic_hot_water,
             )
-            if enum_value != self.domestic_hot_water.operation_mode:
+            if enum_value != self.domestic_hot_water.operation_mode_dhw:
                 await self.coordinator.api.set_domestic_hot_water_operation_mode(
                     self.domestic_hot_water,
                     DHWOperationMode(enum_value),

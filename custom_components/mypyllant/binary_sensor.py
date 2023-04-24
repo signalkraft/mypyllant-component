@@ -11,7 +11,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from myPyllant.models import Circuit, System, SystemDevice
+from myPyllant.models import Circuit, Device, System
 
 from . import SystemCoordinator
 from .const import DOMAIN
@@ -54,15 +54,19 @@ class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):
         return self.coordinator.data[self.system_index]
 
     @property
-    def control(self) -> SystemDevice | None:
-        devices = [d for d in self.system.devices if d.type == "CONTROL"]
+    def primary_heat_generator(self) -> Device | None:
+        devices = [d for d in self.system.devices if d.type == "primary_heat_generator"]
         if len(devices) > 0:
             return devices[0]
         return None
 
     @property
-    def control_name(self) -> str | None:
-        return self.control.name if self.control else None
+    def device_name(self) -> str | None:
+        return (
+            self.primary_heat_generator.name_display
+            if self.primary_heat_generator
+            else None
+        )
 
     @property
     def entity_category(self) -> EntityCategory | None:
@@ -70,14 +74,14 @@ class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):
 
     @property
     def device_info(self) -> DeviceInfo | None:
-        if self.control:
-            return DeviceInfo(
-                identifiers={(DOMAIN, f"system{self.system.id}")},
-                name=self.control_name,
-                manufacturer="Vaillant",
-                model=self.control_name,
-            )
-        return None
+        if self.primary_heat_generator:
+            return {
+                "identifiers": {
+                    (DOMAIN, f"device{self.primary_heat_generator.device_uuid}")
+                }
+            }
+        else:
+            return None
 
 
 class CircuitEntity(CoordinatorEntity, BinarySensorEntity):
@@ -123,11 +127,12 @@ class ControlError(SystemControlEntity):
 
     @property
     def is_on(self) -> bool | None:
-        return self.system.status_error
+        # TODO: Find replacement
+        return False
 
     @property
     def name(self) -> str:
-        return f"Error {self.control_name}"
+        return f"Error {self.device_name}"
 
     @property
     def unique_id(self) -> str:
@@ -149,11 +154,12 @@ class ControlOnline(SystemControlEntity):
 
     @property
     def is_on(self) -> bool | None:
-        return self.system.status_online
+        # TODO: Find replacement
+        return True
 
     @property
     def name(self) -> str:
-        return f"Online Status {self.control_name}"
+        return f"Online Status {self.device_name}"
 
     @property
     def unique_id(self) -> str:

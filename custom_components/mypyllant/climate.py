@@ -169,7 +169,11 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
-        attr = {"time_windows": self.zone.time_windows}
+        attr = {
+            "time_windows": self.zone.heating.time_program_heating,
+            "quick_veto_start_date_time": self.zone.quick_veto_start_date_time,
+            "quick_veto_end_date_time": self.zone.quick_veto_end_date_time,
+        }
         return attr
 
     async def set_holiday(self, **kwargs):
@@ -226,12 +230,14 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def current_humidity(self) -> float | None:
-        return self.zone.humidity
+        return self.zone.current_room_humidity
 
     @property
     def hvac_mode(self) -> HVACMode:
         return [
-            k for k, v in HVAC_MODE_MAP.items() if v == self.zone.heating_operation_mode
+            k
+            for k, v in HVAC_MODE_MAP.items()
+            if v == self.zone.heating.operation_mode_heating
         ][0]
 
     async def async_set_hvac_mode(self, hvac_mode):
@@ -287,7 +293,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             if requested_mode == ZoneCurrentSpecialFunction.QUICK_VETO:
                 await self.coordinator.api.quick_veto_zone_temperature(
                     self.zone,
-                    self.zone.manual_mode_setpoint,
+                    self.zone.heating.manual_mode_setpoint_heating,
                     default_duration=self.default_quick_veto_duration,
                 )
             if requested_mode == ZoneCurrentSpecialFunction.HOLIDAY:
