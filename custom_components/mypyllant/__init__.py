@@ -139,7 +139,9 @@ class SystemCoordinator(MyPyllantCoordinator):
         await self._refresh_session()
         data = [
             s
-            async for s in await self.hass.async_add_executor_job(self.api.get_systems)
+            async for s in await self.hass.async_add_executor_job(
+                self.api.get_systems, True, True
+            )
         ]
         return data
 

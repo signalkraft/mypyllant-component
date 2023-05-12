@@ -154,8 +154,7 @@ class ControlOnline(SystemControlEntity):
 
     @property
     def is_on(self) -> bool | None:
-        # TODO: Find replacement
-        return True
+        return self.system.connected
 
     @property
     def name(self) -> str:
