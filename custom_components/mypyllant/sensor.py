@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import datetime
 import logging
 
 from homeassistant.components.sensor import (
@@ -24,7 +23,7 @@ from myPyllant.models import (
     Zone,
 )
 
-from . import DailyDataCoordinator, HourlyDataCoordinator, SystemCoordinator
+from . import DailyDataCoordinator, SystemCoordinator
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -139,33 +138,14 @@ async def create_system_sensors(
     return sensors
 
 
-async def create_hourly_data_sensors(
-    hass: HomeAssistant, config: ConfigEntry
-) -> list[SensorEntity]:
-    hourly_data_coordinator: HourlyDataCoordinator = hass.data[DOMAIN][config.entry_id][
-        "hourly_data_coordinator"
-    ]
-
-    if not hourly_data_coordinator.data:
-        _LOGGER.warning("No hourly data, skipping sensors")
-        return []
-
-    sensors: list[SensorEntity] = []
-    for device_index, device_data_list in enumerate(hourly_data_coordinator.data):
-        for da_index, _ in enumerate(device_data_list):
-            _LOGGER.debug(
-                f"Creating data sensors for device {device_index} and hourly data {da_index}"
-            )
-            sensors.append(DataSensor(device_index, da_index, hourly_data_coordinator))
-    return sensors
-
-
 async def create_daily_data_sensors(
     hass: HomeAssistant, config: ConfigEntry
 ) -> list[SensorEntity]:
     daily_data_coordinator: DailyDataCoordinator = hass.data[DOMAIN][config.entry_id][
         "daily_data_coordinator"
     ]
+
+    _LOGGER.debug(f"Daily data: {daily_data_coordinator.data}")
 
     if not daily_data_coordinator.data:
         _LOGGER.warning("No daily data, skipping sensors")
@@ -175,6 +155,8 @@ async def create_daily_data_sensors(
     for system_id in daily_data_coordinator.data.keys():
         _LOGGER.debug(f"Creating efficiency sensor for System {system_id}")
         sensors.append(EfficiencySensor(system_id, daily_data_coordinator))
+        for da_index, _ in enumerate(daily_data_coordinator.data[system_id]):
+            sensors.append(DataSensor(system_id, da_index, daily_data_coordinator))
 
     return sensors
 
@@ -183,7 +165,6 @@ async def async_setup_entry(
     hass: HomeAssistant, config: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     async_add_entities(await create_system_sensors(hass, config))
-    async_add_entities(await create_hourly_data_sensors(hass, config))
     async_add_entities(await create_daily_data_sensors(hass, config))
 
 
@@ -601,14 +582,14 @@ class DomesticHotWaterCurrentSpecialFunctionSensor(DomesticHotWaterSensor):
 
 
 class DataSensor(CoordinatorEntity, SensorEntity):
-    coordinator: HourlyDataCoordinator
-    _attr_state_class = SensorStateClass.TOTAL
+    coordinator: DailyDataCoordinator
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
 
     def __init__(
-        self, device_index: int, da_index: int, coordinator: HourlyDataCoordinator
+        self, system_id: str, da_index: int, coordinator: DailyDataCoordinator
     ) -> None:
         super().__init__(coordinator)
-        self.device_index = device_index
+        self.system_id = system_id
         self.da_index = da_index
         if self.device_data.energy_type in DATA_UNIT_MAP:
             self._attr_native_unit_of_measurement = DATA_UNIT_MAP[
@@ -628,11 +609,7 @@ class DataSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def device_data(self) -> DeviceData:
-        return self.coordinator.data[self.device_index][self.da_index]
-
-    @property
-    def last_reset(self) -> datetime.datetime | None:
-        return self.data_bucket.start_date if self.data_bucket else None
+        return self.coordinator.data[self.system_id][self.da_index]
 
     @property
     def device(self) -> Device | None:
@@ -674,7 +651,8 @@ class DataSensor(CoordinatorEntity, SensorEntity):
     def _handle_coordinator_update(self) -> None:
         super()._handle_coordinator_update()
         _LOGGER.debug(
-            f"Updated DataSensor {self.unique_id} = {self.native_value}, from data {self.device_data.data}"
+            f"Updated DataSensor {self.unique_id} = {self.native_value} last reset on {self.last_reset}, "
+            f"from data {self.device_data.data}"
         )
 
 
@@ -693,6 +671,9 @@ class EfficiencySensor(CoordinatorEntity, SensorEntity):
 
     @property
     def energy_consumed(self) -> float:
+        """
+        Returns total consumed electrical energy for the current day
+        """
         return sum(
             [
                 v.data[-1].value
@@ -705,6 +686,9 @@ class EfficiencySensor(CoordinatorEntity, SensorEntity):
 
     @property
     def heat_energy_generated(self) -> float:
+        """
+        Returns total generated heating energy for the current day
+        """
         return sum(
             [
                 v.data[-1].value

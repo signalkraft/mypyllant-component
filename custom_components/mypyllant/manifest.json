@@ -3,10 +3,10 @@
   "name": "myVAILLANT",
   "codeowners": ["@signalkraft"],
   "config_flow": true,
-  "documentation": "https://github.com/signalkraft/myPyllant",
+  "documentation": "https://github.com/signalkraft/mypyllant-component#readme",
   "integration_type": "hub",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/signalkraft/issues",
-  "requirements": ["myPyllant==0.3.2"],
-  "version": "0.3.0b1"
+  "requirements": ["myPyllant==0.3.3"],
+  "version": "0.3.0b2"
 }

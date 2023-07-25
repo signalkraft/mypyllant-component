@@ -50,12 +50,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _LOGGER.debug("Refreshing SystemCoordinator")
     await system_coordinator.async_refresh()
 
-    hourly_data_coordinator = HourlyDataCoordinator(
-        hass, api, entry, timedelta(hours=1)
-    )
-    _LOGGER.debug("Refreshing HourlyDataCoordinator")
-    await hourly_data_coordinator.async_refresh()
-
+    # Daily data coordinator is updated hourly, but requests data for the whole day
     daily_data_coordinator = DailyDataCoordinator(hass, api, entry, timedelta(hours=1))
     _LOGGER.debug("Refreshing DailyDataCoordinator")
     await daily_data_coordinator.async_refresh()
@@ -63,7 +58,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {
         "system_coordinator": system_coordinator,
-        "hourly_data_coordinator": hourly_data_coordinator,
         "daily_data_coordinator": daily_data_coordinator,
     }
 
@@ -77,9 +71,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if unload_ok:
         await hass.data[DOMAIN][entry.entry_id][
             "system_coordinator"
-        ].api.aiohttp_session.close()
-        await hass.data[DOMAIN][entry.entry_id][
-            "hourly_data_coordinator"
         ].api.aiohttp_session.close()
         await hass.data[DOMAIN][entry.entry_id][
             "daily_data_coordinator"
@@ -143,27 +134,6 @@ class SystemCoordinator(MyPyllantCoordinator):
                 self.api.get_systems, True, True
             )
         ]
-        return data
-
-
-class HourlyDataCoordinator(MyPyllantCoordinator):
-    data: list[list[DeviceData]]
-
-    async def _async_update_data(self) -> list[list[DeviceData]]:
-        _LOGGER.debug("Starting async update data for HourlyDataCoordinator")
-        await self._refresh_session()
-        data = []
-        start = datetime.now() - timedelta(hours=12)
-        end = datetime.now() + timedelta(hours=12)
-        _LOGGER.debug(f"Getting data from {start} to {end}")
-        async for system in await self.hass.async_add_executor_job(
-            self.api.get_systems
-        ):
-            for device in system.devices:
-                device_data = self.api.get_data_by_device(
-                    device, DeviceDataBucketResolution.HOUR, start, end
-                )
-                data.append([da async for da in device_data])
         return data
 
 

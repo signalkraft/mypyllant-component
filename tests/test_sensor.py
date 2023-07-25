@@ -6,7 +6,7 @@ from myPyllant.api import MyPyllantAPI
 from myPyllant.models import CircuitState, DeviceData
 from myPyllant.tests.test_api import get_test_data
 
-from custom_components.mypyllant import HourlyDataCoordinator, SystemCoordinator
+from custom_components.mypyllant import DailyDataCoordinator, SystemCoordinator
 from custom_components.mypyllant.sensor import (
     CircuitFlowTemperatureSensor,
     CircuitHeatingCurveSensor,
@@ -148,15 +148,13 @@ async def test_data_sensor(
     hass, mypyllant_aioresponses, mocked_api: MyPyllantAPI, test_data
 ):
     with mypyllant_aioresponses(test_data) as _:
-        hourly_data_coordinator = HourlyDataCoordinator(
+        daily_data_coordinator = DailyDataCoordinator(
             hass, mocked_api, mock.Mock(), datetime.timedelta(seconds=10)
         )
-        hourly_data_coordinator.data = (
-            await hourly_data_coordinator._async_update_data()
+        daily_data_coordinator.data = await daily_data_coordinator._async_update_data()
+        data_sensor = DataSensor(
+            list(daily_data_coordinator.data.keys())[0], 0, daily_data_coordinator
         )
-
-        data_sensor = DataSensor(0, 0, hourly_data_coordinator)
-        print(data_sensor.device_data)
         assert isinstance(
             data_sensor.device_data,
             DeviceData,
@@ -169,8 +167,5 @@ async def test_data_sensor(
             data_sensor.name,
             str,
         )
-        assert isinstance(
-            data_sensor.last_reset,
-            datetime.datetime,
-        )
+        assert data_sensor.last_reset is None
         await mocked_api.aiohttp_session.close()

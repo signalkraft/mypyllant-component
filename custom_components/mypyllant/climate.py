@@ -221,7 +221,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         )
 
     @property
-    def target_temperature(self) -> float:
+    def target_temperature(self) -> float | None:
         return self.zone.desired_room_temperature_setpoint
 
     @property
@@ -273,6 +273,10 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         :param preset_mode:
         :return:
         """
+        if preset_mode not in PRESET_MAP:
+            raise ValueError(
+                f'Invalid preset mode, use one of {", ".join(PRESET_MAP.keys())}'
+            )
         requested_mode = PRESET_MAP[preset_mode]
         if requested_mode != self.zone.current_special_function:
             if requested_mode == ZoneCurrentSpecialFunction.NONE:

@@ -46,17 +46,44 @@ because of this library.
 4. [Add myVaillant integration](https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant), or go to Settings > Integrations and add myVAILLANT
 5. Sign in with the email & password you used in the myVAILLANT app (or MiGo app for Saunier Duval)
 
+## Options
+
+### Seconds between scans
+
+Wait interval between updating (most) sensors. The energy data and efficiency sensors have a fixed hourly interval.
+
+### Offset in hours for energy sensors
+
+Energy data is saved with a delay, due to [an issue with the hourly data from the Vaillant API](#delayed-hourly-data).
+
+### Default duration in hours for quick veto
+
+When setting the temperature with the climate controls, the integration uses the "quick veto" feature of the myVAILLANT app.
+
+With this option you can set for how long the temperature should stay set, before returning to the default value.
+
+### Country
+
+The country you registered your myVAILLANT account in. The list of options is limited to known supported countries.
+
+If a country is missing, please open an issue.
+
+### Brand
+
+Brand of your HVAC equipment and app, pick Saunier Duval if you use the MiGo Link app.
+
 ## Known Issues
 
 ### Delayed Hourly Data
 
-Hourly Data, such as energy consumption or generated heat, is shown with a delay of ~2 hours.
+Hourly Data, such as energy consumption or generated heat, is shown with a delay that's controlled by an option called 
+"Offset in hours for energy sensors" (default 2h).
 
 The myVAILLANT API sometimes returns the latest datapoint at 0 and later refreshed the same time period to the 
 real value. For example when requesting data at 9:15am the period from 8-9am shows 0, when requesting again at 10:15am 
 the same period suddenly shows >0.
 
-To mitigate this problem, hourly datapoints are created ~2h after they show up in the API. The times reported in
+To mitigate this problem, hourly datapoints are created with a delay. The times reported in
 Home Assistant are therefore wrong. There's no way to fix this, apparently. In Home Assistant, sensor readings can only 
 be added "now" and not with a timestamp in the past.
 
@@ -117,7 +144,7 @@ Search for "myvaillant" in Developer Tools > Services in your Home Assistant ins
 
 > **Warning**
 > 
-> You need at least Python 3.10
+> You need at least Python 3.10.
 
 Fork and clone this repo, then from the root directory run:
 
