@@ -49,7 +49,6 @@ set_manual_mode_setpoint:
       example: HEATING
       selector:
         select:
-          translation_key: "set_manual_mode_setpoint_type"
           options:
             - "HEATING"
             - "COOLING"
