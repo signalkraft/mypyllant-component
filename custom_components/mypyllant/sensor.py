@@ -680,9 +680,9 @@ class EfficiencySensor(CoordinatorEntity, SensorEntity):
             [
                 v.data[-1].value
                 for v in self.device_data_list
-                if v.data[-1].value
+                if len(v.data)
+                and v.data[-1].value
                 and v.energy_type == "CONSUMED_ELECTRICAL_ENERGY"
-                and len(v.data)
             ]
         )
 
@@ -695,9 +695,9 @@ class EfficiencySensor(CoordinatorEntity, SensorEntity):
             [
                 v.data[-1].value
                 for v in self.device_data_list
-                if v.data[-1].value
+                if len(v.data)
+                and v.data[-1].value
                 and v.energy_type == "HEAT_GENERATED"
-                and len(v.data)
             ]
         )
 
