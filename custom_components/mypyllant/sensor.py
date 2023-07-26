@@ -609,8 +609,6 @@ class DataSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def device_data(self) -> DeviceData:
-        print(self.system_id)
-        print(self.coordinator.data[self.system_id])
         return self.coordinator.data[self.system_id][self.da_index]
 
     @property
