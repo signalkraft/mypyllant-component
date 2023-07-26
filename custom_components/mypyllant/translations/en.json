@@ -30,13 +30,5 @@
         }
       }
     }
-  },
-  "selector": {
-    "set_manual_mode_setpoint_type": {
-      "options": {
-        "HEATING": "Heating",
-        "COOLING": "Cooling"
-      }
-    }
   }
 }
