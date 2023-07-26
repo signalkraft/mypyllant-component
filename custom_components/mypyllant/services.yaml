@@ -25,6 +25,35 @@ set_quick_veto:
           min: 0
           mode: box
 
+set_manual_mode_setpoint:
+  name: Set manual mode setpoint
+  description: Sets temperature for manual mode
+  target:
+    entity:
+      integration: mypyllant
+      domain: climate
+  fields:
+    temperature:
+      name: Temperature
+      description: Manual Mode Setpoint Temperature
+      example: 21
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 30
+          mode: slider
+    setpoint_type:
+      name: Type
+      description: Manual Mode Type
+      example: HEATING
+      selector:
+        select:
+          translation_key: "set_manual_mode_setpoint_type"
+          options:
+            - "HEATING"
+            - "COOLING"
+
 cancel_quick_veto:
   name: Cancel quick veto
   description: Cancels quick veto temperature and returns to normal schedule / manual setpoint

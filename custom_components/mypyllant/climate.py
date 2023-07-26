@@ -19,12 +19,16 @@ from homeassistant.components.climate.const import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import entity_platform
+from homeassistant.helpers import entity_platform, selector
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.template import as_datetime
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from myPyllant.const import DEFAULT_QUICK_VETO_DURATION
+from myPyllant.const import (
+    DEFAULT_MANUAL_SETPOINT_TYPE,
+    DEFAULT_QUICK_VETO_DURATION,
+    MANUAL_SETPOINT_TYPES,
+)
 from myPyllant.models import (
     System,
     Zone,
@@ -39,10 +43,16 @@ from .const import (
     SERVICE_CANCEL_HOLIDAY,
     SERVICE_CANCEL_QUICK_VETO,
     SERVICE_SET_HOLIDAY,
+    SERVICE_SET_MANUAL_MODE_SETPOINT,
     SERVICE_SET_QUICK_VETO,
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+_MANUAL_SETPOINT_TYPES_OPTIONS = [
+    selector.SelectOptionDict(value=k, label=v)
+    for k, v in MANUAL_SETPOINT_TYPES.items()
+]
 
 HVAC_MODE_MAP = {
     HVACMode.OFF: ZoneHeatingOperatingMode.OFF,
@@ -97,6 +107,21 @@ async def async_setup_entry(
                 ),
             },
             "set_quick_veto",
+        )
+        platform.async_register_entity_service(
+            SERVICE_SET_MANUAL_MODE_SETPOINT,
+            {
+                vol.Required("temperature"): vol.All(
+                    vol.Coerce(float), vol.Clamp(min=0, max=30)
+                ),
+                vol.Required("setpoint_type"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=_MANUAL_SETPOINT_TYPES_OPTIONS,
+                        mode=selector.SelectSelectorMode.DROPDOWN,
+                    ),
+                ),
+            },
+            "set_manual_mode_setpoint",
         )
         platform.async_register_entity_service(
             SERVICE_CANCEL_QUICK_VETO,
@@ -208,6 +233,17 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         )
         await self.coordinator.async_request_refresh_delayed()
 
+    async def set_manual_mode_setpoint(self, **kwargs):
+        _LOGGER.debug(
+            f"Setting manual mode setpoint temperature on {self.zone.name} with params {kwargs}"
+        )
+        temperature = kwargs.get("temperature")
+        setpoint_type = kwargs.get("setpoint_type", DEFAULT_MANUAL_SETPOINT_TYPE)
+        await self.coordinator.api.set_manual_mode_setpoint(
+            self.zone, temperature, setpoint_type
+        )
+        await self.coordinator.async_request_refresh_delayed()
+
     async def remove_quick_veto(self):
         _LOGGER.debug(f"Removing quick veto on {self.zone.name}")
         await self.coordinator.api.cancel_quick_veto_zone_temperature(self.zone)
@@ -249,15 +285,23 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """
-        Set new target temperature
+        Set new target temperature. Depending on heating mode this sets the manual mode setpoint,
+        or it creates a quick veto
         """
         _LOGGER.debug(f"Setting temperature on {self.zone.name} with params {kwargs}")
         temperature = kwargs.get(ATTR_TEMPERATURE)
+        if not temperature:
+            return
 
-        if temperature and temperature != self.target_temperature:
-            await self.coordinator.api.quick_veto_zone_temperature(
-                self.zone, temperature
+        if self.zone.heating.operation_mode_heating == ZoneHeatingOperatingMode.MANUAL:
+            _LOGGER.debug(
+                f"Setting manual mode setpoint on {self.zone.name} to {temperature}"
             )
+            await self.set_manual_mode_setpoint(temperature=temperature)
+            await self.coordinator.async_request_refresh_delayed()
+        else:
+            _LOGGER.debug(f"Setting quick veto on {self.zone.name} to {temperature}")
+            await self.set_quick_veto(temperature=temperature)
             await self.coordinator.async_request_refresh_delayed()
 
     @property

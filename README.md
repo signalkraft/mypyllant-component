@@ -52,9 +52,10 @@ because of this library.
 
 Wait interval between updating (most) sensors. The energy data and efficiency sensors have a fixed hourly interval.
 
-### Offset in hours for energy sensors
+### Delay before refreshing data after updates
 
-Energy data is saved with a delay, due to [an issue with the hourly data from the Vaillant API](#delayed-hourly-data).
+How long to wait between making a request (i.e. setting target temperature) and refreshing data.
+The Vaillant takes some time to return the updated values.
 
 ### Default duration in hours for quick veto
 
@@ -73,19 +74,6 @@ If a country is missing, please open an issue.
 Brand of your HVAC equipment and app, pick Saunier Duval if you use the MiGo Link app.
 
 ## Known Issues
-
-### Delayed Hourly Data
-
-Hourly Data, such as energy consumption or generated heat, is shown with a delay that's controlled by an option called 
-"Offset in hours for energy sensors" (default 2h).
-
-The myVAILLANT API sometimes returns the latest datapoint at 0 and later refreshed the same time period to the 
-real value. For example when requesting data at 9:15am the period from 8-9am shows 0, when requesting again at 10:15am 
-the same period suddenly shows >0.
-
-To mitigate this problem, hourly datapoints are created with a delay. The times reported in
-Home Assistant are therefore wrong. There's no way to fix this, apparently. In Home Assistant, sensor readings can only 
-be added "now" and not with a timestamp in the past.
 
 ### Lack of Test Data for Different Systems
 
@@ -181,3 +169,7 @@ logger:
     custom_components.mypyllant: debug
     myPyllant: debug
 ```
+
+### Contributing to the underlying mypyllant library
+
+See https://github.com/signalkraft/mypyllant#contributing

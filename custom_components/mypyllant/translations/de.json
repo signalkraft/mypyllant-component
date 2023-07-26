@@ -23,6 +23,7 @@
       "init": {
         "data": {
           "update_interval": "Intervall zwischen Updates in Sekunden",
+          "refresh_delay": "Verzögerung bevor Daten nach einer Änderung aktualisiert werden",
           "quick_veto_duration": "Standard Dauer in Stunden für Quick Veto",
           "country": "Land",
           "brand": "Hersteller"

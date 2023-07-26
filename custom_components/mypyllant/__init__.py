@@ -14,10 +14,12 @@ from myPyllant.models import DeviceData, DeviceDataBucketResolution, System
 
 from .const import (
     DEFAULT_COUNTRY,
+    DEFAULT_REFRESH_DELAY,
     DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
     OPTION_BRAND,
     OPTION_COUNTRY,
+    OPTION_REFRESH_DELAY,
     OPTION_UPDATE_INTERVAL,
 )
 
@@ -118,7 +120,8 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         The API takes a long time to return updated values (i.e. after setting a new heating mode)
         This function waits for a few second and then refreshes
         """
-        await asyncio.sleep(4)
+        delay = self.entry.options.get(OPTION_REFRESH_DELAY, DEFAULT_REFRESH_DELAY)
+        await asyncio.sleep(delay)
         await self.async_request_refresh()
 
 
@@ -131,7 +134,7 @@ class SystemCoordinator(MyPyllantCoordinator):
         data = [
             s
             async for s in await self.hass.async_add_executor_job(
-                self.api.get_systems, True, True
+                self.api.get_systems, True, True, True
             )
         ]
         return data

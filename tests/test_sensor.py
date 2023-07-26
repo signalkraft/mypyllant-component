@@ -152,9 +152,8 @@ async def test_data_sensor(
             hass, mocked_api, mock.Mock(), datetime.timedelta(seconds=10)
         )
         daily_data_coordinator.data = await daily_data_coordinator._async_update_data()
-        data_sensor = DataSensor(
-            list(daily_data_coordinator.data.keys())[0], 0, daily_data_coordinator
-        )
+        system_id = list(daily_data_coordinator.data.keys())[0]
+        data_sensor = DataSensor(system_id, 0, daily_data_coordinator)
         assert isinstance(
             data_sensor.device_data,
             DeviceData,

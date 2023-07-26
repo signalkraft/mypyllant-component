@@ -34,6 +34,7 @@ async def async_setup_entry(
     for index, system in enumerate(coordinator.data):
         sensors.append(ControlError(index, coordinator))
         sensors.append(ControlOnline(index, coordinator))
+        sensors.append(FirmwareUpdateRequired(index, coordinator))
         for circuit_index, circuit in enumerate(system.circuits):
             sensors.append(CircuitIsCoolingAllowed(index, circuit_index, coordinator))
 
@@ -167,6 +168,32 @@ class ControlOnline(SystemControlEntity):
     @property
     def device_class(self) -> BinarySensorDeviceClass | None:
         return BinarySensorDeviceClass.CONNECTIVITY
+
+
+class FirmwareUpdateRequired(SystemControlEntity):
+    def __init__(
+        self,
+        system_index: int,
+        coordinator: SystemCoordinator,
+    ):
+        super().__init__(system_index, coordinator)
+        self.entity_id = f"{DOMAIN}.firmware_update_required_{system_index}"
+
+    @property
+    def is_on(self) -> bool | None:
+        return self.system.firmware_update_required
+
+    @property
+    def name(self) -> str:
+        return f"Firmware Update Required {self.device_name}"
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_firmware_update_required_{self.system_index}"
+
+    @property
+    def device_class(self) -> BinarySensorDeviceClass | None:
+        return BinarySensorDeviceClass.UPDATE
 
 
 class CircuitIsCoolingAllowed(CircuitEntity):
