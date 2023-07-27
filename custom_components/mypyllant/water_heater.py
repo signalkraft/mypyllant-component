@@ -92,7 +92,7 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
         )
 
     @property
-    def target_temperature(self) -> float:
+    def target_temperature(self) -> float | None:
         return self.domestic_hot_water.tapping_setpoint
 
     @property

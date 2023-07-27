@@ -537,7 +537,7 @@ class DomesticHotWaterSetPointSensor(DomesticHotWaterSensor):
         return f"Setpoint Domestic Hot Water {self.domestic_hot_water.index}"
 
     @property
-    def native_value(self):
+    def native_value(self) -> float | None:
         return self.domestic_hot_water.tapping_setpoint
 
     @property
