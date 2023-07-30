@@ -9,7 +9,12 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 from homeassistant.helpers.config_validation import positive_int
-from myPyllant.api import AuthenticationFailed, LoginEndpointInvalid, MyPyllantAPI
+from myPyllant.api import (
+    AuthenticationFailed,
+    LoginEndpointInvalid,
+    MyPyllantAPI,
+    RealmInvalid,
+)
 from myPyllant.const import (
     BRANDS,
     COUNTRIES,
@@ -55,12 +60,6 @@ DATA_SCHEMA = vol.Schema(
     {
         vol.Required("username"): str,
         vol.Required("password"): str,
-        vol.Required(OPTION_COUNTRY): selector.SelectSelector(
-            selector.SelectSelectorConfig(
-                options=_COUNTRIES_OPTIONS,
-                mode=selector.SelectSelectorMode.DROPDOWN,
-            ),
-        ),
         vol.Required(
             OPTION_BRAND,
             default=DEFAULT_BRAND,
@@ -70,14 +69,18 @@ DATA_SCHEMA = vol.Schema(
                 mode=selector.SelectSelectorMode.LIST,
             ),
         ),
-    }
+        vol.Optional(OPTION_COUNTRY): selector.SelectSelector(
+            selector.SelectSelectorConfig(
+                options=_COUNTRIES_OPTIONS,
+                mode=selector.SelectSelectorMode.DROPDOWN,
+            ),
+        ),
+    },
 )
 
 
 async def validate_input(hass: HomeAssistant, data: dict) -> str:
-    api = MyPyllantAPI(
-        data["username"], data["password"], data["country"], data["brand"]
-    )
+    api = MyPyllantAPI(**data)
     await api.login()
 
     return data["username"].lower()
@@ -122,17 +125,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         ),
                     ): positive_int,
                     vol.Required(
-                        OPTION_COUNTRY,
-                        default=self.config_entry.options.get(
-                            OPTION_COUNTRY, config_country
-                        ),
-                    ): selector.SelectSelector(
-                        selector.SelectSelectorConfig(
-                            options=_COUNTRIES_OPTIONS,
-                            mode=selector.SelectSelectorMode.DROPDOWN,
-                        ),
-                    ),
-                    vol.Required(
                         OPTION_BRAND,
                         default=self.config_entry.options.get(
                             OPTION_BRAND, config_brand
@@ -141,6 +133,17 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         selector.SelectSelectorConfig(
                             options=_BRANDS_OPTIONS,
                             mode=selector.SelectSelectorMode.LIST,
+                        ),
+                    ),
+                    vol.Optional(
+                        OPTION_COUNTRY,
+                        default=self.config_entry.options.get(
+                            OPTION_COUNTRY, config_country
+                        ),
+                    ): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=_COUNTRIES_OPTIONS,
+                            mode=selector.SelectSelectorMode.DROPDOWN,
                         ),
                     ),
                 }
@@ -172,6 +175,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignore
                 errors["base"] = "authentication_failed"
             except LoginEndpointInvalid:
                 errors["country"] = "login_endpoint_invalid"
+            except RealmInvalid:
+                errors["country"] = "realm_invalid"
             except Exception as e:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception", exc_info=e)
                 errors["base"] = "unknown"

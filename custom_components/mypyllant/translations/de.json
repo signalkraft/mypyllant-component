@@ -14,6 +14,7 @@
     },
     "error": {
       "login_endpoint_invalid": "Kein Login möglich mit diesem Land und Hersteller",
+      "realm_invalid": "Für diesen Hersteller wird ein Land benötigt",
       "authentication_failed": "Login fehlgeschlagen, stimmen Benutzername & Passwort?",
       "unknown": "Unerwarteter Fehler, siehe Logs"
     }

@@ -43,7 +43,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     brand = entry.options.get(OPTION_BRAND, entry.data.get(OPTION_BRAND, DEFAULT_BRAND))
 
     _LOGGER.debug(f"Creating API and logging in with {username} in realm {country}")
-    api = MyPyllantAPI(username, password, country, brand)
+    api = MyPyllantAPI(
+        username=username, password=password, brand=brand, country=country
+    )
     await api.login()
 
     system_coordinator = SystemCoordinator(
