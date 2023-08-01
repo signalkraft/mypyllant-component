@@ -1,0 +1,11 @@
+version: '3'
+services:
+  homeassistant:
+    ports:
+      - 8123:8123
+    container_name: homeassistant
+    image: "ghcr.io/home-assistant/home-assistant:stable"
+    volumes:
+      - ./docker/config:/config
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
