@@ -7,5 +7,6 @@ services:
     image: "ghcr.io/home-assistant/home-assistant:stable"
     volumes:
       - ./docker/config:/config
+      - ./docker/myPyllant:/usr/local/lib/python3.10/site-packages/myPyllant
       - /etc/localtime:/etc/localtime:ro
     restart: unless-stopped

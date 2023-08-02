@@ -12,4 +12,4 @@ pylint>=2.15.0
 pylint-strict-informational>=0.1
 pydantic-factories==1.17.2
 pytest-asyncio==0.20.3
-git+https://github.com/signalkraft/myPyllant.git@ae32ccc596cf6a55a5154dce8c6605b8b161c221
+myPyllant==0.4.3

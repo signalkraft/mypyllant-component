@@ -64,7 +64,7 @@ repos:
           - pydantic
           - pytest
           - types-requests
-          - git+https://github.com/signalkraft/myPyllant.git@ae32ccc596cf6a55a5154dce8c6605b8b161c221
+          - myPyllant==0.4.3
           - pydantic-factories
   - repo: local
     hooks:
