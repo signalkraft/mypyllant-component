@@ -64,7 +64,7 @@ repos:
           - pydantic
           - pytest
           - types-requests
-          - myPyllant==0.4.3
+          - myPyllant==0.4.4
           - pydantic-factories
   - repo: local
     hooks:
