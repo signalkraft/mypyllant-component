@@ -4,7 +4,7 @@ from unittest import mock
 import pytest as pytest
 from myPyllant.api import MyPyllantAPI
 from myPyllant.models import CircuitState, DeviceData
-from myPyllant.tests.test_api import get_test_data
+from myPyllant.tests.test_api import list_test_data
 
 from custom_components.mypyllant import DailyDataCoordinator, SystemCoordinator
 from custom_components.mypyllant.sensor import (
@@ -27,7 +27,7 @@ from custom_components.mypyllant.sensor import (
 )
 
 
-@pytest.mark.parametrize("test_data", get_test_data())
+@pytest.mark.parametrize("test_data", list_test_data())
 async def test_system_sensors(
     hass, mypyllant_aioresponses, mocked_api: MyPyllantAPI, test_data
 ):
@@ -47,7 +47,7 @@ async def test_system_sensors(
         await mocked_api.aiohttp_session.close()
 
 
-@pytest.mark.parametrize("test_data", get_test_data())
+@pytest.mark.parametrize("test_data", list_test_data())
 async def test_zone_sensors(
     hass, mypyllant_aioresponses, mocked_api: MyPyllantAPI, test_data
 ):
@@ -81,7 +81,7 @@ async def test_zone_sensors(
         await mocked_api.aiohttp_session.close()
 
 
-@pytest.mark.parametrize("test_data", get_test_data())
+@pytest.mark.parametrize("test_data", list_test_data())
 async def test_circuit_sensors(
     hass, mypyllant_aioresponses, mocked_api: MyPyllantAPI, test_data
 ):
@@ -110,7 +110,7 @@ async def test_circuit_sensors(
         await mocked_api.aiohttp_session.close()
 
 
-@pytest.mark.parametrize("test_data", get_test_data())
+@pytest.mark.parametrize("test_data", list_test_data())
 async def test_domestic_hot_water_sensor(
     hass, mypyllant_aioresponses, mocked_api: MyPyllantAPI, test_data
 ):
@@ -119,6 +119,10 @@ async def test_domestic_hot_water_sensor(
             hass, mocked_api, mock.Mock(), datetime.timedelta(seconds=10)
         )
         system_coordinator.data = await system_coordinator._async_update_data()
+        if not system_coordinator.data[0].domestic_hot_water:
+            pytest.skip(
+                f"No DHW in system {system_coordinator.data[0]}, skipping DHW sensors"
+            )
         assert isinstance(
             DomesticHotWaterOperationModeSensor(0, 0, system_coordinator).native_value,
             str,
@@ -143,7 +147,7 @@ async def test_domestic_hot_water_sensor(
         await mocked_api.aiohttp_session.close()
 
 
-@pytest.mark.parametrize("test_data", get_test_data())
+@pytest.mark.parametrize("test_data", list_test_data())
 async def test_data_sensor(
     hass, mypyllant_aioresponses, mocked_api: MyPyllantAPI, test_data
 ):
@@ -153,6 +157,8 @@ async def test_data_sensor(
         )
         daily_data_coordinator.data = await daily_data_coordinator._async_update_data()
         system_id = list(daily_data_coordinator.data.keys())[0]
+        if not daily_data_coordinator.data[system_id]:
+            pytest.skip(f"No devices in system {system_id}, skipping data sensor tests")
         data_sensor = DataSensor(system_id, 0, daily_data_coordinator)
         assert isinstance(
             data_sensor.device_data,

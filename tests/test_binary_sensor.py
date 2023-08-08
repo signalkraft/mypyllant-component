@@ -3,8 +3,8 @@ from unittest import mock
 
 import pytest
 from myPyllant.api import MyPyllantAPI
-from myPyllant.models import Device, System
-from myPyllant.tests.test_api import get_test_data
+from myPyllant.models import System
+from myPyllant.tests.test_api import list_test_data
 
 from custom_components.mypyllant import SystemCoordinator
 from custom_components.mypyllant.binary_sensor import (
@@ -16,7 +16,7 @@ from custom_components.mypyllant.binary_sensor import (
 )
 
 
-@pytest.mark.parametrize("test_data", get_test_data())
+@pytest.mark.parametrize("test_data", list_test_data())
 async def test_system_binary_sensors(
     hass, mypyllant_aioresponses, mocked_api: MyPyllantAPI, test_data
 ):
@@ -26,7 +26,6 @@ async def test_system_binary_sensors(
         )
         system_coordinator.data = await system_coordinator._async_update_data()
         system = SystemControlEntity(0, system_coordinator)
-        assert isinstance(system.primary_heat_generator, Device)
         assert isinstance(system.device_info, dict)
 
         circuit = CircuitEntity(0, 0, system_coordinator)

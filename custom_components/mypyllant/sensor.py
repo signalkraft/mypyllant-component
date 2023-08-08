@@ -25,6 +25,7 @@ from myPyllant.models import (
 
 from . import DailyDataCoordinator, SystemCoordinator
 from .const import DOMAIN
+from .utils import get_system_sensor_unique_id
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -183,7 +184,7 @@ class SystemSensor(CoordinatorEntity, SensorEntity):
     def device_info(self):
         return {
             "identifiers": {
-                (DOMAIN, f"device{self.system.primary_heat_generator.device_uuid}")
+                (DOMAIN, f"device{get_system_sensor_unique_id(self.system)}")
             }
         }
 

@@ -11,10 +11,11 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from myPyllant.models import Circuit, Device, System
+from myPyllant.models import Circuit, System
 
 from . import SystemCoordinator
 from .const import DOMAIN
+from .utils import get_system_sensor_unique_id
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -55,34 +56,16 @@ class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):
         return self.coordinator.data[self.system_index]
 
     @property
-    def primary_heat_generator(self) -> Device | None:
-        devices = [d for d in self.system.devices if d.type == "primary_heat_generator"]
-        if len(devices) > 0:
-            return devices[0]
-        return None
-
-    @property
-    def device_name(self) -> str | None:
-        return (
-            self.primary_heat_generator.name_display
-            if self.primary_heat_generator
-            else None
-        )
-
-    @property
     def entity_category(self) -> EntityCategory | None:
         return EntityCategory.DIAGNOSTIC
 
     @property
     def device_info(self) -> DeviceInfo | None:
-        if self.primary_heat_generator:
-            return {
-                "identifiers": {
-                    (DOMAIN, f"device{self.primary_heat_generator.device_uuid}")
-                }
+        return {
+            "identifiers": {
+                (DOMAIN, f"device{get_system_sensor_unique_id(self.system)}")
             }
-        else:
-            return None
+        }
 
 
 class CircuitEntity(CoordinatorEntity, BinarySensorEntity):
@@ -133,7 +116,7 @@ class ControlError(SystemControlEntity):
 
     @property
     def name(self) -> str:
-        return f"Error {self.device_name}"
+        return f"Error {self.system.system_name}"
 
     @property
     def unique_id(self) -> str:
@@ -159,7 +142,7 @@ class ControlOnline(SystemControlEntity):
 
     @property
     def name(self) -> str:
-        return f"Online Status {self.device_name}"
+        return f"Online Status {self.system.system_name}"
 
     @property
     def unique_id(self) -> str:
@@ -185,7 +168,7 @@ class FirmwareUpdateRequired(SystemControlEntity):
 
     @property
     def name(self) -> str:
-        return f"Firmware Update Required {self.device_name}"
+        return f"Firmware Update Required {self.system.system_name}"
 
     @property
     def unique_id(self) -> str:

@@ -3,13 +3,13 @@ from unittest import mock
 
 import pytest
 from myPyllant.api import MyPyllantAPI
-from myPyllant.tests.test_api import get_test_data
+from myPyllant.tests.test_api import list_test_data
 
 from custom_components.mypyllant import SystemCoordinator
 from custom_components.mypyllant.water_heater import DomesticHotWaterEntity
 
 
-@pytest.mark.parametrize("test_data", get_test_data())
+@pytest.mark.parametrize("test_data", list_test_data())
 async def test_water_heater(
     hass, mypyllant_aioresponses, mocked_api: MyPyllantAPI, test_data
 ):
@@ -19,6 +19,10 @@ async def test_water_heater(
         )
         system_coordinator.data = await system_coordinator._async_update_data()
 
+        if not system_coordinator.data[0].domestic_hot_water:
+            pytest.skip(
+                f"No DHW in system {system_coordinator.data[0]}, skipping water heater tests"
+            )
         dhw = DomesticHotWaterEntity(0, 0, system_coordinator)
         assert isinstance(dhw.device_info, dict)
         assert isinstance(dhw.target_temperature, float)
