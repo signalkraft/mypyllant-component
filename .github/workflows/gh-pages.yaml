@@ -1,12 +1,14 @@
-name: ci
+name: Github Pages
 
 on:
   push:
     branches:
       - main
       - bulex
+
 permissions:
   contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -23,4 +25,4 @@ jobs:
           restore-keys: |
             mkdocs-material-
       - run: pip install mkdocs-material
-      - run: mkdocs gh-deploy --force
+      - run: mkdocs gh-deploy --config-file ./docs/mkdocs.yml --force
