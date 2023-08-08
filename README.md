@@ -8,7 +8,7 @@ Home Assistant component that interfaces with the myVAILLANT API (and branded ve
 
 ![myPyllant](https://raw.githubusercontent.com/signalkraft/myPyllant/main/logo.png)
 
-* [Documentation](http://signalkraft.com/mypyllant-component/)
+* [Documentation](https://signalkraft.com/mypyllant-component/)
 * [Discussion on Home Assistant Community](https://community.home-assistant.io/t/myvaillant-integration/542610)
 * [myPyllant Python library](https://github.com/signalkraft/mypyllant)
 

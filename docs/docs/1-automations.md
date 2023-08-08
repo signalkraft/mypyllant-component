@@ -1,6 +1,6 @@
 # Automations
 
-## Legionella Protection
+## Legionella Protection[^1]
 
 With the Home Assistant component, more flexible legionella protection is possible. You can tweak the time condition
 or the target temperature(s).
@@ -38,3 +38,5 @@ mode: single
 2. Here you can set the target temperature for legionella protection
 3. This is the duration. Make sure it covers the time period where your water heater is turned on
 4. This should be your regular water temperature
+
+[^1]: Contributed by CommanderROR in the [Home Assistant Community](https://community.home-assistant.io/t/myvaillant-integration/542610/70)
