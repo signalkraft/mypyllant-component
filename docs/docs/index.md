@@ -14,34 +14,12 @@ Home Assistant component that interfaces with the myVAILLANT API
 (and branded versions of it, such as the MiGo Link app from Saunier Duval & Bulex).
 Uses the [myPyllant library](https://github.com/signalkraft/mypyllant).
 
-## Tested Setups
-
-* Vaillant aroTHERM plus heatpump + sensoCOMFORT VRC 720 + sensoNET VR 921
-* Vaillant ECOTEC PLUS boiler + VR940F + sensoCOMFORT
-* Vaillant ECOTEC PLUS boiler + VRT380f + sensoNET
-* Saunier Duval DUOMAX F30 90 + MISET Radio + MiLink V3
-* Bulex Thema Condens F30/35 + Red 5 + MiPro Sense + MiLink v3
-
-
-!!! warning
-
-    This integration is not compatible with systems that use sensoAPP and multiMATIC.
-
-
-Not affiliated with Vaillant, the developers take no responsibility for anything that happens to your devices 
-because of this library.
-
-## Features
-
-![Screenshot](https://raw.githubusercontent.com/signalkraft/mypyllant-component/main/screenshot.png)
-
-* Supports climate & hot water controls, as well as sensor information
-* Control operating modes, target temperature, and presets such as holiday more or quick veto
-* Track sensor information of devices, such as temperature, humidity, operating mode, energy usage, or energy efficiency
-* See diagnostic information, such as the current heating curve, flow temperature, or water pressure
-* Custom services to set holiday mode or quick veto temperature overrides, and their duration
-
 ## Installation
+
+!!! note
+
+    1. The developers are not affiliated with Vaillant, we take no responsibility for anything that happens to your devices because of this library
+    1. This integration is not compatible with systems that use sensoAPP and multiMATIC
 
 ### HACS
 
@@ -58,6 +36,24 @@ because of this library.
 3. Restart Home Assistant
 4. [Add myVaillant integration](https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant), or go to Settings > Integrations and add myVAILLANT
 5. Sign in with the email & password you used in the myVAILLANT app (or MiGo app for Saunier Duval)
+
+## Tested Setups
+
+* Vaillant aroTHERM plus heatpump + sensoCOMFORT VRC 720 + sensoNET VR 921
+* Vaillant ECOTEC PLUS boiler + VR940F + sensoCOMFORT
+* Vaillant ECOTEC PLUS boiler + VRT380f + sensoNET
+* Saunier Duval DUOMAX F30 90 + MISET Radio + MiLink V3
+* Bulex Thema Condens F30/35 + Red 5 + MiPro Sense + MiLink v3
+
+## Features
+
+![Screenshot](https://raw.githubusercontent.com/signalkraft/mypyllant-component/main/screenshot.png)
+
+* Supports climate & hot water controls, as well as sensor information
+* Control operating modes, target temperature, and presets such as holiday more or quick veto
+* Track sensor information of devices, such as temperature, humidity, operating mode, energy usage, or energy efficiency
+* See diagnostic information, such as the current heating curve, flow temperature, or water pressure
+* Custom services to set holiday mode or quick veto temperature overrides, and their duration
 
 ## Options
 
@@ -80,11 +76,66 @@ With this option you can set for how long the temperature should stay set, befor
 
 The country you registered your myVAILLANT account in. The list of options is limited to known supported countries.
 
-If a country is missing, please open an issue.
-
 ### Brand
 
 Brand of your HVAC equipment and app, pick Saunier Duval if you use the MiGo Link app.
+
+## Supported Brands & Countries
+
+!!! note "Missing a Country?"
+
+    If a country is missing, please [open an issue](https://github.com/signalkraft/mypyllant-component/issues/new)
+    or [contribute a new country to the myPyllant library](3-contributing.md#supporting-new-countries).
+
+- Vaillant
+    - Albania
+    - Austria
+    - Belgium
+    - Bulgaria
+    - Croatia
+    - Czechia
+    - Denmark
+    - Estonia
+    - Finland
+    - France
+    - Georgia
+    - Germany
+    - Greece
+    - Hungary
+    - Italy
+    - Latvia
+    - Lithuania
+    - Luxembourg
+    - Netherlands
+    - Norway
+    - Poland
+    - Portugal
+    - Romania
+    - Serbia
+    - Slovakia
+    - Slovenia
+    - Spain
+    - Sweden
+    - Switzerland
+    - Ukraine
+    - United Kingdom
+    - Uzbekistan
+- Saunier Duval
+    - Austria
+    - Czechia
+    - Finland
+    - France
+    - Greece
+    - Hungary
+    - Italy
+    - Lithuania
+    - Poland
+    - Portugal
+    - Romania
+    - Slovakia
+    - Spain
+- Bulex
+    - Does not support country selection, just leave the option empty
 
 ## Known Issues
 

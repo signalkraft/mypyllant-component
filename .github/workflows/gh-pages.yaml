@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - bulex
 
 permissions:
   contents: write

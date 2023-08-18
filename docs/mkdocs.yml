@@ -8,6 +8,9 @@ theme:
     scheme: slate
   features:
     - content.code.annotate
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - toc.integrate
 repo_url: https://github.com/signalkraft/mypyllant-component/
 markdown_extensions:
   - admonition
