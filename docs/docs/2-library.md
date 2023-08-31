@@ -66,15 +66,13 @@ async def main(user, password, brand, country):
     async with MyPyllantAPI(user, password, brand, country) as api:
         async for system in api.get_systems():
             print(await api.get_time_zone(system))
-            print(await api.set_holiday(system))
             print(
                 await api.set_holiday(
                     system, datetime.now(), datetime.now() + timedelta(days=7)
                 )
             )
-            print(await api.get_time_zone(system))
             print(await api.cancel_holiday(system))
-            print(await api.set_set_back_temperature(system.zones[0], 15.5))
+            print(await api.set_set_back_temperature(system.zones[0], 18))
             print(await api.quick_veto_zone_temperature(system.zones[0], 21, 5))
             print(await api.cancel_quick_veto_zone_temperature(system.zones[0]))
             if system.domestic_hot_water:

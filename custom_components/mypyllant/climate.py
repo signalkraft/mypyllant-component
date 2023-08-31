@@ -103,7 +103,7 @@ async def async_setup_entry(
                     vol.Coerce(float), vol.Clamp(min=0, max=30)
                 ),
                 vol.Optional("duration_hours"): vol.All(
-                    vol.Coerce(int), vol.Clamp(min=1)
+                    vol.Coerce(float), vol.Clamp(min=1)
                 ),
             },
             "set_quick_veto",
@@ -135,7 +135,7 @@ async def async_setup_entry(
                 vol.Optional("start"): vol.Coerce(as_datetime),
                 vol.Optional("end"): vol.Coerce(as_datetime),
                 vol.Optional("duration_hours"): vol.All(
-                    vol.Coerce(int), vol.Clamp(min=1)
+                    vol.Coerce(float), vol.Clamp(min=1)
                 ),
             },
             "set_holiday",

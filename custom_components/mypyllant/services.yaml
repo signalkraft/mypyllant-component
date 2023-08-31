@@ -15,6 +15,7 @@ set_quick_veto:
         number:
           min: 0
           max: 30
+          step: 0.1
           mode: slider
     duration_hours:
       name: Duration
@@ -23,6 +24,7 @@ set_quick_veto:
       selector:
         number:
           min: 0
+          step: 0.1
           mode: box
 
 set_manual_mode_setpoint:
@@ -42,6 +44,7 @@ set_manual_mode_setpoint:
         number:
           min: 0
           max: 30
+          step: 0.1
           mode: slider
     setpoint_type:
       name: Type
