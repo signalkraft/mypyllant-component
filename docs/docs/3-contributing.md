@@ -97,3 +97,14 @@ You can then either create a PR with the created folder, or zip it and [attach i
 If your myVAILLANT app has more features than this integration, chances are you have a more complex system then me.
 You can reverse engineer the API endpoints and open an issue with the requests + responses.
 See [Reverse Engineering](3-reverse-engineering.md) for a tutorial.
+
+### Running commands on your Home Assistant installation in Docker
+
+If you're using this component in a Home Assistant installation that uses docker compose, you can run these commands directly (from the folder that contains your `docker-compose.yml`):
+
+```shell
+docker compose exec homeassistant python3 -m myPyllant.tests.generate_test_data username password brand --country country
+# Note the output folder
+docker compose cp homeassistant:<testdata folder> .
+# Test data will be copied to your current directory
+```
