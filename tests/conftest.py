@@ -5,7 +5,7 @@ import pytest
 from myPyllant.api import MyPyllantAPI
 from myPyllant.models import Circuit, DomesticHotWater, System, Zone
 from myPyllant.tests.utils import _mocked_api, _mypyllant_aioresponses
-from pydantic_factories import ModelFactory
+from polyfactory.factories.pydantic_factory import ModelFactory
 
 from custom_components.mypyllant import SystemCoordinator
 

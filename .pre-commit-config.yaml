@@ -60,12 +60,10 @@ repos:
         additional_dependencies:
           - aiohttp
           - aioresponses
-          - pytest-homeassistant-custom-component==0.13.21
-          - pydantic
           - pytest
           - types-requests
-          - myPyllant==0.5.1
-          - pydantic-factories
+          - myPyllant==0.5.2
+          - polyfactory
   - repo: local
     hooks:
     - id: pytest
