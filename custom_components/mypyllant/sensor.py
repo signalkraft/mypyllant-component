@@ -48,7 +48,7 @@ async def create_system_sensors(
         return []
 
     sensors: list[SensorEntity] = []
-    _LOGGER.debug(f"Creating system sensors for {system_coordinator.data}")
+    _LOGGER.debug("Creating system sensors for %s", system_coordinator.data)
     for index, system in enumerate(system_coordinator.data):
         if system.outdoor_temperature is not None:
             sensors.append(SystemOutdoorTemperatureSensor(index, system_coordinator))
@@ -59,7 +59,7 @@ async def create_system_sensors(
         #     sensors.append(SystemModeSensor(index, system_coordinator))
 
         for device_index, device in enumerate(system.devices):
-            _LOGGER.debug(f"Creating SystemDevice sensors for {device}")
+            _LOGGER.debug("Creating SystemDevice sensors for %s", device)
 
             if "water_pressure" in device.operational_data:
                 sensors.append(
@@ -69,7 +69,7 @@ async def create_system_sensors(
                 )
 
         for zone_index, zone in enumerate(system.zones):
-            _LOGGER.debug(f"Creating Zone sensors for {zone}")
+            _LOGGER.debug("Creating Zone sensors for %s", zone)
             sensors.append(
                 ZoneDesiredRoomTemperatureSetpointSensor(
                     index, zone_index, system_coordinator
@@ -96,7 +96,7 @@ async def create_system_sensors(
             )
 
         for circuit_index, circuit in enumerate(system.circuits):
-            _LOGGER.debug(f"Creating Circuit sensors for {circuit}")
+            _LOGGER.debug("Creating Circuit sensors for %s", circuit)
             sensors.append(CircuitStateSensor(index, circuit_index, system_coordinator))
             if circuit.current_circuit_flow_temperature is not None:
                 sensors.append(
@@ -116,7 +116,7 @@ async def create_system_sensors(
                 )
 
         for dhw_index, dhw in enumerate(system.domestic_hot_water):
-            _LOGGER.debug(f"Creating Domestic Hot Water sensors for {dhw}")
+            _LOGGER.debug("Creating Domestic Hot Water sensors for %s", dhw)
             if dhw.current_dhw_temperature:
                 sensors.append(
                     DomesticHotWaterTankTemperatureSensor(
@@ -146,7 +146,7 @@ async def create_daily_data_sensors(
         "daily_data_coordinator"
     ]
 
-    _LOGGER.debug(f"Daily data: {daily_data_coordinator.data}")
+    _LOGGER.debug("Daily data: %s", daily_data_coordinator.data)
 
     if not daily_data_coordinator.data:
         _LOGGER.warning("No daily data, skipping sensors")
@@ -154,7 +154,7 @@ async def create_daily_data_sensors(
 
     sensors: list[SensorEntity] = []
     for system_id in daily_data_coordinator.data.keys():
-        _LOGGER.debug(f"Creating efficiency sensor for System {system_id}")
+        _LOGGER.debug("Creating efficiency sensor for System %s", system_id)
         sensors.append(EfficiencySensor(system_id, daily_data_coordinator))
         for da_index, _ in enumerate(daily_data_coordinator.data[system_id]):
             sensors.append(DataSensor(system_id, da_index, daily_data_coordinator))
@@ -598,7 +598,10 @@ class DataSensor(CoordinatorEntity, SensorEntity):
             ]
         self._attr_device_class = SensorDeviceClass.ENERGY
         _LOGGER.debug(
-            f"Finishing init of {self.name} = {self.native_value} and unique id {self.unique_id}"
+            "Finishing init of %s = %s and unique id %s",
+            self.name,
+            self.native_value,
+            self.unique_id,
         )
 
     @property
@@ -652,8 +655,11 @@ class DataSensor(CoordinatorEntity, SensorEntity):
     def _handle_coordinator_update(self) -> None:
         super()._handle_coordinator_update()
         _LOGGER.debug(
-            f"Updated DataSensor {self.unique_id} = {self.native_value} last reset on {self.last_reset}, "
-            f"from data {self.device_data.data}"
+            "Updated DataSensor %s = %s last reset on %s, from data %s",
+            self.unique_id,
+            self.native_value,
+            self.last_reset,
+            self.device_data.data,
         )
 
 

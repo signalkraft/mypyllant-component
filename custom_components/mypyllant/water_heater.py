@@ -32,7 +32,7 @@ async def async_setup_entry(
         "system_coordinator"
     ]
     if not coordinator.data:
-        _LOGGER.warning("No system data, skipping water hearer")
+        _LOGGER.warning("No system data, skipping water heater")
         return
 
     dhws: list[WaterHeaterEntity] = []

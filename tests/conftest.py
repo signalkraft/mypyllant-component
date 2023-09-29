@@ -5,9 +5,9 @@ import pytest
 from myPyllant.api import MyPyllantAPI
 from myPyllant.models import Circuit, DomesticHotWater, System, Zone
 from myPyllant.tests.utils import _mocked_api, _mypyllant_aioresponses
-from polyfactory.factories.pydantic_factory import ModelFactory
+from polyfactory.factories import DataclassFactory
 
-from custom_components.mypyllant import SystemCoordinator
+from custom_components.mypyllant import DOMAIN, DailyDataCoordinator, SystemCoordinator
 
 
 @pytest.fixture(autouse=True)
@@ -16,19 +16,19 @@ def auto_enable_custom_integrations(enable_custom_integrations):
     yield
 
 
-class SystemFactory(ModelFactory):
+class SystemFactory(DataclassFactory):
     __model__ = System
 
 
-class ZoneFactory(ModelFactory):
+class ZoneFactory(DataclassFactory):
     __model__ = Zone
 
 
-class CircuitFactory(ModelFactory):
+class CircuitFactory(DataclassFactory):
     __model__ = Circuit
 
 
-class DomesticHotWaterFactory(ModelFactory):
+class DomesticHotWaterFactory(DataclassFactory):
     __model__ = DomesticHotWater
 
 
@@ -43,9 +43,36 @@ async def mocked_api() -> MyPyllantAPI:
 
 
 @pytest.fixture
-async def system_coordinator_mock(hass, mocked_api):
-    system_coordinator = SystemCoordinator(
-        hass, mocked_api, mock.Mock(), timedelta(seconds=10)
-    )
-    system_coordinator.data = await system_coordinator._async_update_data()
-    return system_coordinator
+async def system_coordinator_mock(hass, mocked_api) -> SystemCoordinator:
+    with mock.patch(
+        "homeassistant.config_entries.ConfigEntry",
+        new_callable=mock.PropertyMock,
+        return_value="mockid",
+    ) as entry:
+        hass.data = {
+            DOMAIN: {
+                entry.entry_id: {
+                    "quota_time": None,
+                    "quota_exc_info": None,
+                }
+            }
+        }
+        return SystemCoordinator(hass, mocked_api, entry, timedelta(seconds=10))
+
+
+@pytest.fixture
+async def daily_data_coordinator_mock(hass, mocked_api) -> DailyDataCoordinator:
+    with mock.patch(
+        "homeassistant.config_entries.ConfigEntry",
+        new_callable=mock.PropertyMock,
+        return_value="mockid",
+    ) as entry:
+        hass.data = {
+            DOMAIN: {
+                entry.entry_id: {
+                    "quota_time": None,
+                    "quota_exc_info": None,
+                }
+            }
+        }
+        return DailyDataCoordinator(hass, mocked_api, entry, timedelta(seconds=10))

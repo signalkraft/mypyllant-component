@@ -93,7 +93,7 @@ async def async_setup_entry(
 
     if len(climates) > 0:
         platform = entity_platform.async_get_current_platform()
-        _LOGGER.debug(f"Setting up climate entity services for {platform}")
+        _LOGGER.debug("Setting up climate entity services for %s", platform)
         # noinspection PyTypeChecker
         # Wrapping the schema in vol.Schema() breaks entity_id passing
         platform.async_register_entity_service(
@@ -203,7 +203,9 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     async def set_holiday(self, **kwargs):
         _LOGGER.debug(
-            f"Setting holiday mode on System {self.system.id} with params {kwargs}"
+            "Setting holiday mode on System %s with params %s",
+            self.system.id,
+            kwargs,
         )
         start = kwargs.get("start")
         end = kwargs.get("end")
@@ -220,12 +222,12 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         await self.coordinator.async_request_refresh_delayed()
 
     async def cancel_holiday(self):
-        _LOGGER.debug(f"Canceling holiday on System {self.system.id}")
+        _LOGGER.debug("Canceling holiday on System %s", self.system.id)
         await self.coordinator.api.cancel_holiday(self.system)
         await self.coordinator.async_request_refresh_delayed()
 
     async def set_quick_veto(self, **kwargs):
-        _LOGGER.debug(f"Setting quick veto on {self.zone.name} with params {kwargs}")
+        _LOGGER.debug("Setting quick veto on %s with params %s", self.zone.name, kwargs)
         temperature = kwargs.get("temperature")
         duration_hours = kwargs.get("duration_hours")
         await self.coordinator.api.quick_veto_zone_temperature(
@@ -245,7 +247,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         await self.coordinator.async_request_refresh_delayed()
 
     async def remove_quick_veto(self):
-        _LOGGER.debug(f"Removing quick veto on {self.zone.name}")
+        _LOGGER.debug("Removing quick veto on %s", self.zone.name)
         await self.coordinator.api.cancel_quick_veto_zone_temperature(self.zone)
         await self.coordinator.async_request_refresh_delayed()
 
@@ -288,7 +290,9 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         Set new target temperature. Depending on heating mode this sets the manual mode setpoint,
         or it creates a quick veto
         """
-        _LOGGER.debug(f"Setting temperature on {self.zone.name} with params {kwargs}")
+        _LOGGER.debug(
+            "Setting temperature on %s with params %s", self.zone.name, kwargs
+        )
         temperature = kwargs.get(ATTR_TEMPERATURE)
         if not temperature:
             return
@@ -300,7 +304,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             await self.set_manual_mode_setpoint(temperature=temperature)
             await self.coordinator.async_request_refresh_delayed()
         else:
-            _LOGGER.debug(f"Setting quick veto on {self.zone.name} to {temperature}")
+            _LOGGER.debug("Setting quick veto on %s to %s", self.zone.name, temperature)
             await self.set_quick_veto(temperature=temperature)
             await self.coordinator.async_request_refresh_delayed()
 
