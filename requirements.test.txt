@@ -9,7 +9,7 @@ mypy>=0.991
 pre-commit>=2.21.0
 pytest>=7.0.1
 pytest-cov>=2.9.0
-pytest-homeassistant-custom-component==0.13.56
+pytest-homeassistant-custom-component==0.13.21
 pylint>=2.15.0
 pylint-strict-informational>=0.1
 polyfactory==2.9.0
