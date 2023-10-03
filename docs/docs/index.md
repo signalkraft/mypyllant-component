@@ -43,6 +43,7 @@ Uses the [myPyllant library](https://github.com/signalkraft/mypyllant).
 * Vaillant ECOTEC PLUS boiler + VR940F + sensoCOMFORT
 * Vaillant ECOTEC PLUS boiler + VRT380f + sensoNET
 * Vaillant ECOTEC PLUS VCW20/1 boiler + sensoCOMFORT VRC 720 + sensoNET VR 921
+* Vaillant ECOTEC PLUS 296/5-5 (R6) + sensoCOMFORT VRC 720/2 + VR 70 (2 circuits) + sensoNET VR 921
 * Saunier Duval DUOMAX F30 90 + MISET Radio + MiLink V3
 * Bulex Thema Condens F30/35 + Red 5 + MiPro Sense + MiLink v3
 
