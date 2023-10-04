@@ -164,7 +164,7 @@ class FirmwareUpdateRequired(SystemControlEntity):
 
     @property
     def is_on(self) -> bool | None:
-        return self.system.firmware_update_required
+        return self.system.claim.firmware.get("update_required", None)
 
     @property
     def name(self) -> str:

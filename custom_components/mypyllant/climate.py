@@ -15,6 +15,7 @@ from homeassistant.components.climate.const import (
     PRESET_AWAY,
     PRESET_BOOST,
     PRESET_NONE,
+    PRESET_SLEEP,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
@@ -64,6 +65,7 @@ PRESET_MAP = {
     PRESET_BOOST: ZoneCurrentSpecialFunction.QUICK_VETO,
     PRESET_NONE: ZoneCurrentSpecialFunction.NONE,
     PRESET_AWAY: ZoneCurrentSpecialFunction.HOLIDAY,
+    PRESET_SLEEP: ZoneCurrentSpecialFunction.SYSTEM_OFF,
 }
 
 
@@ -350,5 +352,11 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                 )
             if requested_mode == ZoneCurrentSpecialFunction.HOLIDAY:
                 await self.coordinator.api.set_holiday(self.system)
+
+            if requested_mode == ZoneCurrentSpecialFunction.SYSTEM_OFF:
+                # SYSTEM_OFF is a valid special function, but since there's no API endpoint we
+                # just turn off the system though the zone heating mode API.
+                # See https://github.com/signalkraft/mypyllant-component/issues/27#issuecomment-1746568372
+                await self.async_set_hvac_mode(HVACMode.OFF)
 
             await self.coordinator.async_request_refresh_delayed()
