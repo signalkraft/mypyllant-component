@@ -8,7 +8,7 @@ async def test_mypyllant_versions():
     """
     files = [
         Path(".").parent / ".pre-commit-config.yaml",
-        Path(".").parent / "requirements.test.txt",
+        Path(".").parent / "dev-requirements.txt",
         Path(".").parent / "custom_components/mypyllant/manifest.json",
     ]
     p = re.compile(r"myPyllant==(.*?)[\"\n]")

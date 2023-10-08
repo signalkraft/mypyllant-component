@@ -11,7 +11,7 @@ Fork and clone this repo, then from the root directory run:
 ```shell
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.test.txt
+pip install -r dev-requirements.txt
 pre-commit install
 # Make your changes
 pytest
@@ -56,7 +56,7 @@ git clone https://github.com/signalkraft/myPyllant.git
 cd myPyllant
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements-dev.txt
+pip install -r dev-requirements.txt
 pip install -e .
 pre-commit install
 pytest
