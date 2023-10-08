@@ -73,7 +73,7 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
                 (DOMAIN, f"domestic_hot_water{self.domestic_hot_water.index}")
             },
             name=self.name,
-            manufacturer="Vaillant",
+            manufacturer=self.system.brand_name,
         )
 
     @property

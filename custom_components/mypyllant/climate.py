@@ -183,7 +183,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         return DeviceInfo(
             identifiers={(DOMAIN, f"zone{self.zone.index}")},
             name=self.name,
-            manufacturer="Vaillant",
+            manufacturer=self.system.brand_name,
         )
 
     @property

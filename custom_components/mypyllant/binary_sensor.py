@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Mapping
+from typing import Any
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
@@ -33,6 +35,7 @@ async def async_setup_entry(
 
     sensors: list[BinarySensorEntity] = []
     for index, system in enumerate(coordinator.data):
+        sensors.append(ClaimEntity(index, coordinator))
         sensors.append(ControlError(index, coordinator))
         sensors.append(ControlOnline(index, coordinator))
         sensors.append(FirmwareUpdateRequired(index, coordinator))
@@ -40,6 +43,45 @@ async def async_setup_entry(
             sensors.append(CircuitIsCoolingAllowed(index, circuit_index, coordinator))
 
     async_add_entities(sensors)
+
+
+class ClaimEntity(CoordinatorEntity, BinarySensorEntity):
+    def __init__(
+        self,
+        system_index: int,
+        coordinator: SystemCoordinator,
+    ):
+        super().__init__(coordinator)
+        self.system_index = system_index
+
+    @property
+    def system(self) -> System:
+        return self.coordinator.data[self.system_index]
+
+    @property
+    def entity_category(self) -> EntityCategory | None:
+        return EntityCategory.DIAGNOSTIC
+
+    @property
+    def extra_state_attributes(self) -> Mapping[str, Any] | None:
+        attr = {
+            "firmware": self.system.claim.firmware,
+        }
+        return attr
+
+    @property
+    def device_info(self):
+        return DeviceInfo(
+            identifiers={(DOMAIN, f"claim{self.system.id}")},
+            name=self.system.claim.nomenclature,
+            manufacturer=self.system.brand_name,
+            model=self.system.claim.nomenclature,
+            sw_version=self.system.claim.firmware_version,
+        )
+
+    @property
+    def name(self) -> str:
+        return self.system.claim.name
 
 
 class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):
@@ -96,7 +138,7 @@ class CircuitEntity(CoordinatorEntity, BinarySensorEntity):
         return DeviceInfo(
             identifiers={(DOMAIN, f"circuit{self.circuit.index}")},
             name=self.circuit_name,
-            manufacturer="Vaillant",
+            manufacturer=self.system.brand_name,
         )
 
 
@@ -110,13 +152,19 @@ class ControlError(SystemControlEntity):
         self.entity_id = f"{DOMAIN}.control_error_{system_index}"
 
     @property
+    def extra_state_attributes(self) -> Mapping[str, Any] | None:
+        attr = {
+            "diagnostic_trouble_codes": self.system.diagnostic_trouble_codes,
+        }
+        return attr
+
+    @property
     def is_on(self) -> bool | None:
-        # TODO: Find replacement
-        return False
+        return self.system.has_diagnostic_trouble_codes
 
     @property
     def name(self) -> str:
-        return f"Error {self.system.system_name}"
+        return f"Trouble Codes on {self.system.system_name}"
 
     @property
     def unique_id(self) -> str:

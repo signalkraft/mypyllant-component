@@ -6,6 +6,7 @@ from myPyllant.tests.test_api import list_test_data
 from custom_components.mypyllant.binary_sensor import (
     CircuitEntity,
     CircuitIsCoolingAllowed,
+    ClaimEntity,
     ControlError,
     ControlOnline,
     SystemControlEntity,
@@ -22,6 +23,13 @@ async def test_system_binary_sensors(
         )
         system = SystemControlEntity(0, system_coordinator_mock)
         assert isinstance(system.device_info, dict)
+
+        system = ClaimEntity(0, system_coordinator_mock)
+        assert isinstance(system.device_info, dict)
+        assert (
+            system.extra_state_attributes
+            and "firmware" in system.extra_state_attributes
+        )
 
         circuit = CircuitEntity(0, 0, system_coordinator_mock)
         assert isinstance(circuit.device_info, dict)

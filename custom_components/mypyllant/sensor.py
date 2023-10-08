@@ -644,7 +644,7 @@ class DataSensor(CoordinatorEntity, SensorEntity):
         return DeviceInfo(
             identifiers={(DOMAIN, f"device{self.device.device_uuid}")},
             name=self.device.name_display,
-            manufacturer="Vaillant",
+            manufacturer=self.device.brand_name,
             model=self.device.product_name_display,
         )
 
