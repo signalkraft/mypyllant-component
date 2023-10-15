@@ -1,3 +1,8 @@
+---
+hide:
+  - navigation
+---
+
 # Reverse Engineering Android Apps
 
 Any Android app that makes HTTPS API requests (in this case to the myVAILLANT API), can be reverse engineered

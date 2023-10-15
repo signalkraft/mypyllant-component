@@ -1,8 +1,10 @@
 ---
-title: Home
+title: Getting Started
+hide:
+  - navigation
 ---
 
-# myPyllant Library & Home Assistant Component
+# Getting Started
 
 [![GitHub Release](https://img.shields.io/github/release/signalkraft/mypyllant-component.svg)](https://github.com/signalkraft/mypyllant-component/releases)
 [![License](https://img.shields.io/github/license/signalkraft/mypyllant-component.svg)](LICENSE)
@@ -49,7 +51,7 @@ Uses the [myPyllant library](https://github.com/signalkraft/mypyllant).
 
 ## Features
 
-![Screenshot](https://raw.githubusercontent.com/signalkraft/mypyllant-component/main/screenshot.png)
+![Default Dashboard Screenshot](assets/default-dashboard.png)
 
 * Supports climate & hot water controls, as well as sensor information
 * Control operating modes, target temperature, and presets such as holiday more or quick veto

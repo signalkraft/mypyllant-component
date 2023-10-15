@@ -1,3 +1,8 @@
+---
+hide:
+  - navigation
+---
+
 # Services
 
 There are custom services to control holiday mode and quick veto temperatures for each climate zone.

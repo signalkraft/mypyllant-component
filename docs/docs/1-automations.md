@@ -1,3 +1,9 @@
+---
+hide:
+  - navigation
+  - toc
+---
+
 # Automations
 
 ## Legionella Protection[^1]

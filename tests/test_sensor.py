@@ -8,6 +8,7 @@ from custom_components.mypyllant.sensor import (
     CircuitHeatingCurveSensor,
     CircuitMinFlowTemperatureSetpointSensor,
     CircuitStateSensor,
+    ClaimEntity,
     DataSensor,
     DomesticHotWaterCurrentSpecialFunctionSensor,
     DomesticHotWaterOperationModeSensor,
@@ -39,6 +40,13 @@ async def test_system_sensors(
         assert isinstance(
             SystemWaterPressureSensor(0, system_coordinator_mock).native_value, float
         )
+
+        claim = ClaimEntity(0, system_coordinator_mock)
+        assert isinstance(claim.device_info, dict)
+        assert (
+            claim.extra_state_attributes and "firmware" in claim.extra_state_attributes
+        )
+
         await mocked_api.aiohttp_session.close()
 
 

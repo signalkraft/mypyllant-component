@@ -36,6 +36,17 @@ PLATFORMS: list[Platform] = [
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    if _LOGGER.isEnabledFor(logging.DEBUG):
+        from importlib.metadata import version
+
+        _LOGGER.debug(
+            "Starting mypyllant component %s (library %s) with homeassistant %s, dacite %s, and aiohttp %s",
+            hass.data["integrations"][DOMAIN].version,
+            version("myPyllant"),
+            version("homeassistant"),
+            version("dacite"),
+            version("aiohttp"),
+        )
     username = entry.data.get("username")
     password = entry.data.get("password")
     update_interval = entry.options.get(OPTION_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
@@ -96,7 +107,7 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         hass: HomeAssistant,
         api: MyPyllantAPI,
         entry: ConfigEntry,
-        update_interval: timedelta,
+        update_interval: timedelta | None,
     ) -> None:
         self.api = api
         self.hass = hass
@@ -158,14 +169,15 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         This function waits for a few second and then refreshes
         """
         delay = self.entry.options.get(OPTION_REFRESH_DELAY, DEFAULT_REFRESH_DELAY)
-        await asyncio.sleep(delay)
+        if delay:
+            await asyncio.sleep(delay)
         await self.async_request_refresh()
 
 
 class SystemCoordinator(MyPyllantCoordinator):
     data: list[System]
 
-    async def _async_update_data(self) -> list[System] | None:
+    async def _async_update_data(self) -> list[System]:
         self._raise_if_quota_hit()
         _LOGGER.debug("Starting async update data for SystemCoordinator")
         try:
@@ -179,7 +191,7 @@ class SystemCoordinator(MyPyllantCoordinator):
             return data
         except ClientResponseError as e:
             self._set_quota(e)
-            return None
+            return []
 
 
 class DailyDataCoordinator(MyPyllantCoordinator):

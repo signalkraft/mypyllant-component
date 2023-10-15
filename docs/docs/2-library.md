@@ -1,3 +1,8 @@
+---
+hide:
+  - navigation
+---
+
 # CLI & Python Library
 
 [![PyPI](https://img.shields.io/pypi/v/myPyllant)](https://pypi.org/project/myPyllant/)

@@ -1,5 +1,7 @@
 import pytest
+from homeassistant.const import ATTR_TEMPERATURE
 from myPyllant.api import MyPyllantAPI
+from myPyllant.models import DHWOperationMode
 from myPyllant.tests.test_api import list_test_data
 
 from custom_components.mypyllant.water_heater import DomesticHotWaterEntity
@@ -20,9 +22,17 @@ async def test_water_heater(
             )
         dhw = DomesticHotWaterEntity(0, 0, system_coordinator_mock)
         assert isinstance(dhw.device_info, dict)
-        assert isinstance(dhw.target_temperature, float)
+        assert isinstance(dhw.min_temp, float)
+        assert isinstance(dhw.max_temp, float)
         if "currentTemperature" in test_data:
             assert isinstance(dhw.current_temperature, float)
         assert isinstance(dhw.operation_list, list)
         assert dhw.current_operation in dhw.operation_list
+
+        await dhw.async_set_temperature(**{ATTR_TEMPERATURE: 50})
+        await dhw.async_set_operation_mode(
+            operation_mode=DHWOperationMode("MANUAL").display_value
+        )
+        system_coordinator_mock._debounced_refresh.async_cancel()
+
         await mocked_api.aiohttp_session.close()

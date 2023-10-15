@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Mapping
+from typing import Any
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -55,9 +57,7 @@ async def create_system_sensors(
             sensors.append(SystemOutdoorTemperatureSensor(index, system_coordinator))
         if system.water_pressure is not None:
             sensors.append(SystemWaterPressureSensor(index, system_coordinator))
-        # TODO find replacement value
-        # if system.mode is not None:
-        #     sensors.append(SystemModeSensor(index, system_coordinator))
+        sensors.append(ClaimEntity(index, system_coordinator))
 
         for device_index, device in enumerate(system.devices):
             _LOGGER.debug("Creating SystemDevice sensors for %s", device)
@@ -228,6 +228,53 @@ class SystemWaterPressureSensor(SystemSensor):
     @property
     def entity_category(self) -> EntityCategory | None:
         return EntityCategory.DIAGNOSTIC
+
+
+class ClaimEntity(CoordinatorEntity, SensorEntity):
+    def __init__(
+        self,
+        system_index: int,
+        coordinator: SystemCoordinator,
+    ):
+        super().__init__(coordinator)
+        self.system_index = system_index
+
+    @property
+    def system(self) -> System:
+        return self.coordinator.data[self.system_index]
+
+    @property
+    def entity_category(self) -> EntityCategory | None:
+        return EntityCategory.DIAGNOSTIC
+
+    @property
+    def extra_state_attributes(self) -> Mapping[str, Any] | None:
+        attr = {
+            "firmware": self.system.claim.firmware,
+        }
+        return attr
+
+    @property
+    def device_info(self):
+        return DeviceInfo(
+            identifiers={(DOMAIN, f"claim{self.system.id}")},
+            name=self.system.claim.nomenclature,
+            manufacturer=self.system.brand_name,
+            model=self.system.claim.nomenclature,
+            sw_version=self.system.claim.firmware_version,
+        )
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_claim_{self.system_index}"
+
+    @property
+    def native_value(self):
+        return self.system.claim.firmware_version
+
+    @property
+    def name(self) -> str:
+        return self.system.claim.name
 
 
 class ZoneEntity(CoordinatorEntity, SensorEntity):

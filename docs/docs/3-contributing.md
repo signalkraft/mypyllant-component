@@ -1,3 +1,8 @@
+---
+hide:
+  - navigation
+---
+
 # Contributing
 
 ## Contributing to the Home Assistant Component
@@ -42,8 +47,18 @@ logger:
     myPyllant: debug
 ```
 
-## Contributing to the underlying myPyllant library
+### Testing in Docker
 
+![Default Dashboard Screenshot](assets/default-dashboard.png)
+
+To get a quick test environment in Docker, copy `.env.sample` to `.env`, 
+add your credentials in the new file, and run `docker compose up`.
+
+After HA started, open http://localhost:8123 in your browser and sign in with user `test` and password `test`.
+
+The integration should be configured and show entities on the default dashboard.
+
+## Contributing to the underlying myPyllant library
 
 !!! warning
 
