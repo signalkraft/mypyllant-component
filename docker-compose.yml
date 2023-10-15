@@ -5,8 +5,12 @@ services:
       - 8123:8123
     container_name: homeassistant
     image: "ghcr.io/home-assistant/home-assistant:stable"
+    env_file:
+      - ./docker/.env
     volumes:
-      - ./docker/config:/config
-      - ./docker/myPyllant:/usr/local/lib/python3.10/site-packages/myPyllant
+      - ./docker/entrypoint.sh:/init-custom
+      - ./docker/config.tar.gz:/tmp/config.tar.gz
+      - ../myPyllant/src/myPyllant:/tmp/myPyllant
+      - ./custom_components/mypyllant/:/tmp/mypyllant-component
       - /etc/localtime:/etc/localtime:ro
-    restart: unless-stopped
+    entrypoint: ["/init-custom"]
