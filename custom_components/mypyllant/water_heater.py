@@ -1,6 +1,7 @@
 import logging
 from typing import Any
 
+import voluptuous as vol
 from homeassistant.components.water_heater import (
     WaterHeaterEntity,
     WaterHeaterEntityFeature,
@@ -8,18 +9,24 @@ from homeassistant.components.water_heater import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_platform
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from myPyllant.models import (
     DHWCurrentSpecialFunction,
     DHWOperationMode,
+    DHWTimeProgram,
     DomesticHotWater,
     System,
 )
 
 from . import SystemCoordinator
-from .const import DOMAIN
+from .const import (
+    DOMAIN,
+    SERVICE_SET_DHW_CIRCULATION_TIME_PROGRAM,
+    SERVICE_SET_DHW_TIME_PROGRAM,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,6 +49,23 @@ async def async_setup_entry(
             dhws.append(DomesticHotWaterEntity(index, dhw_index, coordinator))
 
     async_add_entities(dhws)
+    if len(dhws) > 0:
+        platform = entity_platform.async_get_current_platform()
+        _LOGGER.debug("Setting up water heater entity services for %s", platform)
+        platform.async_register_entity_service(
+            SERVICE_SET_DHW_TIME_PROGRAM,
+            {
+                vol.Required("time_program"): vol.All(dict),
+            },
+            "set_dhw_time_program",
+        )
+        platform.async_register_entity_service(
+            SERVICE_SET_DHW_CIRCULATION_TIME_PROGRAM,
+            {
+                vol.Required("time_program"): vol.All(dict),
+            },
+            "set_dhw_circulation_time_program",
+        )
 
 
 class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
@@ -153,4 +177,18 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
                 self.domestic_hot_water,
                 DHWOperationMode(enum_value),
             )
+        await self.coordinator.async_request_refresh_delayed()
+
+    async def set_dhw_time_program(self, **kwargs):
+        time_program = DHWTimeProgram.from_api(**kwargs.get("time_program"))
+        await self.coordinator.api.set_domestic_hot_water_time_program(
+            self.domestic_hot_water, time_program
+        )
+        await self.coordinator.async_request_refresh_delayed()
+
+    async def set_dhw_circulation_time_program(self, **kwargs):
+        time_program = DHWTimeProgram.from_api(**kwargs.get("time_program"))
+        await self.coordinator.api.set_domestic_hot_water_circulation_time_program(
+            self.domestic_hot_water, time_program
+        )
         await self.coordinator.async_request_refresh_delayed()

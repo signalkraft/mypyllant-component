@@ -150,4 +150,71 @@ set_zone_time_program:
             - start_time: 420
               end_time: 1290
               setpoint: 20
-        type: heating
+
+set_dhw_time_program:
+  name: Set Water Heater Time Program
+  description: Updates the time program for a water heater
+  target:
+    entity:
+      integration: mypyllant
+      domain: water_heater
+  fields:
+    time_program:
+      name: Time Program
+      description: A dictionary of days with a list of start_time and end_time
+      example: >
+        monday:
+        - start_time: 330
+          end_time: 1260
+        tuesday:
+        - start_time: 330
+          end_time: 1260
+        wednesday:
+        - start_time: 330
+          end_time: 1260
+        thursday:
+        - start_time: 330
+          end_time: 1260
+        friday:
+        - start_time: 330
+          end_time: 1260
+        saturday:
+        - start_time: 450
+          end_time: 1260
+        sunday:
+        - start_time: 450
+          end_time: 1260
+
+set_dhw_circulation_time_program:
+  name: Set Water Heater Circulation Time Program
+  description: Updates the time program for the circulation pump of a water heater
+  target:
+    entity:
+      integration: mypyllant
+      domain: water_heater
+  fields:
+    time_program:
+      name: Time Program
+      description: A dictionary of days with a list of start_time and end_time
+      example: >
+        monday:
+        - start_time: 330
+          end_time: 1260
+        tuesday:
+        - start_time: 330
+          end_time: 1260
+        wednesday:
+        - start_time: 330
+          end_time: 1260
+        thursday:
+        - start_time: 330
+          end_time: 1260
+        friday:
+        - start_time: 330
+          end_time: 1260
+        saturday:
+        - start_time: 450
+          end_time: 1260
+        sunday:
+        - start_time: 450
+          end_time: 1260

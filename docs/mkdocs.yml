@@ -8,6 +8,7 @@ theme:
     scheme: slate
   features:
     - content.code.annotate
+    - content.tabs.link
     - navigation.tabs
     - navigation.tabs.sticky
 repo_url: https://github.com/signalkraft/mypyllant-component/
@@ -24,3 +25,5 @@ markdown_extensions:
   - pymdownx.snippets
   - pymdownx.details
   - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true

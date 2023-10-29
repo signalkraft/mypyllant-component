@@ -55,8 +55,9 @@ Uses the [myPyllant library](https://github.com/signalkraft/mypyllant).
 
 * Supports climate & hot water controls, as well as sensor information
 * Control operating modes, target temperature, and presets such as holiday more or quick veto
+* Set the schedule for climate zones, water heaters, and circulation pumps with [a custom service](https://signalkraft.com/mypyllant-component/1-automations/#setting-a-time-program)
 * Track sensor information of devices, such as temperature, humidity, operating mode, energy usage, or energy efficiency
-* See diagnostic information, such as the current heating curve, flow temperature, or water pressure
+* See diagnostic information, such as the current heating curve, flow temperature, firmware versions, or water pressure
 * Custom services to set holiday mode or quick veto temperature overrides, and their duration
 
 ## Options

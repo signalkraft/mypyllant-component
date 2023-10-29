@@ -32,10 +32,10 @@ from myPyllant.const import (
 )
 from myPyllant.models import (
     System,
-    TimeProgramHeating,
     Zone,
     ZoneCurrentSpecialFunction,
     ZoneHeatingOperatingMode,
+    ZoneTimeProgram,
 )
 
 from . import SystemCoordinator
@@ -249,7 +249,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     async def set_zone_time_program(self, **kwargs):
         _LOGGER.debug("Canceling holiday on System %s", self.system.id)
         program_type = kwargs.get("program_type")
-        time_program = TimeProgramHeating.from_api(**kwargs.get("time_program"))
+        time_program = ZoneTimeProgram.from_api(**kwargs.get("time_program"))
         await self.coordinator.api.set_zone_time_program(
             self.zone, program_type, time_program
         )
