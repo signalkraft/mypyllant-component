@@ -215,7 +215,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
         attr = {
-            "time_windows": self.zone.heating.time_program_heating,
+            "time_program_heating": self.zone.heating.time_program_heating,
             "quick_veto_start_date_time": self.zone.quick_veto_start_date_time,
             "quick_veto_end_date_time": self.zone.quick_veto_end_date_time,
         }

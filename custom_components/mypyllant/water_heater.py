@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Mapping
 from typing import Any
 
 import voluptuous as vol
@@ -99,6 +100,14 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
             name=self.name,
             manufacturer=self.system.brand_name,
         )
+
+    @property
+    def extra_state_attributes(self) -> Mapping[str, Any] | None:
+        attr = {
+            "time_program_dhw": self.domestic_hot_water.time_program_dhw,
+            "time_program_circulation_pump": self.domestic_hot_water.time_program_circulation_pump,
+        }
+        return attr
 
     @property
     def unique_id(self) -> str:

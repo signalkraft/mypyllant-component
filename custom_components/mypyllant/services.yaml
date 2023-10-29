@@ -120,7 +120,7 @@ set_zone_time_program:
             - "cooling"
     time_program:
       name: Time Program
-      description: A dictionary of days with a list of start_time, end_time, and setpoint values
+      description: A dictionary of days with a list of setpoints, start_time, and end_time (in minutes since midnight)
       example: >
         monday:
             - start_time: 420
@@ -161,7 +161,7 @@ set_dhw_time_program:
   fields:
     time_program:
       name: Time Program
-      description: A dictionary of days with a list of start_time and end_time
+      description: A dictionary of days with a list of start_time and end_time (in minutes since midnight)
       example: >
         monday:
         - start_time: 330
@@ -195,7 +195,7 @@ set_dhw_circulation_time_program:
   fields:
     time_program:
       name: Time Program
-      description: A dictionary of days with a list of start_time and end_time
+      description: A dictionary of days with a list of start_time and end_time (in minutes since midnight)
       example: >
         monday:
         - start_time: 330

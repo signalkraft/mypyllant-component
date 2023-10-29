@@ -15,8 +15,20 @@ Search for "myvaillant" in Developer Tools > Services in your Home Assistant ins
 
 ## Setting a Time Program
 
-Call the `mypyllant.set_zone_time_program` (for climate) `mypyllant.set_dhw_time_program` (for water heaters) 
-with a `program_type` (only on climate) and a `time_program`.
+The following services can be used to set time programs:
+
+* `mypyllant.set_zone_time_program` for climate zones (requires an additional `program_type`)
+* `mypyllant.set_zone_time_program` for climate zones
+* `mypyllant.set_dhw_circulation_time_program` for circulation pumps on water heaters
+
+You can look up your current time programs in the [developer states view](https://my.home-assistant.io/redirect/developer_states/)
+under attributes for your zones and water heater.
+
+Times in the time program are given in minutes since midnight in UTC.
+
+!!! note "Disabling a time window"
+
+    You can delete all time windows on a day by sending an empty list, for example `monday: []`.
 
 === "Climate"
 
