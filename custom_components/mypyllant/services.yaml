@@ -100,3 +100,54 @@ cancel_holiday:
     entity:
       integration: mypyllant
       domain: climate
+
+set_zone_time_program:
+  name: Set Zone Time Program
+  description: Updates the time program for a zone
+  target:
+    entity:
+      integration: mypyllant
+      domain: climate
+  fields:
+    program_type:
+      name: Type
+      description: Type of the time program (heating, cooling)
+      example: heating
+      selector:
+        select:
+          options:
+            - "heating"
+            - "cooling"
+    time_program:
+      name: Time Program
+      description: A dictionary of days with a list of start_time, end_time, and setpoint values
+      example: >
+        monday:
+            - start_time: 420
+              end_time: 1290
+              setpoint: 20
+        tuesday:
+            - start_time: 420
+              end_time: 1290
+              setpoint: 20
+        wednesday:
+            - start_time: 420
+              end_time: 1290
+              setpoint: 20
+        thursday:
+            - start_time: 420
+              end_time: 1290
+              setpoint: 20
+        friday:
+            - start_time: 420
+              end_time: 1290
+              setpoint: 20
+        saturday:
+            - start_time: 420
+              end_time: 1290
+              setpoint: 20
+        sunday:
+            - start_time: 420
+              end_time: 1290
+              setpoint: 20
+        type: heating

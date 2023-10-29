@@ -32,6 +32,7 @@ from myPyllant.const import (
 )
 from myPyllant.models import (
     System,
+    TimeProgramHeating,
     Zone,
     ZoneCurrentSpecialFunction,
     ZoneHeatingOperatingMode,
@@ -46,6 +47,7 @@ from .const import (
     SERVICE_SET_HOLIDAY,
     SERVICE_SET_MANUAL_MODE_SETPOINT,
     SERVICE_SET_QUICK_VETO,
+    SERVICE_SET_ZONE_TIME_PROGRAM,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -147,6 +149,22 @@ async def async_setup_entry(
             {},
             "cancel_holiday",
         )
+        platform.async_register_entity_service(
+            SERVICE_SET_ZONE_TIME_PROGRAM,
+            {
+                vol.Required("program_type"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=[
+                            selector.SelectOptionDict(value="heating", label="Heating"),
+                            selector.SelectOptionDict(value="cooling", label="Cooling"),
+                        ],
+                        mode=selector.SelectSelectorMode.LIST,
+                    )
+                ),
+                vol.Required("time_program"): vol.All(dict),
+            },
+            "set_zone_time_program",
+        )
 
 
 class ZoneClimate(CoordinatorEntity, ClimateEntity):
@@ -226,6 +244,15 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     async def cancel_holiday(self):
         _LOGGER.debug("Canceling holiday on System %s", self.system.id)
         await self.coordinator.api.cancel_holiday(self.system)
+        await self.coordinator.async_request_refresh_delayed()
+
+    async def set_zone_time_program(self, **kwargs):
+        _LOGGER.debug("Canceling holiday on System %s", self.system.id)
+        program_type = kwargs.get("program_type")
+        time_program = TimeProgramHeating.from_api(**kwargs.get("time_program"))
+        await self.coordinator.api.set_zone_time_program(
+            self.zone, program_type, time_program
+        )
         await self.coordinator.async_request_refresh_delayed()
 
     async def set_quick_veto(self, **kwargs):

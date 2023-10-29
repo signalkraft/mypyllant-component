@@ -29,6 +29,7 @@ because of this library.
 
 * Supports climate & hot water controls, as well as sensor information
 * Control operating modes, target temperature, and presets such as holiday more or quick veto
+* Set the schedule for climate zones with a custom service
 * Track sensor information of devices, such as temperature, humidity, operating mode, energy usage, or energy efficiency
 * See diagnostic information, such as the current heating curve, flow temperature, firmware versions, or water pressure
 * Custom services to set holiday mode or quick veto temperature overrides, and their duration

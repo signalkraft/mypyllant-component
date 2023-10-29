@@ -1,7 +1,6 @@
 ---
 hide:
   - navigation
-  - toc
 ---
 
 # Automations
@@ -44,5 +43,48 @@ mode: single
 2. Here you can set the target temperature for legionella protection
 3. This is the duration. Make sure it covers the time period where your water heater is turned on
 4. This should be your regular water temperature
+
+## Setting a Time Program
+
+Call the [mypyllant.time_program_heating service](https://my.home-assistant.io/redirect/developer_services/) with a `program_type` 
+and a `time_program`.
+
+```yaml
+service: mypyllant.set_zone_time_program
+data:
+  program_type: heating
+  time_program:
+    monday:
+      - start_time: 420
+        end_time: 1290
+        setpoint: 20
+    tuesday:
+      - start_time: 420
+        end_time: 1290
+        setpoint: 20
+    wednesday:
+      - start_time: 420
+        end_time: 1290
+        setpoint: 20
+    thursday:
+      - start_time: 420
+        end_time: 1290
+        setpoint: 20
+    friday:
+      - start_time: 420
+        end_time: 1290
+        setpoint: 20
+    saturday:
+      - start_time: 420
+        end_time: 1290
+        setpoint: 20
+    sunday:
+      - start_time: 420
+        end_time: 1290
+        setpoint: 20
+    type: heating
+target:
+  entity_id: climate.zone_0
+```
 
 [^1]: Contributed by CommanderROR in the [Home Assistant Community](https://community.home-assistant.io/t/myvaillant-integration/542610/70)
