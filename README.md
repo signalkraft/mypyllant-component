@@ -56,7 +56,9 @@ because of this library.
 
 ### Seconds between scans
 
-Wait interval between updating (most) sensors. The energy data and efficiency sensors have a fixed hourly interval.
+Wait interval between updating (most) sensors. **Don't set this too low, for example 10 leads to quota exceeded errors and a temporary ban**.
+
+The energy data and efficiency sensors have a fixed hourly interval.
 
 ### Delay before refreshing data after updates
 

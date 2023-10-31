@@ -23,7 +23,7 @@
     "step": {
       "init": {
         "data": {
-          "update_interval": "Intervall zwischen Updates in Sekunden",
+          "update_interval": "Intervall zwischen Updates in Sekunden (niedrige Werte führen zu 'Quota Exceeded' Fehlern)",
           "refresh_delay": "Verzögerung bevor Daten nach einer Änderung aktualisiert werden",
           "quick_veto_duration": "Standard Dauer in Stunden für Quick Veto",
           "country": "Land",

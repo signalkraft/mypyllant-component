@@ -23,7 +23,7 @@
     "step": {
       "init": {
         "data": {
-          "update_interval": "Seconds between scans",
+          "update_interval": "Seconds between scans (lower values risk 'quota exceeded' errors and temporary bans)",
           "refresh_delay": "Delay before refreshing data after updates",
           "quick_veto_duration": "Default duration in hours for quick veto",
           "country": "Country",
