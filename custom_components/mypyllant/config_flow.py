@@ -25,12 +25,14 @@ from myPyllant.const import (
 from .const import (
     DEFAULT_COUNTRY,
     DEFAULT_REFRESH_DELAY,
+    DEFAULT_TIME_PROGRAM_OVERWRITE,
     DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
     OPTION_BRAND,
     OPTION_COUNTRY,
     OPTION_DEFAULT_QUICK_VETO_DURATION,
     OPTION_REFRESH_DELAY,
+    OPTION_TIME_PROGRAM_OVERWRITE,
     OPTION_UPDATE_INTERVAL,
 )
 
@@ -124,6 +126,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             DEFAULT_QUICK_VETO_DURATION,
                         ),
                     ): positive_int,
+                    vol.Required(
+                        OPTION_TIME_PROGRAM_OVERWRITE,
+                        default=self.config_entry.options.get(
+                            OPTION_TIME_PROGRAM_OVERWRITE,
+                            DEFAULT_TIME_PROGRAM_OVERWRITE,
+                        ),
+                    ): bool,
                     vol.Required(
                         OPTION_BRAND,
                         default=self.config_entry.options.get(

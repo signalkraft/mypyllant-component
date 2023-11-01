@@ -26,6 +26,7 @@
           "update_interval": "Seconds between scans (lower values risk 'quota exceeded' errors and temporary bans)",
           "refresh_delay": "Delay before refreshing data after updates",
           "quick_veto_duration": "Default duration in hours for quick veto",
+          "time_program_overwrite": "Temperature controls overwrite time program instead of setting quick veto",
           "country": "Country",
           "brand": "Brand"
         }

@@ -12,6 +12,10 @@ from homeassistant.components.climate import (
     HVACMode,
 )
 from homeassistant.components.climate.const import (
+    FAN_AUTO,
+    FAN_LOW,
+    FAN_OFF,
+    FAN_ON,
     PRESET_AWAY,
     PRESET_BOOST,
     PRESET_NONE,
@@ -32,6 +36,9 @@ from myPyllant.const import (
 )
 from myPyllant.models import (
     System,
+    Ventilation,
+    VentilationFanStageType,
+    VentilationOperationMode,
     Zone,
     ZoneCurrentSpecialFunction,
     ZoneHeatingOperatingMode,
@@ -40,13 +47,16 @@ from myPyllant.models import (
 
 from . import SystemCoordinator
 from .const import (
+    DEFAULT_TIME_PROGRAM_OVERWRITE,
     DOMAIN,
     OPTION_DEFAULT_QUICK_VETO_DURATION,
+    OPTION_TIME_PROGRAM_OVERWRITE,
     SERVICE_CANCEL_HOLIDAY,
     SERVICE_CANCEL_QUICK_VETO,
     SERVICE_SET_HOLIDAY,
     SERVICE_SET_MANUAL_MODE_SETPOINT,
     SERVICE_SET_QUICK_VETO,
+    SERVICE_SET_VENTILATION_FAN_STAGE,
     SERVICE_SET_ZONE_TIME_PROGRAM,
 )
 
@@ -57,18 +67,35 @@ _MANUAL_SETPOINT_TYPES_OPTIONS = [
     for k, v in MANUAL_SETPOINT_TYPES.items()
 ]
 
-HVAC_MODE_MAP = {
+ZONE_HVAC_MODE_MAP = {
     HVACMode.OFF: ZoneHeatingOperatingMode.OFF,
     HVACMode.HEAT_COOL: ZoneHeatingOperatingMode.MANUAL,
     HVACMode.AUTO: ZoneHeatingOperatingMode.TIME_CONTROLLED,
 }
 
-PRESET_MAP = {
+ZONE_PRESET_MAP = {
     PRESET_BOOST: ZoneCurrentSpecialFunction.QUICK_VETO,
     PRESET_NONE: ZoneCurrentSpecialFunction.NONE,
     PRESET_AWAY: ZoneCurrentSpecialFunction.HOLIDAY,
     PRESET_SLEEP: ZoneCurrentSpecialFunction.SYSTEM_OFF,
 }
+
+VENTILATION_HVAC_MODE_MAP = {
+    HVACMode.FAN_ONLY: VentilationOperationMode.NORMAL,
+    HVACMode.AUTO: VentilationOperationMode.TIME_CONTROLLED,
+}
+
+VENTILATION_FAN_MODE_MAP = {
+    FAN_OFF: VentilationOperationMode.OFF,
+    FAN_ON: VentilationOperationMode.NORMAL,
+    FAN_LOW: VentilationOperationMode.REDUCED,
+    FAN_AUTO: VentilationOperationMode.TIME_CONTROLLED,
+}
+
+_FAN_STAGE_TYPE_OPTIONS = [
+    selector.SelectOptionDict(value=v.value, label=v.value.title())
+    for v in VentilationFanStageType
+]
 
 
 async def async_setup_entry(
@@ -81,23 +108,42 @@ async def async_setup_entry(
     default_quick_veto_duration = config.options.get(
         OPTION_DEFAULT_QUICK_VETO_DURATION, DEFAULT_QUICK_VETO_DURATION
     )
+    time_program_overwrite = config.options.get(
+        OPTION_TIME_PROGRAM_OVERWRITE, DEFAULT_TIME_PROGRAM_OVERWRITE
+    )
     if not coordinator.data:
         _LOGGER.warning("No system data, skipping climate")
         return
 
-    climates: list[ClimateEntity] = []
+    zone_entities: list[ClimateEntity] = []
+    ventilation_entities: list[ClimateEntity] = []
 
     for index, system in enumerate(coordinator.data):
-        for zone_index, zone in enumerate(system.zones):
-            climates.append(
-                ZoneClimate(index, zone_index, coordinator, default_quick_veto_duration)
+        for zone_index, _ in enumerate(system.zones):
+            zone_entities.append(
+                ZoneClimate(
+                    index,
+                    zone_index,
+                    coordinator,
+                    default_quick_veto_duration,
+                    time_program_overwrite,
+                )
+            )
+        for ventilation_index, _ in enumerate(system.ventilation):
+            ventilation_entities.append(
+                VentilationClimate(
+                    index,
+                    ventilation_index,
+                    coordinator,
+                )
             )
 
-    async_add_entities(climates)
+    async_add_entities(zone_entities)
+    async_add_entities(ventilation_entities)
 
-    if len(climates) > 0:
+    if len(zone_entities) > 0:
         platform = entity_platform.async_get_current_platform()
-        _LOGGER.debug("Setting up climate entity services for %s", platform)
+        _LOGGER.debug("Setting up zone climate entity services for %s", platform)
         # noinspection PyTypeChecker
         # Wrapping the schema in vol.Schema() breaks entity_id passing
         platform.async_register_entity_service(
@@ -112,6 +158,8 @@ async def async_setup_entry(
             },
             "set_quick_veto",
         )
+        # noinspection PyTypeChecker
+        # Wrapping the schema in vol.Schema() breaks entity_id passing
         platform.async_register_entity_service(
             SERVICE_SET_MANUAL_MODE_SETPOINT,
             {
@@ -149,6 +197,8 @@ async def async_setup_entry(
             {},
             "cancel_holiday",
         )
+        # noinspection PyTypeChecker
+        # Wrapping the schema in vol.Schema() breaks entity_id passing
         platform.async_register_entity_service(
             SERVICE_SET_ZONE_TIME_PROGRAM,
             {
@@ -166,27 +216,50 @@ async def async_setup_entry(
             "set_zone_time_program",
         )
 
+    if len(ventilation_entities) > 0:
+        platform = entity_platform.async_get_current_platform()
+        _LOGGER.debug("Setting up ventilation climate entity services for %s", platform)
+        # noinspection PyTypeChecker
+        # Wrapping the schema in vol.Schema() breaks entity_id passing
+        platform.async_register_entity_service(
+            SERVICE_SET_VENTILATION_FAN_STAGE,
+            {
+                vol.Required("maximum_fan_stage"): vol.All(
+                    vol.Coerce(int), vol.Clamp(min=1, max=6)
+                ),
+                vol.Required("fan_stage_type"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=_FAN_STAGE_TYPE_OPTIONS,
+                        mode=selector.SelectSelectorMode.LIST,
+                    ),
+                ),
+            },
+            "set_ventilation_fan_stage",
+        )
+
 
 class ZoneClimate(CoordinatorEntity, ClimateEntity):
     """Climate for a zone."""
 
     coordinator: SystemCoordinator
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
-    _attr_hvac_modes = [str(k) for k in HVAC_MODE_MAP.keys()]
-    _attr_preset_modes = [str(k) for k in PRESET_MAP.keys()]
+    _attr_hvac_modes = [str(k) for k in ZONE_HVAC_MODE_MAP.keys()]
+    _attr_preset_modes = [str(k) for k in ZONE_PRESET_MAP.keys()]
 
     def __init__(
         self,
         system_index: int,
         zone_index: int,
         coordinator: SystemCoordinator,
-        default_quick_veto_duration: int,
+        default_quick_veto_duration: float,
+        time_program_overwrite: bool,
     ) -> None:
         super().__init__(coordinator)
         self.system_index = system_index
         self.zone_index = zone_index
         self.entity_id = f"{DOMAIN}.zone_{zone_index}"
         self.default_quick_veto_duration = default_quick_veto_duration
+        self.time_program_overwrite = time_program_overwrite
 
     @property
     def system(self) -> System:
@@ -303,14 +376,14 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     def hvac_mode(self) -> HVACMode:
         return [
             k
-            for k, v in HVAC_MODE_MAP.items()
+            for k, v in ZONE_HVAC_MODE_MAP.items()
             if v == self.zone.heating.operation_mode_heating
         ][0]
 
     async def async_set_hvac_mode(self, hvac_mode):
         await self.coordinator.api.set_zone_heating_operating_mode(
             self.zone,
-            HVAC_MODE_MAP[hvac_mode],
+            ZONE_HVAC_MODE_MAP[hvac_mode],
         )
         await self.coordinator.async_request_refresh_delayed()
 
@@ -333,14 +406,30 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             await self.set_manual_mode_setpoint(temperature=temperature)
             await self.coordinator.async_request_refresh_delayed()
         else:
-            _LOGGER.debug("Setting quick veto on %s to %s", self.zone.name, temperature)
-            await self.set_quick_veto(temperature=temperature)
+            if self.time_program_overwrite and not self.preset_mode == PRESET_BOOST:
+                _LOGGER.debug(
+                    "Setting time program temperature in %s to %s",
+                    self.zone.name,
+                    temperature,
+                )
+                await self.coordinator.api.set_time_program_temperature(
+                    self.zone,
+                    "heating",  # TODO: Cooling?
+                    temperature=temperature,
+                )
+            else:
+                _LOGGER.debug(
+                    "Setting quick veto on %s to %s", self.zone.name, temperature
+                )
+                await self.set_quick_veto(temperature=temperature)
             await self.coordinator.async_request_refresh_delayed()
 
     @property
     def preset_mode(self) -> PRESET_BOOST | PRESET_NONE:
         return [
-            k for k, v in PRESET_MAP.items() if v == self.zone.current_special_function
+            k
+            for k, v in ZONE_PRESET_MAP.items()
+            if v == self.zone.current_special_function
         ][0]
 
     async def async_set_preset_mode(self, preset_mode):
@@ -350,11 +439,11 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         :param preset_mode:
         :return:
         """
-        if preset_mode not in PRESET_MAP:
+        if preset_mode not in ZONE_PRESET_MAP:
             raise ValueError(
-                f'Invalid preset mode, use one of {", ".join(PRESET_MAP.keys())}'
+                f'Invalid preset mode, use one of {", ".join(ZONE_PRESET_MAP.keys())}'
             )
-        requested_mode = PRESET_MAP[preset_mode]
+        requested_mode = ZONE_PRESET_MAP[preset_mode]
         if requested_mode != self.zone.current_special_function:
             if requested_mode == ZoneCurrentSpecialFunction.NONE:
                 if (
@@ -387,3 +476,83 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                 await self.async_set_hvac_mode(HVACMode.OFF)
 
             await self.coordinator.async_request_refresh_delayed()
+
+
+class VentilationClimate(CoordinatorEntity, ClimateEntity):
+    coordinator: SystemCoordinator
+    _attr_fan_modes = [str(k) for k in VENTILATION_FAN_MODE_MAP.keys()]
+    _attr_hvac_mode = HVACMode.FAN_ONLY
+
+    def __init__(
+        self,
+        system_index: int,
+        ventilation_index: int,
+        coordinator: SystemCoordinator,
+    ) -> None:
+        super().__init__(coordinator)
+        self.system_index = system_index
+        self.ventilation_index = ventilation_index
+        self.entity_id = f"{DOMAIN}.ventilation_{ventilation_index}"
+
+    @property
+    def system(self) -> System:
+        return self.coordinator.data[self.system_index]
+
+    @property
+    def ventilation(self) -> Ventilation:
+        return self.system.ventilation[self.ventilation_index]
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        return DeviceInfo(
+            identifiers={(DOMAIN, f"ventilation{self.ventilation.index}")},
+            name=self.name,
+            manufacturer=self.system.brand_name,
+        )
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_climate_ventilation_{self.ventilation_index}"
+
+    @property
+    def name(self) -> str:
+        return [d for d in self.system.devices if d.type == "ventilation"][
+            0
+        ].name_display
+
+    @property
+    def extra_state_attributes(self) -> Mapping[str, Any] | None:
+        attr = {
+            "time_program_ventilation": self.ventilation.time_program_ventilation,
+        }
+        return attr
+
+    @property
+    def supported_features(self) -> ClimateEntityFeature:
+        """Return the list of supported features."""
+        return ClimateEntityFeature.FAN_MODE
+
+    @property
+    def fan_mode(self) -> HVACMode:
+        return [
+            k
+            for k, v in VENTILATION_FAN_MODE_MAP.items()
+            if v == self.ventilation.operation_mode_ventilation
+        ][0]
+
+    async def async_set_fan_mode(self, fan_mode: str) -> None:
+        await self.coordinator.api.set_ventilation_operation_mode(
+            self.ventilation,
+            VENTILATION_FAN_MODE_MAP[fan_mode],
+        )
+        await self.coordinator.async_request_refresh_delayed()
+
+    async def set_ventilation_fan_stage(
+        self, maximum_fan_stage: int | str, **kwargs: Any
+    ) -> None:
+        await self.coordinator.api.set_ventilation_fan_stage(
+            self.ventilation,
+            int(maximum_fan_stage),
+            VentilationFanStageType(kwargs.get("fan_stage_type")),
+        )
+        await self.coordinator.async_request_refresh_delayed()
