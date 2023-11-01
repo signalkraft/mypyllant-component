@@ -77,6 +77,15 @@ When setting the temperature with the climate controls, the integration uses the
 
 With this option you can set for how long the temperature should stay set, before returning to the default value.
 
+### Temperature controls overwrite time program instead of setting quick veto
+
+When raising or lowering the desired temperature in the myVAILLANT app, it sets a quick veto mode for a limited time
+with that new temperature, if the zone is in time controlled mode. If you want to permanently change the desired
+temperature, you need to update the time schedule.
+
+By default, this integration has the same behavior. But when enabling this option, the Home Assistant climate controls 
+instead overwrite the temperatures set in the time schedule with the new value (unless quick veto is already active).
+
 ### Country
 
 The country you registered your myVAILLANT account in. The list of options is limited to known supported countries.
