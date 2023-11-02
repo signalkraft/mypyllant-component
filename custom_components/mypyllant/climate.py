@@ -532,7 +532,7 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
     def supported_features(self) -> ClimateEntityFeature:
         """Return the list of supported features."""
         return ClimateEntityFeature.FAN_MODE
-    
+
     @property
     def hvac_mode(self) -> HVACMode:
         return [
