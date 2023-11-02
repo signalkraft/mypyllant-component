@@ -481,7 +481,8 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 class VentilationClimate(CoordinatorEntity, ClimateEntity):
     coordinator: SystemCoordinator
     _attr_fan_modes = [str(k) for k in VENTILATION_FAN_MODE_MAP.keys()]
-    _attr_hvac_mode = HVACMode.FAN_ONLY
+    _attr_hvac_modes = [str(k) for k in VENTILATION_HVAC_MODE_MAP.keys()]
+    _attr_temperature_unit = UnitOfTemperature.CELSIUS
 
     def __init__(
         self,
@@ -531,6 +532,22 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
     def supported_features(self) -> ClimateEntityFeature:
         """Return the list of supported features."""
         return ClimateEntityFeature.FAN_MODE
+
+    
+    @property
+    def hvac_mode(self) -> HVACMode:
+        return [
+            k
+            for k, v in VENTILATION_HVAC_MODE_MAP.items()
+            if v == self.ventilation.operation_mode_ventilation
+        ][0]
+
+    async def async_set_hvac_mode(self, hvac_mode):
+        await self.coordinator.api.set_ventilation_operation_mode(
+            self.ventilation,
+            VENTILATION_HVAC_MODE_MAP[hvac_mode],
+        )
+        await self.coordinator.async_request_refresh_delayed()
 
     @property
     def fan_mode(self) -> HVACMode:
