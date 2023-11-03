@@ -1,0 +1,36 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "password": "Heslo",
+          "username": "Používateľské meno",
+          "country": "Krajina",
+          "brand": "Značka"
+        },
+        "title": "Prihlasovacie údaje",
+        "description": "Rovnako ako aplikácia myVAILLANT"
+      }
+    },
+    "error": {
+      "login_endpoint_invalid": "Pre túto kombináciu značky a krajiny sa nenašiel žiadny spôsob prihlásenia",
+      "realm_invalid": "Táto značka vyžaduje výber krajiny",
+      "authentication_failed": "Overenie zlyhalo, skontrolujte svoje používateľské meno a heslo a uistite sa, že ste vybrali správnu krajinu a značku zariadenia",
+      "unknown": "Neočakávaná chyba"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "update_interval": "Sekundy medzi kontrolami (pri nižších hodnotách hrozí riziko prekročenia kvóty a dočasné zákazy)",
+          "refresh_delay": "Oneskorenie pred obnovením údajov po aktualizáciách",
+          "quick_veto_duration": "Predvolené trvanie v hodinách pre rýchle veto",
+          "time_program_overwrite": "Regulátory teploty prepisujú časový program namiesto nastavenia rýchleho veta",
+          "country": "Krajina",
+          "brand": "Značka"
+        }
+      }
+    }
+  }
+}
