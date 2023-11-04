@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import math
 from collections.abc import Mapping
 from typing import Any
 
@@ -13,8 +14,8 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util.percentage import (
-    ordered_list_item_to_percentage,
-    percentage_to_ordered_list_item,
+    percentage_to_ranged_value,
+    ranged_value_to_percentage,
 )
 from myPyllant.models import (
     System,
@@ -69,7 +70,8 @@ class VentilationFan(CoordinatorEntity, FanEntity):
     coordinator: SystemCoordinator
     _attr_preset_modes = [str(k) for k in VentilationOperationMode]
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
-    _attr_speed_count = len(FAN_SPEED_OPTIONS)
+    _attr_speed_count = 6
+    _low_high_range = (1, _attr_speed_count)
 
     def __init__(
         self,
@@ -89,6 +91,16 @@ class VentilationFan(CoordinatorEntity, FanEntity):
     @property
     def ventilation(self) -> Ventilation:
         return self.system.ventilation[self.ventilation_index]
+
+    @property
+    def maximum_fan_stage(self):
+        if (
+            self.ventilation.operation_mode_ventilation
+            == VentilationOperationMode.REDUCED
+        ):
+            return self.ventilation.maximum_night_fan_stage
+        else:
+            return self.ventilation.maximum_day_fan_stage
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -165,32 +177,20 @@ class VentilationFan(CoordinatorEntity, FanEntity):
 
     @property
     def percentage(self) -> int | None:
-        # See https://developers.home-assistant.io/docs/core/entity/fan#set-speed-percentage
-        if (
-            self.ventilation.operation_mode_ventilation
-            == VentilationOperationMode.TIME_CONTROLLED
-        ):
-            return 100
-        elif (
-            self.ventilation.operation_mode_ventilation == VentilationOperationMode.OFF
-        ):
-            return 0
-        else:
-            return ordered_list_item_to_percentage(
-                FAN_SPEED_OPTIONS,
-                self.ventilation.operation_mode_ventilation,
-            )
+        return ranged_value_to_percentage(self._low_high_range, self.maximum_fan_stage)
 
     async def async_set_percentage(self, percentage: int) -> None:
-        if percentage == 0:
-            await self.coordinator.api.set_ventilation_operation_mode(
-                self.ventilation,
-                VentilationOperationMode.OFF,
-            )
+        if (
+            self.ventilation.operation_mode_ventilation
+            == VentilationOperationMode.REDUCED
+        ):
+            fan_stage_type = VentilationFanStageType.NIGHT
         else:
-            mode = percentage_to_ordered_list_item(FAN_SPEED_OPTIONS, percentage)
-            await self.coordinator.api.set_ventilation_operation_mode(
-                self.ventilation,
-                mode,
-            )
+            fan_stage_type = VentilationFanStageType.DAY
+
+        await self.coordinator.api.set_ventilation_fan_stage(
+            self.ventilation,
+            math.ceil(percentage_to_ranged_value(self._low_high_range, percentage)),
+            fan_stage_type,
+        )
         await self.coordinator.async_request_refresh_delayed()

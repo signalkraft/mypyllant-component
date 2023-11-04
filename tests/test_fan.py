@@ -30,7 +30,12 @@ async def test_ventilation_fan(
         assert isinstance(ventilation.device_info, dict)
         assert isinstance(ventilation.extra_state_attributes, dict)
         assert isinstance(ventilation.preset_mode, str)
+        assert isinstance(ventilation.percentage, int)
 
         await ventilation.async_set_preset_mode(str(VentilationOperationMode.REDUCED))
+        await ventilation.async_set_percentage(0)
+        await ventilation.async_set_percentage(25)
+        await ventilation.async_set_percentage(50)
+        await ventilation.async_set_percentage(100)
         system_coordinator_mock._debounced_refresh.async_cancel()
         await mocked_api.aiohttp_session.close()
