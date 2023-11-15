@@ -1,3 +1,0 @@
-# Reference
-
-::: myPyllant.api.MyPyllantAPI
