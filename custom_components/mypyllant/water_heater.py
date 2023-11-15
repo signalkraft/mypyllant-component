@@ -107,7 +107,7 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
             "time_program_dhw": self.domestic_hot_water.time_program_dhw,
             "time_program_circulation_pump": self.domestic_hot_water.time_program_circulation_pump,
         }
-        return attr
+        return attr | self.domestic_hot_water.extra_fields
 
     @property
     def unique_id(self) -> str:

@@ -1,13 +1,13 @@
 import pytest as pytest
 from homeassistant.components.climate import HVACMode
-from homeassistant.components.climate.const import PRESET_AWAY
+from homeassistant.components.climate.const import FAN_OFF, PRESET_AWAY
 from homeassistant.const import ATTR_TEMPERATURE
 from myPyllant.api import MyPyllantAPI
 from myPyllant.const import DEFAULT_QUICK_VETO_DURATION
 from myPyllant.tests.test_api import list_test_data
 
 from custom_components.mypyllant import SystemCoordinator
-from custom_components.mypyllant.climate import ZoneClimate
+from custom_components.mypyllant.climate import VentilationClimate, ZoneClimate
 from custom_components.mypyllant.const import DEFAULT_TIME_PROGRAM_OVERWRITE
 
 
@@ -32,6 +32,7 @@ async def test_zone_climate(
         assert isinstance(climate.device_info, dict)
         assert isinstance(climate.extra_state_attributes, dict)
         assert isinstance(climate.target_temperature, float)
+        assert isinstance(climate.extra_state_attributes, dict)
 
         await climate.set_holiday()
         await climate.cancel_holiday()
@@ -52,4 +53,33 @@ async def test_zone_climate(
         assert isinstance(climate.preset_modes, list)
         assert climate.hvac_mode in climate.hvac_modes
         assert climate.preset_mode in climate.preset_modes
+        await mocked_api.aiohttp_session.close()
+
+
+@pytest.mark.parametrize("test_data", list_test_data())
+async def test_ventilation_climate(
+    mypyllant_aioresponses,
+    mocked_api: MyPyllantAPI,
+    system_coordinator_mock: SystemCoordinator,
+    test_data,
+):
+    with mypyllant_aioresponses(test_data) as _:
+        system_coordinator_mock.data = (
+            await system_coordinator_mock._async_update_data()
+        )
+        if not system_coordinator_mock.data[0].ventilation:
+            await mocked_api.aiohttp_session.close()
+            pytest.skip("No ventilation entity in system")
+
+        ventilation = VentilationClimate(
+            0,
+            0,
+            system_coordinator_mock,
+        )
+        assert isinstance(ventilation.device_info, dict)
+        assert isinstance(ventilation.extra_state_attributes, dict)
+        assert isinstance(ventilation.fan_mode, str)
+
+        await ventilation.async_set_fan_mode(FAN_OFF)
+        system_coordinator_mock._debounced_refresh.async_cancel()
         await mocked_api.aiohttp_session.close()

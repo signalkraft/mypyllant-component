@@ -57,7 +57,7 @@ async def create_system_sensors(
             sensors.append(SystemOutdoorTemperatureSensor(index, system_coordinator))
         if system.water_pressure is not None:
             sensors.append(SystemWaterPressureSensor(index, system_coordinator))
-        sensors.append(ClaimEntity(index, system_coordinator))
+        sensors.append(HomeEntity(index, system_coordinator))
 
         for device_index, device in enumerate(system.devices):
             _LOGGER.debug("Creating SystemDevice sensors for %s", device)
@@ -230,7 +230,7 @@ class SystemWaterPressureSensor(SystemSensor):
         return EntityCategory.DIAGNOSTIC
 
 
-class ClaimEntity(CoordinatorEntity, SensorEntity):
+class HomeEntity(CoordinatorEntity, SensorEntity):
     def __init__(
         self,
         system_index: int,
@@ -249,32 +249,29 @@ class ClaimEntity(CoordinatorEntity, SensorEntity):
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
-        attr = {
-            "firmware": self.system.claim.firmware,
-        }
-        return attr
+        return self.system.home.extra_fields | self.system.extra_fields
 
     @property
     def device_info(self):
         return DeviceInfo(
-            identifiers={(DOMAIN, f"claim{self.system.id}")},
-            name=self.system.claim.nomenclature,
+            identifiers={(DOMAIN, f"home{self.system.id}")},
+            name=self.system.home.nomenclature,
             manufacturer=self.system.brand_name,
-            model=self.system.claim.nomenclature,
-            sw_version=self.system.claim.firmware_version,
+            model=self.system.home.nomenclature,
+            sw_version=self.system.home.firmware_version,
         )
 
     @property
     def unique_id(self) -> str:
-        return f"{DOMAIN}_claim_{self.system_index}"
+        return f"{DOMAIN}_home_{self.system_index}"
 
     @property
     def native_value(self):
-        return self.system.claim.firmware_version
+        return self.system.home.firmware_version
 
     @property
     def name(self) -> str:
-        return self.system.claim.name
+        return self.system.home.name
 
 
 class ZoneEntity(CoordinatorEntity, SensorEntity):
@@ -478,6 +475,10 @@ class CircuitStateSensor(CircuitSensor):
     @property
     def entity_category(self) -> EntityCategory | None:
         return EntityCategory.DIAGNOSTIC
+
+    @property
+    def extra_state_attributes(self) -> Mapping[str, Any] | None:
+        return self.circuit.extra_fields
 
     @property
     def unique_id(self) -> str:

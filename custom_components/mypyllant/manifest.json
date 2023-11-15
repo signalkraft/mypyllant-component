@@ -7,6 +7,6 @@
   "integration_type": "hub",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/signalkraft/mypyllant-component/issues",
-  "requirements": ["myPyllant==0.5.13b1"],
-  "version": "v0.5.5b1"
+  "requirements": ["myPyllant==0.6.0"],
+  "version": "v0.6.0"
 }

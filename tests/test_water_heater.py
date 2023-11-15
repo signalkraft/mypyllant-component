@@ -27,6 +27,7 @@ async def test_water_heater(
         if "currentTemperature" in test_data:
             assert isinstance(dhw.current_temperature, float)
         assert isinstance(dhw.operation_list, list)
+        assert isinstance(dhw.extra_state_attributes, dict)
         assert dhw.current_operation in dhw.operation_list
 
         await dhw.async_set_temperature(**{ATTR_TEMPERATURE: 50})

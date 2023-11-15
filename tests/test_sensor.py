@@ -8,12 +8,12 @@ from custom_components.mypyllant.sensor import (
     CircuitHeatingCurveSensor,
     CircuitMinFlowTemperatureSetpointSensor,
     CircuitStateSensor,
-    ClaimEntity,
     DataSensor,
     DomesticHotWaterCurrentSpecialFunctionSensor,
     DomesticHotWaterOperationModeSensor,
     DomesticHotWaterSetPointSensor,
     DomesticHotWaterTankTemperatureSensor,
+    HomeEntity,
     SystemOutdoorTemperatureSensor,
     SystemWaterPressureSensor,
     ZoneCurrentRoomTemperatureSensor,
@@ -41,10 +41,11 @@ async def test_system_sensors(
             SystemWaterPressureSensor(0, system_coordinator_mock).native_value, float
         )
 
-        claim = ClaimEntity(0, system_coordinator_mock)
-        assert isinstance(claim.device_info, dict)
+        home = HomeEntity(0, system_coordinator_mock)
+        assert isinstance(home.device_info, dict)
         assert (
-            claim.extra_state_attributes and "firmware" in claim.extra_state_attributes
+            home.extra_state_attributes
+            and "controller_type" in home.extra_state_attributes
         )
 
         await mocked_api.aiohttp_session.close()
@@ -100,9 +101,13 @@ async def test_circuit_sensors(
         system_coordinator_mock.data = (
             await system_coordinator_mock._async_update_data()
         )
-        assert isinstance(
-            CircuitStateSensor(0, 0, system_coordinator_mock).native_value, CircuitState
-        )
+        circuit_state = CircuitStateSensor(0, 0, system_coordinator_mock)
+        assert isinstance(circuit_state.native_value, CircuitState)
+        assert isinstance(circuit_state.extra_state_attributes, dict)
+        if "room_temperature_control_mode" in test_data:
+            assert (
+                "room_temperature_control_mode" in circuit_state.extra_state_attributes
+            )
         assert isinstance(
             CircuitFlowTemperatureSensor(0, 0, system_coordinator_mock).native_value,
             float,

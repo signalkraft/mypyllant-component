@@ -10,6 +10,7 @@ async def test_mypyllant_versions():
         Path(".").parent / ".pre-commit-config.yaml",
         Path(".").parent / "dev-requirements.txt",
         Path(".").parent / "custom_components/mypyllant/manifest.json",
+        Path(".").parent / "docs/Dockerfile",
     ]
     p = re.compile(r"myPyllant==(.*?)[\"\n]")
     matches = [re.findall(p, f.read_text()) for f in files]

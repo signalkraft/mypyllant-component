@@ -71,38 +71,6 @@ class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):
         }
 
 
-class CircuitEntity(CoordinatorEntity, BinarySensorEntity):
-    def __init__(
-        self,
-        system_index: int,
-        circuit_index: int,
-        coordinator: SystemCoordinator,
-    ):
-        super().__init__(coordinator)
-        self.system_index = system_index
-        self.circuit_index = circuit_index
-
-    @property
-    def system(self) -> System:
-        return self.coordinator.data[self.system_index]
-
-    @property
-    def circuit_name(self) -> str:
-        return f"Circuit {self.circuit_index}"
-
-    @property
-    def circuit(self) -> Circuit:
-        return self.coordinator.data[self.system_index].circuits[self.circuit_index]
-
-    @property
-    def device_info(self) -> DeviceInfo | None:
-        return DeviceInfo(
-            identifiers={(DOMAIN, f"circuit{self.circuit.index}")},
-            name=self.circuit_name,
-            manufacturer=self.system.brand_name,
-        )
-
-
 class ControlError(SystemControlEntity):
     def __init__(
         self,
@@ -173,11 +141,11 @@ class FirmwareUpdateRequired(SystemControlEntity):
 
     @property
     def is_on(self) -> bool | None:
-        return self.system.claim.firmware.get("update_required", None)
+        return self.system.home.firmware.get("update_required", None)
 
     @property
     def name(self) -> str:
-        return f"Firmware Update Required {self.system.claim.name}"
+        return f"Firmware Update Required {self.system.home.name}"
 
     @property
     def unique_id(self) -> str:
@@ -189,7 +157,7 @@ class FirmwareUpdateRequired(SystemControlEntity):
 
     @property
     def device_info(self) -> DeviceInfo | None:
-        return {"identifiers": {(DOMAIN, f"claim{self.system.id}")}}
+        return {"identifiers": {(DOMAIN, f"home{self.system.id}")}}
 
 
 class FirmwareUpdateEnabled(SystemControlEntity):
@@ -203,11 +171,11 @@ class FirmwareUpdateEnabled(SystemControlEntity):
 
     @property
     def is_on(self) -> bool | None:
-        return self.system.claim.firmware.get("update_enabled", None)
+        return self.system.home.firmware.get("update_enabled", None)
 
     @property
     def name(self) -> str:
-        return f"Firmware Update Enabled {self.system.claim.name}"
+        return f"Firmware Update Enabled {self.system.home.name}"
 
     @property
     def unique_id(self) -> str:
@@ -215,7 +183,39 @@ class FirmwareUpdateEnabled(SystemControlEntity):
 
     @property
     def device_info(self) -> DeviceInfo | None:
-        return {"identifiers": {(DOMAIN, f"claim{self.system.id}")}}
+        return {"identifiers": {(DOMAIN, f"home{self.system.id}")}}
+
+
+class CircuitEntity(CoordinatorEntity, BinarySensorEntity):
+    def __init__(
+        self,
+        system_index: int,
+        circuit_index: int,
+        coordinator: SystemCoordinator,
+    ):
+        super().__init__(coordinator)
+        self.system_index = system_index
+        self.circuit_index = circuit_index
+
+    @property
+    def system(self) -> System:
+        return self.coordinator.data[self.system_index]
+
+    @property
+    def circuit_name(self) -> str:
+        return f"Circuit {self.circuit_index}"
+
+    @property
+    def circuit(self) -> Circuit:
+        return self.coordinator.data[self.system_index].circuits[self.circuit_index]
+
+    @property
+    def device_info(self) -> DeviceInfo | None:
+        return DeviceInfo(
+            identifiers={(DOMAIN, f"circuit{self.circuit.index}")},
+            name=self.circuit_name,
+            manufacturer=self.system.brand_name,
+        )
 
 
 class CircuitIsCoolingAllowed(CircuitEntity):
