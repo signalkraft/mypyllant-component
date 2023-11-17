@@ -6,6 +6,11 @@
 
 Home Assistant component that interfaces with the myVAILLANT API (and branded versions of it, such as the MiGo Link app from Saunier Duval & Bulex).
 
+> [!WARNING]  
+> If you're using sensoAPP or the multiMATIC app, this integration won't work for you. Try the [Multimatic integration](https://github.com/thomasgermain/vaillant-component) instead and check [Vaillant's website](https://www.vaillant.de/heizung/produkte/mobile-apps/myvaillant-app/) for more information.
+> 
+> This integration is not affiliated with Vaillant, the developers take no responsibility for anything that happens to your devices because of this library.
+
 ![myPyllant](https://raw.githubusercontent.com/signalkraft/myPyllant/main/logo.png)
 
 * [Documentation](https://signalkraft.com/mypyllant-component/)
@@ -19,9 +24,6 @@ Home Assistant component that interfaces with the myVAILLANT API (and branded ve
 * Vaillant ECOTEC PLUS boiler + VRT380f + sensoNET
 * Saunier Duval DUOMAX F30 90 + MISET Radio + MiLink V3
 * [More are documented here](https://signalkraft.com/mypyllant-component/#tested-setups)
-
-Not affiliated with Vaillant, the developers take no responsibility for anything that happens to your devices 
-because of this library.
 
 ## Features
 
