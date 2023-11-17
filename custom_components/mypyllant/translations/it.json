@@ -1,0 +1,36 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "password": "Password",
+          "username": "Username",
+          "country": "Stato",
+          "brand": "Marca"
+        },
+        "title": "Informazioni Login",
+        "description": "Uguali all'app myVAILLANT"
+      }
+    },
+    "error": {
+      "login_endpoint_invalid": "Non è stato trovato un metodo di login per questa combinazione di marca e stato",
+      "realm_invalid": "Questa marca richiede uno stato per essere selezionabile",
+      "authentication_failed": "Autenticazione fallita, controlla username e password e assicurati di selezionare lo stato e la marca corretta",
+      "unknown": "Errore inaspettato"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "update_interval": "Secondi tra le scansioni (valori più bassi riducono il rischio di 'quota exceeded' e ban temporanei)",
+          "refresh_delay": "Ritardo prima dell'aggiornamento dei dati",
+          "quick_veto_duration": "Durata di default in ore per l'acqua calda rapida",
+          "time_program_overwrite": "Controlla la temperatura sovrascrivendo la programmazione oraria invece di attivare acqua calda rapida",
+          "country": "Stato",
+          "brand": "Marca"
+        }
+      }
+    }
+  }
+}
