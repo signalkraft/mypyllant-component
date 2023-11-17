@@ -36,6 +36,39 @@ Without this keyword, information about your system will be exported as JSON.
 
 ## Usage
 
+### Exporting Data about your System
+
+```bash
+python3 -m myPyllant.export user password brand --country country
+# See python3 -m myPyllant.export -h for more options and a list of countries
+```
+
+The `--data` argument exports historical data of the devices in your system.
+Without this keyword, information about your system will be exported as JSON.
+
+::: myPyllant.export.main
+    options:
+      show_source: true
+      heading_level: 0
+
+### Exporting Energy Reports
+
+```bash
+python3 -m myPyllant.report user password brand --country country
+# Wrote 2023 report to energy_data_2023_ArothermPlus_XYZ.csv
+# Wrote 2023 report to energy_data_2023_HydraulicStation_XYZ.csv
+```
+
+Writes a report for each heat generator, by default for the current year. You can provide `--year` to select
+a different year.
+
+::: myPyllant.report.main
+    options:
+      show_source: true
+      heading_level: 0
+
+### Using the API in Python
+
 ```python
 #!/usr/bin/env python3
 
@@ -98,22 +131,11 @@ if __name__ == "__main__":
 
 ```
 
+Want to contribute more features? Checkout out the [contribution section](3-contributing.md#contributing-to-the-underlying-mypyllant-library).
 
-## Contributing & Tests
+## API Documentation
 
-!!! warning
-
-    You need at least Python 3.10
-
-I'm happy to accept PRs, if you run the pre-commit checks and test your changes:
-
-```shell
-git clone https://github.com/signalkraft/myPyllant.git
-cd myPyllant
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r dev-requirements.txt
-pip install -e .
-pre-commit install
-pytest
-```
+::: myPyllant.api.MyPyllantAPI
+    options:
+      show_source: true
+      heading_level: 3

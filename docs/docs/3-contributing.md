@@ -5,13 +5,13 @@ hide:
 
 # Contributing
 
-## Contributing to the Home Assistant Component
+## Cloning & Installing
 
 !!! warning
 
     You need at least Python 3.10.
 
-Fork and clone this repo, then from the root directory run:
+Fork and clone the [mypyllant-component repository](https://github.com/signalkraft/mypyllant-component), then from within the directory run:
 
 ```shell
 python3 -m venv .venv
@@ -19,15 +19,14 @@ source .venv/bin/activate
 pip install -r dev-requirements.txt
 pre-commit install
 # Make your changes
-pytest
-git commit ...
+git commit -m ...  # Code formatting, analysis, and tests are run automatically before the commit
 ```
 
 If you also need to modify the underlying [myPyllant library](https://github.com/signalkraft/mypyllant),
 clone & install it in editable mode in `mypyllant-component`:
 
 ```shell
-# From the root of this repository
+# From within the mypyllant-component directory
 git clone https://github.com/signalkraft/myPyllant.git ../myPyllant
 pip install -e ../myPyllant
 ```
@@ -49,14 +48,17 @@ logger:
 
 ### Testing in Docker
 
-![Default Dashboard Screenshot](assets/default-dashboard.png)
+To test your changes, you can spin up a quick Docker environment:
 
-To get a quick test environment in Docker, copy `.env.sample` to `.env`, 
-add your credentials in the new file, and run `docker compose up`.
+1. Follow the [cloning & installation](#cloning-installing) steps above
+2. Copy `.env.sample` to `.env` and add your credentials in the new file
+3. Run `docker compose up`
 
-After HA started, open http://localhost:8123 in your browser and sign in with user `test` and password `test`.
+After HA started, open [http://localhost:8123](http://localhost:8123) in your browser and sign in with user `test` and password `test`.
 
 The integration should be configured and show entities on the default dashboard.
+
+![Default Dashboard Screenshot](assets/default-dashboard.png)
 
 ## Contributing to the underlying myPyllant library
 
@@ -64,17 +66,16 @@ The integration should be configured and show entities on the default dashboard.
 
     You need at least Python 3.10
 
-I'm happy to accept PRs, if you run the pre-commit checks and test your changes:
+Fork and clone the [myPyllant repository](https://github.com/signalkraft/myPyllant), then from within the directory run:
 
 ```shell
-git clone https://github.com/signalkraft/myPyllant.git
-cd myPyllant
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r dev-requirements.txt
 pip install -e .
 pre-commit install
-pytest
+# Make your changes
+git commit -m ...  # Code formatting, analysis, and tests are run automatically before the commit
 ```
 
 ### Supporting new Countries
@@ -87,6 +88,11 @@ python3 -m myPyllant.tests.find_countries
 ```
 
 Copy the resulting dictionary into [https://github.com/signalkraft/myPyllant/blob/main/src/myPyllant/const.py](src/myPyllant/const.py)
+
+::: myPyllant.tests.find_countries.main
+    options:
+      show_source: true
+      heading_level: 0
 
 ### Contributing Test Data
 
@@ -106,6 +112,11 @@ docker run -v $(pwd)/test_data:/build/src/myPyllant/tests/json -ti ghcr.io/signa
 With docker, the results will be put into `test_data/`.
 
 You can then either create a PR with the created folder, or zip it and [attach it to an issue](https://github.com/signalkraft/myPyllant/issues/new).
+
+::: myPyllant.tests.generate_test_data.main
+    options:
+      show_source: true
+      heading_level: 0
 
 ### Adding new API endpoints
 
