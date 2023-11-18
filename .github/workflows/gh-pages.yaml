@@ -14,5 +14,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: docker build -t mypyllant-docs docs
-      - run: docker run -v ~/.ssh:/root/.ssh -v ${PWD}:/build mypyllant-docs gh-deploy --config-file /build/docs/mkdocs.yml --force
+      - run: docker build -t mypyllant-docs . -f docs/Dockerfile
+      - run: docker run -v ~/.ssh:/root/.ssh mypyllant-docs gh-deploy --config-file docs/mkdocs.yml --force
