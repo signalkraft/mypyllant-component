@@ -11,8 +11,6 @@ theme:
     - content.tabs.link
     - navigation.tabs
     - navigation.tabs.sticky
-plugins:
-  - mkdocstrings
 repo_url: https://github.com/signalkraft/mypyllant-component/
 markdown_extensions:
   - admonition
