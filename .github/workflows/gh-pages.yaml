@@ -15,4 +15,4 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: docker build -t mypyllant-docs docs
-      - run: docker run --rm -it -v ~/.ssh:/root/.ssh -v ${PWD}/docs:/docs mypyllant-docs gh-deploy --config-file /docs/mkdocs.yml --force
+      - run: docker run -v ~/.ssh:/root/.ssh -v ${PWD}/docs:/docs mypyllant-docs gh-deploy --config-file /docs/mkdocs.yml --force
