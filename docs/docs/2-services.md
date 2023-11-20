@@ -1,4 +1,5 @@
 ---
+description: Home Assistant services to control your myVAILLANT devices
 hide:
   - navigation
   - toc

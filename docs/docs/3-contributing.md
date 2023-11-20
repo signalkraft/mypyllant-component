@@ -1,4 +1,5 @@
 ---
+description: Contribution guide with setup & test instructions
 hide:
   - navigation
 ---

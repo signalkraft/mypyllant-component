@@ -1,5 +1,6 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 site_name: myPyllant Library & Home Assistant Component
+site_url: https://signalkraft.com/mypyllant-component/
 theme:
   name: material
   icon:

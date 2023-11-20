@@ -1,4 +1,5 @@
 ---
+description: Useful Home Assistant automations with mypyllant-component
 hide:
   - navigation
   - toc

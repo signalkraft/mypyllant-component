@@ -1,4 +1,5 @@
 ---
+description: Python & CLI library
 hide:
   - navigation
 ---

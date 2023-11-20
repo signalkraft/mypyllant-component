@@ -1,4 +1,5 @@
 ---
+description: Available entities and extra attributes in mypyllant-component
 hide:
   - navigation
 ---
