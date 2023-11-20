@@ -45,36 +45,7 @@ and "Hydraulic Station") or the naming of your heating zones (in this case "Zone
 
 ## Extra State Attributes
 
-Some entities come with extra state attributes for debugging and advanced usage.
-
-### Home Sensor
-
-```yaml
-continuous_heating_start_setpoint: -26
-alternative_point: -21
-heating_circuit_bivalence_point: 0
-dhw_bivalence_point: -7
-automatic_cooling_on_off: false
-adaptive_heating_curve: true
-dhw_maximum_loading_time: 60
-dhw_hysteresis: 3
-dhw_flow_setpoint_offset: 25
-continuous_heating_room_setpoint: 20
-hybrid_control_strategy: BIVALENCE_POINT
-max_flow_setpoint_hp_error: 25
-dhw_maximum_temperature: 80
-maximum_preheating_time: 0
-paralell_tank_loading_allowed: false
-outdoor_temperature: 8.019531
-system_water_pressure: 1.6
-outdoor_temperature_average24h: 9.707031
-controller_type: VRC720
-system_scheme: 8
-backup_heater_type: CONDENSING
-backup_heater_allowed_for: DHW_AND_HEATING
-module_configuration_v_r71: 3
-energy_provide_power_cut_behavior: DISABLE_HEATPUMP_AND_BACKUP_HEATER
-```
+Some entities come with extra state attributes for debugging and advanced usage. Your attributes may be different, depending on your devices.
 
 ### Home Sensor
 
@@ -121,7 +92,7 @@ diagnostic_trouble_codes:
 - serial_number: 
   article_number: '0020260914'
   codes: []
-  ```
+```
 
 ### Climate Entity
 
