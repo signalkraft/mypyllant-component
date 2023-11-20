@@ -10,6 +10,7 @@ DEFAULT_REFRESH_DELAY = 5  # in seconds
 DEFAULT_COUNTRY = "germany"
 DEFAULT_TIME_PROGRAM_OVERWRITE = False
 QUOTA_PAUSE_INTERVAL = 3 * 3600  # in seconds
+API_DOWN_PAUSE_INTERVAL = 15 * 60  # in seconds
 
 SERVICE_SET_QUICK_VETO = "set_quick_veto"
 SERVICE_SET_MANUAL_MODE_SETPOINT = "set_manual_mode_setpoint"

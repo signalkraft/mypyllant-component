@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from asyncio.exceptions import CancelledError
 from datetime import datetime, timedelta
 
 from aiohttp.client_exceptions import ClientResponseError
@@ -14,6 +15,7 @@ from myPyllant.const import DEFAULT_BRAND
 from myPyllant.models import DeviceData, DeviceDataBucketResolution, System
 
 from .const import (
+    API_DOWN_PAUSE_INTERVAL,
     DEFAULT_COUNTRY,
     DEFAULT_REFRESH_DELAY,
     DEFAULT_UPDATE_INTERVAL,
@@ -24,6 +26,7 @@ from .const import (
     OPTION_UPDATE_INTERVAL,
     QUOTA_PAUSE_INTERVAL,
 )
+from .utils import is_quota_exceeded_exception
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -120,34 +123,9 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
             update_interval=update_interval,
         )
 
-    def _set_quota(self, e: ClientResponseError) -> None:
-        """
-        Check if the API returns an error with "Quota Exceeded" in the message
-        """
-        if e.status == 403 and "quota exceeded" in e.message.lower():
-            self.hass.data[DOMAIN][self.entry.entry_id]["quota_time"] = datetime.now()
-            self.hass.data[DOMAIN][self.entry.entry_id]["quota_exc_info"] = e
-            self._raise_if_quota_hit()
-
-    def _raise_if_quota_hit(self) -> None:
-        """
-        Check if we previously hit a quota, and if the quota was hit within a certain interval
-        If yes, we keep raising UpdateFailed() until after the interval to avoid spamming the API
-        """
-        quota_time = self.hass.data[DOMAIN][self.entry.entry_id]["quota_time"]
-        if not quota_time:
-            return
-
-        time_elapsed = (datetime.now() - quota_time).seconds
-        _LOGGER.debug("Quota was hit %ss ago on %s", time_elapsed, quota_time)
-        if time_elapsed < QUOTA_PAUSE_INTERVAL:
-            exc_info: ClientResponseError = self.hass.data[DOMAIN][self.entry.entry_id][
-                "quota_exc_info"
-            ]
-            raise UpdateFailed(
-                f"{exc_info.message} on {exc_info.request_info.real_url}, "
-                f"skipping update of myVAILLANT data for another {QUOTA_PAUSE_INTERVAL - time_elapsed}s",
-            ) from exc_info
+    @property
+    def hass_data(self):
+        return self.hass.data[DOMAIN][self.entry.entry_id]
 
     async def _refresh_session(self):
         if self.api.oauth_session_expires < datetime.now() + timedelta(seconds=180):
@@ -173,11 +151,70 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
             await asyncio.sleep(delay)
         await self.async_request_refresh()
 
+    def _raise_api_down(self, exc_info: CancelledError | TimeoutError) -> None:
+        """
+        Raises UpdateFailed if a TimeoutError or CancelledError occurred during updating
+
+        Sets a quota time, so the API isn't queried as often while it is down
+        """
+        self.hass_data["quota_time"] = datetime.now()
+        self.hass_data["quota_exc_info"] = exc_info
+        raise UpdateFailed(
+            f"myVAILLANT API is down, skipping update of myVAILLANT data for another {QUOTA_PAUSE_INTERVAL}s"
+        ) from exc_info
+
+    def _set_quota_and_raise(self, exc_info: ClientResponseError) -> None:
+        """
+        Check if the API raises a ClientResponseError with "Quota Exceeded" in the message
+        Raises UpdateFailed if a quota error is detected
+        """
+        if is_quota_exceeded_exception(exc_info):
+            self.hass_data["quota_time"] = datetime.now()
+            self.hass_data["quota_exc_info"] = exc_info
+            self._raise_if_quota_hit()
+
+    def _raise_if_quota_hit(self) -> None:
+        """
+        Check if we previously hit a quota, and if the quota was hit within a certain interval
+        If yes, we keep raising UpdateFailed() until after the interval to avoid spamming the API
+        """
+        quota_time: datetime = self.hass_data["quota_time"]
+        if not quota_time:
+            return
+
+        time_elapsed = (datetime.now() - quota_time).seconds
+        exc_info: Exception = self.hass_data["quota_exc_info"]
+
+        if is_quota_exceeded_exception(exc_info):
+            _LOGGER.debug(
+                "Quota was hit %ss ago on %s",
+                time_elapsed,
+                quota_time,
+                exc_info=exc_info,
+            )
+            if time_elapsed < QUOTA_PAUSE_INTERVAL:
+                raise UpdateFailed(
+                    f"{exc_info.message} on {exc_info.request_info.real_url}, "  # type: ignore
+                    f"skipping update of myVAILLANT data for another {QUOTA_PAUSE_INTERVAL - time_elapsed}s"
+                ) from exc_info
+        else:
+            _LOGGER.debug(
+                "myVAILLANT API is down since %ss (%s)",
+                time_elapsed,
+                quota_time,
+                exc_info=exc_info,
+            )
+            if time_elapsed < API_DOWN_PAUSE_INTERVAL:
+                raise UpdateFailed(
+                    f"myVAILLANT API is down, skipping update of myVAILLANT data for another"
+                    f" {API_DOWN_PAUSE_INTERVAL - time_elapsed}s"
+                ) from exc_info
+
 
 class SystemCoordinator(MyPyllantCoordinator):
     data: list[System]
 
-    async def _async_update_data(self) -> list[System]:
+    async def _async_update_data(self) -> list[System] | None:
         self._raise_if_quota_hit()
         _LOGGER.debug("Starting async update data for SystemCoordinator")
         try:
@@ -190,8 +227,11 @@ class SystemCoordinator(MyPyllantCoordinator):
             ]
             return data
         except ClientResponseError as e:
-            self._set_quota(e)
-            return []
+            self._set_quota_and_raise(e)
+            raise UpdateFailed() from e
+        except (CancelledError, TimeoutError) as e:
+            self._raise_api_down(e)
+            return None  # mypy
 
 
 class DailyDataCoordinator(MyPyllantCoordinator):
@@ -217,5 +257,8 @@ class DailyDataCoordinator(MyPyllantCoordinator):
                     data[system.id] += [da async for da in device_data]
             return data
         except ClientResponseError as e:
-            self._set_quota(e)
-            return None
+            self._set_quota_and_raise(e)
+            raise UpdateFailed() from e
+        except (CancelledError, TimeoutError) as e:
+            self._raise_api_down(e)
+            return None  # mypy
