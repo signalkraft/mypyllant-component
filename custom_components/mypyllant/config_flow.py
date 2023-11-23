@@ -82,10 +82,9 @@ DATA_SCHEMA = vol.Schema(
 
 
 async def validate_input(hass: HomeAssistant, data: dict) -> str:
-    api = MyPyllantAPI(**data)
-    await api.login()
-
-    return data["username"].lower()
+    async with MyPyllantAPI(**data) as api:
+        await api.login()
+        return data["username"].lower()
 
 
 class OptionsFlowHandler(config_entries.OptionsFlow):

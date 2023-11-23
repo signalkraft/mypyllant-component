@@ -62,13 +62,13 @@ repos:
           - aioresponses
           - pytest
           - types-requests
-          - myPyllant==0.6.0
+          - myPyllant==0.6.1
           - polyfactory
   - repo: local
     hooks:
     - id: pytest
       name: pytest
-      entry: run_pytest.sh
+      entry: run_pytest.sh --no-cov
       language: script
       pass_filenames: false
-      always_run: true
+      files: ^(tests|custom_components)/.+\.(py|json|yaml)$

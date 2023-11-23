@@ -1,6 +1,9 @@
+from asyncio import CancelledError
 from datetime import datetime, timedelta
 
 import pytest as pytest
+from aiohttp import RequestInfo
+from aiohttp.client_exceptions import ClientResponseError
 from freezegun import freeze_time
 from homeassistant.helpers.update_coordinator import UpdateFailed
 from myPyllant.api import MyPyllantAPI
@@ -13,8 +16,18 @@ async def test_quota(
     mypyllant_aioresponses, mocked_api: MyPyllantAPI, system_coordinator_mock
 ):
     # Trigger quota error in the past and check that it raises an exception
+    quota_exception = ClientResponseError(
+        request_info=RequestInfo(
+            url="https://api.vaillant-group.com/service-connected-control/end-user-app-api/v1/homes",  # type: ignore
+            method="GET",
+            headers=None,  # type: ignore
+        ),
+        history=None,  # type: ignore
+        status=403,
+        message="Quota Exceeded",
+    )
     with freeze_time(datetime.now() - timedelta(seconds=QUOTA_PAUSE_INTERVAL + 180)):
-        with mypyllant_aioresponses(test_quota=True) as _:
+        with mypyllant_aioresponses(raise_exception=quota_exception) as _:
             with pytest.raises(UpdateFailed, match=r"Quota.*") as _:
                 system_coordinator_mock.data = (
                     await system_coordinator_mock._async_update_data()
@@ -40,7 +53,7 @@ async def test_api_down(
     mypyllant_aioresponses, mocked_api: MyPyllantAPI, system_coordinator_mock
 ):
     # Trigger API down error and check that it raises an exception
-    with mypyllant_aioresponses(test_api_down=True) as _:
+    with mypyllant_aioresponses(raise_exception=CancelledError()) as _:
         with pytest.raises(UpdateFailed, match=r"myVAILLANT API is down.*") as _:
             system_coordinator_mock.data = (
                 await system_coordinator_mock._async_update_data()

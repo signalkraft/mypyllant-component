@@ -29,7 +29,7 @@ data = {
 async def test_flow_init(hass):
     """Test the initial flow."""
     result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": "user"}
+        DOMAIN, context={"source": SOURCE_USER}
     )
 
     expected = {

@@ -214,7 +214,7 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
 class SystemCoordinator(MyPyllantCoordinator):
     data: list[System]
 
-    async def _async_update_data(self) -> list[System] | None:
+    async def _async_update_data(self) -> list[System]:
         self._raise_if_quota_hit()
         _LOGGER.debug("Starting async update data for SystemCoordinator")
         try:
@@ -231,13 +231,13 @@ class SystemCoordinator(MyPyllantCoordinator):
             raise UpdateFailed() from e
         except (CancelledError, TimeoutError) as e:
             self._raise_api_down(e)
-            return None  # mypy
+            return []  # mypy
 
 
 class DailyDataCoordinator(MyPyllantCoordinator):
     data: dict[str, list[DeviceData]]
 
-    async def _async_update_data(self) -> dict[str, list[DeviceData]] | None:
+    async def _async_update_data(self) -> dict[str, list[DeviceData]]:
         self._raise_if_quota_hit()
         _LOGGER.debug("Starting async update data for DailyDataCoordinator")
         try:
@@ -261,4 +261,4 @@ class DailyDataCoordinator(MyPyllantCoordinator):
             raise UpdateFailed() from e
         except (CancelledError, TimeoutError) as e:
             self._raise_api_down(e)
-            return None  # mypy
+            return {}  # mypy
