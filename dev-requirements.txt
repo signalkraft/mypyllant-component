@@ -11,7 +11,7 @@ polyfactory~=2.9.0
 pytest-asyncio~=0.21.0
 
 # Need specific versions
-pytest==7.3.1
+pytest==7.4.3
 pytest-cov==4.1.0
-pytest-homeassistant-custom-component==0.13.56
-myPyllant==0.6.1
+pytest-homeassistant-custom-component==0.13.77
+myPyllant==0.6.3

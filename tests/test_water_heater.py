@@ -17,6 +17,7 @@ async def test_water_heater(
         )
 
         if not system_coordinator_mock.data[0].domestic_hot_water:
+            await mocked_api.aiohttp_session.close()
             pytest.skip(
                 f"No DHW in system {system_coordinator_mock.data[0]}, skipping water heater tests"
             )

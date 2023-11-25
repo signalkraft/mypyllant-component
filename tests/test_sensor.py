@@ -140,6 +140,7 @@ async def test_domestic_hot_water_sensor(
             await system_coordinator_mock._async_update_data()
         )
         if not system_coordinator_mock.data[0].domestic_hot_water:
+            await mocked_api.aiohttp_session.close()
             pytest.skip(
                 f"No DHW in system {system_coordinator_mock.data[0]}, skipping DHW sensors"
             )
@@ -182,6 +183,7 @@ async def test_data_sensor(
         )
         system_id = list(daily_data_coordinator_mock.data.keys())[0]
         if not daily_data_coordinator_mock.data[system_id]:
+            await mocked_api.aiohttp_session.close()
             pytest.skip(f"No devices in system {system_id}, skipping data sensor tests")
         data_sensor = DataSensor(system_id, 0, daily_data_coordinator_mock)
         assert isinstance(
