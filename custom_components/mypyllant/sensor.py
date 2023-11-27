@@ -198,7 +198,7 @@ class SystemOutdoorTemperatureSensor(SystemSensor):
 
     @property
     def native_value(self):
-        if self.system.outdoor_temperature:
+        if self.system.outdoor_temperature is not None:
             return round(self.system.outdoor_temperature, 1)
         else:
             return None
@@ -216,7 +216,7 @@ class SystemWaterPressureSensor(SystemSensor):
 
     @property
     def native_value(self):
-        if self.system.water_pressure:
+        if self.system.water_pressure is not None:
             return round(self.system.water_pressure, 1)
         else:
             return None
@@ -516,7 +516,7 @@ class CircuitHeatingCurveSensor(CircuitSensor):
 
     @property
     def native_value(self):
-        if self.circuit.heating_curve:
+        if self.circuit.heating_curve is not None:
             return round(self.circuit.heating_curve, 2)
         else:
             return None
@@ -772,7 +772,7 @@ class EfficiencySensor(CoordinatorEntity, SensorEntity):
 
     @property
     def native_value(self) -> float | None:
-        if self.energy_consumed:
+        if self.energy_consumed is not None:
             return round(self.heat_energy_generated / self.energy_consumed, 1)
         else:
             return None

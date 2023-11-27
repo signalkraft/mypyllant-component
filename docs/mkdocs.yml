@@ -3,6 +3,7 @@ site_name: myPyllant Library & Home Assistant Component
 site_url: https://signalkraft.com/mypyllant-component/
 theme:
   name: material
+  language: en
   icon:
     logo: material/rabbit-variant-outline
   palette:
@@ -12,9 +13,13 @@ theme:
     - content.tabs.link
     - navigation.tabs
     - navigation.tabs.sticky
+    - search.suggest
+    - search.highlight
+    - search.share
 plugins:
   - mkdocstrings
   - social
+  - search
 repo_url: https://github.com/signalkraft/mypyllant-component/
 markdown_extensions:
   - admonition
