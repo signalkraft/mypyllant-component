@@ -2,7 +2,7 @@ version: '3'
 services:
   homeassistant:
     ports:
-      - 8123:8123
+      - "8123:8123"
     container_name: homeassistant
     image: "ghcr.io/home-assistant/home-assistant:stable"
     env_file:

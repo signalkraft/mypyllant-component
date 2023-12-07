@@ -14,4 +14,4 @@ pytest-asyncio~=0.21.0
 pytest==7.4.3
 pytest-cov==4.1.0
 pytest-homeassistant-custom-component==0.13.77
-myPyllant==0.6.3
+myPyllant==0.6.4

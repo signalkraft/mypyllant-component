@@ -114,8 +114,8 @@ class ControlOnline(SystemControlEntity):
         self.entity_id = f"{DOMAIN}.control_online_{system_index}"
 
     @property
-    def is_on(self) -> bool | None:
-        return self.system.connected
+    def is_on(self) -> bool:
+        return self.system.connected is True
 
     @property
     def name(self) -> str:
