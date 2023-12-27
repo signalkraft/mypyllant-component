@@ -1,0 +1,10 @@
+default_config:
+
+logger:
+  default: warning
+  logs:
+    custom_components.mypyllant: debug
+    myPyllant: debug
+
+debugpy:
+  start: true
