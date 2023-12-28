@@ -66,6 +66,7 @@ class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):
     def device_info(self) -> DeviceInfo | None:
         return {"identifiers": {(DOMAIN, f"home_{self.system.id}")}}
 
+
 class ControlError(SystemControlEntity):
     def __init__(
         self,
@@ -147,6 +148,7 @@ class FirmwareUpdateRequired(SystemControlEntity):
     def device_class(self) -> BinarySensorDeviceClass | None:
         return BinarySensorDeviceClass.UPDATE
 
+
 class FirmwareUpdateEnabled(SystemControlEntity):
     def __init__(
         self,
@@ -166,6 +168,7 @@ class FirmwareUpdateEnabled(SystemControlEntity):
     @property
     def unique_id(self) -> str:
         return f"{get_unique_id_prefix(self.system.id)}firmware_update_enabled"
+
 
 class CircuitEntity(CoordinatorEntity, BinarySensorEntity):
     def __init__(

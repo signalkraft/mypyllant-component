@@ -96,7 +96,10 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
     def device_info(self) -> DeviceInfo:
         return DeviceInfo(
             identifiers={
-                (DOMAIN, f"domestic_hot_water_{self.system.id}_{self.domestic_hot_water.index}")
+                (
+                    DOMAIN,
+                    f"domestic_hot_water_{self.system.id}_{self.domestic_hot_water.index}",
+                )
             },
             name=self.name,
             manufacturer=self.system.brand_name,
