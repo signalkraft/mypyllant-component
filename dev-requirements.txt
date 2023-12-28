@@ -5,10 +5,9 @@ watchdog~=2.0.3
 mock-open~=1.4.0
 mypy~=0.991
 pre-commit~=2.21.0
-pylint~=2.15.0
-pylint-strict-informational~=0.1
 polyfactory~=2.9.0
 pytest-asyncio~=0.21.0
+ruff~=0.1.9
 
 # Need specific versions
 pytest==7.4.3
