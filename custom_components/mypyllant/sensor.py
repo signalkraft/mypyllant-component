@@ -758,7 +758,7 @@ class DataSensor(CoordinatorEntity, SensorEntity):
             identifiers={
                 (DOMAIN, f"device_{self.system_id}_{self.device.device_uuid}")
             },
-            name=f"{get_name_prefix(self.home_name)}{self.device.name_display}",
+            name=f"{get_name_prefix(self.home_name)}{self.de_index} {self.device.name_display}",
             manufacturer=self.device.brand_name,
             model=self.device.product_name_display,
         )
