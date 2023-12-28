@@ -235,7 +235,7 @@ class SystemCoordinator(MyPyllantCoordinator):
 
 
 class DailyDataCoordinator(MyPyllantCoordinator):
-    data: dict[str, list[DeviceData]]
+    data: dict[str, (str,list[DeviceData])]
 
     async def _async_update_data(self) -> dict[str, list[DeviceData]]:
         self._raise_if_quota_hit()
@@ -254,7 +254,7 @@ class DailyDataCoordinator(MyPyllantCoordinator):
                     device_data = self.api.get_data_by_device(
                         device, DeviceDataBucketResolution.DAY, start, end
                     )
-                    data[system.id] += [da async for da in device_data]
+                    data[system.id] += (system.home.name, [da async for da in device_data])
             return data
         except ClientResponseError as e:
             self._set_quota_and_raise(e)

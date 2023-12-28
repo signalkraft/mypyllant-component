@@ -2,6 +2,7 @@ from asyncio.exceptions import CancelledError
 
 from aiohttp.client_exceptions import ClientResponseError
 from myPyllant.models import System
+from custom_components.mypyllant.const import DOMAIN
 
 
 def get_system_sensor_unique_id(system: System) -> str:
@@ -12,10 +13,15 @@ def get_system_sensor_unique_id(system: System) -> str:
     Otherwise, we fall back to the system id
     """
     if system.primary_heat_generator:
-        return system.primary_heat_generator.device_uuid
+        return f"{system.id}_{system.primary_heat_generator.device_uuid}"
     else:
         return system.id
 
+def get_unique_id_prefix(system_id: str) -> str:
+    return f"{DOMAIN}_{system_id}_"
+
+def get_name_prefix(home: str) -> str:
+    return f"{home} - "
 
 def is_quota_exceeded_exception(exc_info: Exception) -> bool:
     """

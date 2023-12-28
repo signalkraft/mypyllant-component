@@ -45,6 +45,8 @@ from myPyllant.models import (
     ZoneTimeProgram,
 )
 
+from custom_components.mypyllant.utils import get_name_prefix, get_unique_id_prefix
+
 from . import SystemCoordinator
 from .const import (
     DEFAULT_TIME_PROGRAM_OVERWRITE,
@@ -257,7 +259,6 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         super().__init__(coordinator)
         self.system_index = system_index
         self.zone_index = zone_index
-        self.entity_id = f"{DOMAIN}.zone_{zone_index}"
         self.default_quick_veto_duration = default_quick_veto_duration
         self.time_program_overwrite = time_program_overwrite
 
@@ -270,20 +271,27 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         return self.system.zones[self.zone_index]
 
     @property
+    def circuitNameSuffix(self) -> str:
+        if self.zone.associated_circuit_index is None:
+            return ''
+        else:
+            return f" of Circuit {self.zone.associated_circuit_index}"
+
+    @property
     def device_info(self) -> DeviceInfo:
         return DeviceInfo(
-            identifiers={(DOMAIN, f"zone{self.zone.index}")},
-            name=self.name,
+            identifiers={(DOMAIN, f"zone_{self.system.id}_{self.zone.index}")},
+            name=f"{get_name_prefix(self.system.home.name)}Zone {self.zone.name}{self.circuitNameSuffix}",
             manufacturer=self.system.brand_name,
         )
 
     @property
     def unique_id(self) -> str:
-        return f"{DOMAIN}_climate_zone_{self.zone_index}"
+        return f"{get_unique_id_prefix(self.system.id)}climate_zone_{self.zone_index}"
 
     @property
     def name(self) -> str:
-        return self.zone.name
+        return f"{get_name_prefix(self.system.home.name)}Climate Zone {self.zone.name}"
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
@@ -493,7 +501,6 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
         super().__init__(coordinator)
         self.system_index = system_index
         self.ventilation_index = ventilation_index
-        self.entity_id = f"{DOMAIN}.ventilation_{ventilation_index}"
 
     @property
     def system(self) -> System:
@@ -506,20 +513,21 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
     @property
     def device_info(self) -> DeviceInfo:
         return DeviceInfo(
-            identifiers={(DOMAIN, f"ventilation{self.ventilation.index}")},
+            identifiers={(DOMAIN, f"ventilation_{self.system.id}_{self.ventilation.index}")},
             name=self.name,
             manufacturer=self.system.brand_name,
         )
 
     @property
     def unique_id(self) -> str:
-        return f"{DOMAIN}_climate_ventilation_{self.ventilation_index}"
+        return f"{get_unique_id_prefix(self.system.id)}climate_ventilation_{self.ventilation_index}"
 
     @property
     def name(self) -> str:
-        return [d for d in self.system.devices if d.type == "ventilation"][
+        vname = [d for d in self.system.devices if d.type == 'ventilation'][
             0
         ].name_display
+        return f"{get_name_prefix(self.system.home.name)}Ventilation {vname}"
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:

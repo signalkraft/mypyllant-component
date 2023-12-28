@@ -22,6 +22,8 @@ from myPyllant.models import (
     System,
 )
 
+from custom_components.mypyllant.utils import get_name_prefix, get_unique_id_prefix
+
 from . import SystemCoordinator
 from .const import (
     DOMAIN,
@@ -81,7 +83,6 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
         super().__init__(coordinator)
         self.system_index = system_index
         self.dhw_index = dhw_index
-        self.entity_id = f"{DOMAIN}.domestic_hot_water_{dhw_index}"
 
     @property
     def system(self) -> System:
@@ -95,7 +96,7 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
     def device_info(self) -> DeviceInfo:
         return DeviceInfo(
             identifiers={
-                (DOMAIN, f"domestic_hot_water{self.domestic_hot_water.index}")
+                (DOMAIN, f"domestic_hot_water_{self.system.id}_{self.domestic_hot_water.index}")
             },
             name=self.name,
             manufacturer=self.system.brand_name,
@@ -111,11 +112,11 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
 
     @property
     def unique_id(self) -> str:
-        return f"{DOMAIN}_domestic_hot_water_{self.dhw_index}"
+        return f"{get_unique_id_prefix(self.system.id)}_domestic_hot_water_{self.dhw_index}"
 
     @property
     def name(self) -> str:
-        return f"Domestic Hot Water {self.dhw_index}"
+        return f"{get_name_prefix(self.system.home.name)}Domestic Hot Water {self.dhw_index}"
 
     @property
     def supported_features(self) -> WaterHeaterEntityFeature:
