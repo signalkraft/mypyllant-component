@@ -271,9 +271,9 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         return self.system.zones[self.zone_index]
 
     @property
-    def circuitNameSuffix(self) -> str:
+    def circuit_name_suffix(self) -> str:
         if self.zone.associated_circuit_index is None:
-            return ''
+            return ""
         else:
             return f" of Circuit {self.zone.associated_circuit_index}"
 
@@ -281,7 +281,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     def device_info(self) -> DeviceInfo:
         return DeviceInfo(
             identifiers={(DOMAIN, f"zone_{self.system.id}_{self.zone.index}")},
-            name=f"{get_name_prefix(self.system.home.name)}Zone {self.zone.name}{self.circuitNameSuffix}",
+            name=f"{get_name_prefix(self.system.home.name)}Zone {self.zone.name}{self.circuit_name_suffix}",
             manufacturer=self.system.brand_name,
         )
 
@@ -513,7 +513,9 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
     @property
     def device_info(self) -> DeviceInfo:
         return DeviceInfo(
-            identifiers={(DOMAIN, f"ventilation_{self.system.id}_{self.ventilation.index}")},
+            identifiers={
+                (DOMAIN, f"ventilation_{self.system.id}_{self.ventilation.index}")
+            },
             name=self.name,
             manufacturer=self.system.brand_name,
         )
@@ -524,7 +526,7 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def name(self) -> str:
-        vname = [d for d in self.system.devices if d.type == 'ventilation'][
+        vname = [d for d in self.system.devices if d.type == "ventilation"][
             0
         ].name_display
         return f"{get_name_prefix(self.system.home.name)}Ventilation {vname}"
