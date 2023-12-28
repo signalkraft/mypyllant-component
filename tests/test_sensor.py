@@ -181,11 +181,11 @@ async def test_data_sensor(
         daily_data_coordinator_mock.data = (
             await daily_data_coordinator_mock._async_update_data()
         )
-        system_id = list(daily_data_coordinator_mock.data.keys())[0]
-        if not daily_data_coordinator_mock.data[system_id]:
+        system_id = next(iter(daily_data_coordinator_mock.data), None)
+        if system_id is None or not daily_data_coordinator_mock.data[system_id]:
             await mocked_api.aiohttp_session.close()
             pytest.skip(f"No devices in system {system_id}, skipping data sensor tests")
-        data_sensor = DataSensor(system_id, 0, daily_data_coordinator_mock)
+        data_sensor = DataSensor(system_id, 0, 0, daily_data_coordinator_mock)
         assert isinstance(
             data_sensor.device_data,
             DeviceData,

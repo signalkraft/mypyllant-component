@@ -4,6 +4,7 @@ import asyncio
 import logging
 from asyncio.exceptions import CancelledError
 from datetime import datetime, timedelta
+from typing import TypedDict
 
 from aiohttp.client_exceptions import ClientResponseError
 from homeassistant.config_entries import ConfigEntry
@@ -50,8 +51,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             version("dacite"),
             version("aiohttp"),
         )
-    username = entry.data.get("username")
-    password = entry.data.get("password")
+    username: str = entry.data.get("username") # type: ignore
+    password: str = entry.data.get("password") # type: ignore
     update_interval = entry.options.get(OPTION_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
     country = entry.options.get(
         OPTION_COUNTRY, entry.data.get(OPTION_COUNTRY, DEFAULT_COUNTRY)
@@ -128,7 +129,7 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         return self.hass.data[DOMAIN][self.entry.entry_id]
 
     async def _refresh_session(self):
-        if self.api.oauth_session_expires < datetime.now() + timedelta(seconds=180):
+        if self.api.oauth_session_expires is None or self.api.oauth_session_expires < datetime.now() + timedelta(seconds=180):
             _LOGGER.debug("Refreshing token for %s", self.api.username)
             await self.api.refresh_token()
         else:
@@ -233,28 +234,35 @@ class SystemCoordinator(MyPyllantCoordinator):
             self._raise_api_down(e)
             return []  # mypy
 
+class SystemWithDeviceData(TypedDict):
+    home_name: str
+    devices_data: list[list[DeviceData]]
 
 class DailyDataCoordinator(MyPyllantCoordinator):
-    data: dict[str, (str,list[DeviceData])]
+    data: dict[str, SystemWithDeviceData]
 
-    async def _async_update_data(self) -> dict[str, list[DeviceData]]:
+    async def _async_update_data(self) -> dict[str, SystemWithDeviceData]:
         self._raise_if_quota_hit()
         _LOGGER.debug("Starting async update data for DailyDataCoordinator")
         try:
             await self._refresh_session()
-            data: dict[str, list[DeviceData]] = {}
+            data: dict[str, SystemWithDeviceData] = {}
             start = datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
             end = start + timedelta(days=1)
             _LOGGER.debug("Getting data from %s to %s", start, end)
             async for system in await self.hass.async_add_executor_job(
                 self.api.get_systems
             ):
-                data[system.id] = []
+                if len(system.devices) == 0: continue
+                data[system.id] = {
+                    'home_name': system.home.name,
+                    'devices_data': []
+                }
                 for device in system.devices:
                     device_data = self.api.get_data_by_device(
                         device, DeviceDataBucketResolution.DAY, start, end
                     )
-                    data[system.id] += (system.home.name, [da async for da in device_data])
+                    data[system.id]['devices_data'].append([da async for da in device_data])
             return data
         except ClientResponseError as e:
             self._set_quota_and_raise(e)

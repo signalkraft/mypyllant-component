@@ -17,7 +17,7 @@ from myPyllant.models import Circuit, System
 
 from . import SystemCoordinator
 from .const import DOMAIN
-from .utils import get_name_prefix, get_system_sensor_unique_id, get_unique_id_prefix
+from .utils import get_name_prefix, get_unique_id_prefix
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -64,12 +64,7 @@ class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):
 
     @property
     def device_info(self) -> DeviceInfo | None:
-        return {
-            "identifiers": {
-                (DOMAIN, f"device_{get_system_sensor_unique_id(self.system)}")
-            }
-        }
-
+        return {"identifiers": {(DOMAIN, f"home_{self.system.id}")}}
 
 class ControlError(SystemControlEntity):
     def __init__(
@@ -152,11 +147,6 @@ class FirmwareUpdateRequired(SystemControlEntity):
     def device_class(self) -> BinarySensorDeviceClass | None:
         return BinarySensorDeviceClass.UPDATE
 
-    @property
-    def device_info(self) -> DeviceInfo | None:
-        return {"identifiers": {(DOMAIN, f"home_{self.system.id}")}}
-
-
 class FirmwareUpdateEnabled(SystemControlEntity):
     def __init__(
         self,
@@ -176,11 +166,6 @@ class FirmwareUpdateEnabled(SystemControlEntity):
     @property
     def unique_id(self) -> str:
         return f"{get_unique_id_prefix(self.system.id)}firmware_update_enabled"
-
-    @property
-    def device_info(self) -> DeviceInfo | None:
-        return {"identifiers": {(DOMAIN, f"home_{self.system.id}")}}
-
 
 class CircuitEntity(CoordinatorEntity, BinarySensorEntity):
     def __init__(
