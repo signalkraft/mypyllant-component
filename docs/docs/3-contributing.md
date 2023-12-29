@@ -34,6 +34,10 @@ pip install -e ../myPyllant
 
 Now you can modify `myPyllant/src` and directly develop against these changes in `mypyllant-component`.
 
+### VSCode Dev Container
+
+There's also a VSCode dev container available in `.devcontainer.json`, provided by [github.com/ml1nk](https://github.com/ml1nk).
+
 ### Debugging
 
 When debugging or reporting issues, turn on debug logging by adding this to your `configuration.yaml` 
