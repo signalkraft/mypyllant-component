@@ -273,7 +273,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         if self.zone.associated_circuit_index is None:
             return ""
         else:
-            return f" of Circuit {self.zone.associated_circuit_index}"
+            return f" (Circuit {self.zone.associated_circuit_index})"
 
     @property
     def name_prefix(self) -> str:
@@ -519,23 +519,29 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
     @property
     def device_info(self) -> DeviceInfo:
         return DeviceInfo(
-            identifiers={
-                (DOMAIN, f"{self.system.id}_ventilation_{self.ventilation.index}")
-            },
-            name=self.name,
+            identifiers={(DOMAIN, self.id_infix)},
+            name=self.name_prefix,
             manufacturer=self.system.brand_name,
         )
 
     @property
     def unique_id(self) -> str:
-        return f"{DOMAIN}_{self.system.id}_ventilation_{self.ventilation_index}_climate"
+        return f"{DOMAIN}_{self.id_infix}_climate"
 
     @property
-    def name(self) -> str:
+    def id_infix(self) -> str:
+        return f"{self.system.id}_ventilation_{self.ventilation_index}"
+
+    @property
+    def name_prefix(self) -> str:
         vname = [d for d in self.system.devices if d.type == "ventilation"][
             0
         ].name_display
         return f"{self.system.home.home_name or self.system.home.nomenclature} Ventilation {vname}"
+
+    @property
+    def name(self) -> str:
+        return f"{self.name_prefix} Climate"
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:

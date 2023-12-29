@@ -226,7 +226,7 @@ class SystemOutdoorTemperatureSensor(SystemSensor):
 
     @property
     def name(self):
-        return f"{DOMAIN} {self.name_prefix} Outdoor Temperature"
+        return f"{self.name_prefix} Outdoor Temperature"
 
 
 class SystemWaterPressureSensor(SystemSensor):
@@ -329,7 +329,7 @@ class ZoneEntity(CoordinatorEntity, SensorEntity):
         if self.zone.associated_circuit_index is None:
             return ""
         else:
-            return f" of Circuit {self.zone.associated_circuit_index}"
+            return f" (Circuit {self.zone.associated_circuit_index})"
 
     @property
     def name_prefix(self) -> str:
