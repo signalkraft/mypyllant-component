@@ -45,8 +45,6 @@ from myPyllant.models import (
     ZoneTimeProgram,
 )
 
-from custom_components.mypyllant.utils import get_unique_id_prefix
-
 from . import SystemCoordinator
 from .const import (
     DEFAULT_TIME_PROGRAM_OVERWRITE,
@@ -278,20 +276,28 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             return f" of Circuit {self.zone.associated_circuit_index}"
 
     @property
+    def name_prefix(self) -> str:
+        return f"{self.system.home.home_name or self.system.home.nomenclature} Zone {self.zone.name}{self.circuit_name_suffix}"
+
+    @property
+    def id_infix(self) -> str:
+        return f"{self.system.id}_zone_{self.zone.index}"
+
+    @property
     def device_info(self) -> DeviceInfo:
         return DeviceInfo(
-            identifiers={(DOMAIN, f"zone_{self.system.id}_{self.zone.index}")},
-            name=f"{self.system.home.name} Zone {self.zone.name}{self.circuit_name_suffix}",
+            identifiers={(DOMAIN, self.id_infix)},
+            name=self.name_prefix,
             manufacturer=self.system.brand_name,
         )
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}climate_zone_{self.zone_index}"
+        return f"{DOMAIN}_{self.id_infix}_climate"
 
     @property
     def name(self) -> str:
-        return f"{self.system.home.name} Climate Zone {self.zone.name}"
+        return f"{self.name_prefix} Climate"
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
@@ -514,7 +520,7 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
     def device_info(self) -> DeviceInfo:
         return DeviceInfo(
             identifiers={
-                (DOMAIN, f"ventilation_{self.system.id}_{self.ventilation.index}")
+                (DOMAIN, f"{self.system.id}_ventilation_{self.ventilation.index}")
             },
             name=self.name,
             manufacturer=self.system.brand_name,
@@ -522,14 +528,14 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}climate_ventilation_{self.ventilation_index}"
+        return f"{DOMAIN}_{self.system.id}_ventilation_{self.ventilation_index}_climate"
 
     @property
     def name(self) -> str:
         vname = [d for d in self.system.devices if d.type == "ventilation"][
             0
         ].name_display
-        return f"{self.system.home.name} Ventilation {vname}"
+        return f"{self.system.home.home_name or self.system.home.nomenclature} Ventilation {vname}"
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:

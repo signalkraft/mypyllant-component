@@ -27,7 +27,6 @@ from myPyllant.models import (
 
 from . import DailyDataCoordinator, SystemCoordinator
 from .const import DOMAIN
-from .utils import get_unique_id_prefix
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -197,8 +196,16 @@ class SystemSensor(CoordinatorEntity, SensorEntity):
         return self.coordinator.data[self.index]
 
     @property
+    def id_infix(self) -> str:
+        return f"{self.system.id}_home"
+
+    @property
+    def name_prefix(self) -> str:
+        return f"{self.system.home.home_name or self.system.home.nomenclature}"
+
+    @property
     def device_info(self) -> DeviceInfo | None:
-        return {"identifiers": {(DOMAIN, f"home_{self.system.id}")}}
+        return {"identifiers": {(DOMAIN, self.id_infix)}}
 
 
 class SystemOutdoorTemperatureSensor(SystemSensor):
@@ -215,11 +222,11 @@ class SystemOutdoorTemperatureSensor(SystemSensor):
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}outdoor_temperature"
+        return f"{DOMAIN}_{self.id_infix}_outdoor_temperature"
 
     @property
     def name(self):
-        return f"{self.system.home.name} Outdoor Temperature"
+        return f"{DOMAIN} {self.name_prefix} Outdoor Temperature"
 
 
 class SystemWaterPressureSensor(SystemSensor):
@@ -236,7 +243,7 @@ class SystemWaterPressureSensor(SystemSensor):
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}water_pressure_{self.index}"
+        return f"{DOMAIN}_{self.id_infix}_water_pressure"
 
     @property
     def entity_category(self) -> EntityCategory | None:
@@ -244,7 +251,7 @@ class SystemWaterPressureSensor(SystemSensor):
 
     @property
     def name(self):
-        return f"{self.system.home.name} System Water Pressure"
+        return f"{self.name_prefix} System Water Pressure"
 
 
 class HomeEntity(CoordinatorEntity, SensorEntity):
@@ -269,10 +276,18 @@ class HomeEntity(CoordinatorEntity, SensorEntity):
         return self.system.home.extra_fields | self.system.extra_fields
 
     @property
+    def name_prefix(self) -> str:
+        return f"{self.system.home.home_name or self.system.home.nomenclature}"
+
+    @property
+    def id_infix(self) -> str:
+        return f"{self.system.id}_home"
+
+    @property
     def device_info(self):
         return DeviceInfo(
-            identifiers={(DOMAIN, f"home_{self.system.id}")},
-            name=f"{self.system.home.name}",
+            identifiers={(DOMAIN, self.id_infix)},
+            name=self.name_prefix,
             manufacturer=self.system.brand_name,
             model=self.system.home.nomenclature,
             sw_version=self.system.home.firmware_version,
@@ -280,7 +295,7 @@ class HomeEntity(CoordinatorEntity, SensorEntity):
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}home"
+        return f"{DOMAIN}_{self.id_infix}_base"
 
     @property
     def native_value(self):
@@ -288,7 +303,7 @@ class HomeEntity(CoordinatorEntity, SensorEntity):
 
     @property
     def name(self):
-        return f"{self.system.home.name} Firmware Version"
+        return f"{self.system.home.home_name or self.system.home.nomenclature} Firmware Version"
 
 
 class ZoneEntity(CoordinatorEntity, SensorEntity):
@@ -317,10 +332,18 @@ class ZoneEntity(CoordinatorEntity, SensorEntity):
             return f" of Circuit {self.zone.associated_circuit_index}"
 
     @property
+    def name_prefix(self) -> str:
+        return f"{self.system.home.home_name or self.system.home.nomenclature} Zone {self.zone.name}{self.circuit_name_suffix}"
+
+    @property
+    def id_infix(self) -> str:
+        return f"{self.system.id}_zone_{self.zone.index}"
+
+    @property
     def device_info(self):
         return DeviceInfo(
-            identifiers={(DOMAIN, f"zone_{self.system.id}_{self.zone.index}")},
-            name=f"{self.system.home.name} Zone {self.zone.name}{self.circuit_name_suffix}",
+            identifiers={(DOMAIN, self.id_infix)},
+            name=self.name_prefix,
             manufacturer=self.system.brand_name,
         )
 
@@ -336,7 +359,7 @@ class ZoneDesiredRoomTemperatureSetpointSensor(ZoneEntity):
 
     @property
     def name(self):
-        return f"{self.system.home.name} Desired Temperature in {self.zone.name}"
+        return f"{self.name_prefix} Desired Temperature"
 
     @property
     def native_value(self):
@@ -349,7 +372,7 @@ class ZoneDesiredRoomTemperatureSetpointSensor(ZoneEntity):
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}zone_desired_temperature_{self.zone_index}"
+        return f"{DOMAIN}_{self.id_infix}_desired_temperature"
 
 
 class ZoneCurrentRoomTemperatureSensor(ZoneEntity):
@@ -359,7 +382,7 @@ class ZoneCurrentRoomTemperatureSensor(ZoneEntity):
 
     @property
     def name(self):
-        return f"{self.system.home.name} Current Temperature in {self.zone.name}"
+        return f"{self.name_prefix} Current Temperature"
 
     @property
     def native_value(self):
@@ -371,7 +394,7 @@ class ZoneCurrentRoomTemperatureSensor(ZoneEntity):
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}zone_current_temperature_{self.zone_index}"
+        return f"{DOMAIN}_{self.id_infix}_current_temperature"
 
 
 class ZoneHumiditySensor(ZoneEntity):
@@ -381,7 +404,7 @@ class ZoneHumiditySensor(ZoneEntity):
 
     @property
     def name(self):
-        return f"{self.system.home.name} Humidity in {self.zone.name}"
+        return f"{self.name_prefix} Humidity"
 
     @property
     def native_value(self):
@@ -389,13 +412,13 @@ class ZoneHumiditySensor(ZoneEntity):
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}zone_humidity_{self.zone_index}"
+        return f"{DOMAIN}_{self.id_infix}_humidity"
 
 
 class ZoneHeatingOperatingModeSensor(ZoneEntity):
     @property
     def name(self):
-        return f"{self.system.home.name} Heating Operating Mode in {self.zone.name}"
+        return f"{self.name_prefix} Heating Operating Mode"
 
     @property
     def native_value(self):
@@ -403,7 +426,7 @@ class ZoneHeatingOperatingModeSensor(ZoneEntity):
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}zone_heating_operating_mode_{self.zone_index}"
+        return f"{DOMAIN}_{self.id_infix}_heating_operating_mode"
 
     @property
     def entity_category(self) -> EntityCategory | None:
@@ -413,7 +436,7 @@ class ZoneHeatingOperatingModeSensor(ZoneEntity):
 class ZoneHeatingStateSensor(ZoneEntity):
     @property
     def name(self):
-        return f"{self.system.home.name} Heating State in {self.zone.name}"
+        return f"{self.name_prefix} Heating State"
 
     @property
     def native_value(self):
@@ -421,7 +444,7 @@ class ZoneHeatingStateSensor(ZoneEntity):
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}zone_heating_state_{self.zone_index}"
+        return f"{DOMAIN}_{self.id_infix}_heating_state"
 
     @property
     def entity_category(self) -> EntityCategory | None:
@@ -431,7 +454,7 @@ class ZoneHeatingStateSensor(ZoneEntity):
 class ZoneCurrentSpecialFunctionSensor(ZoneEntity):
     @property
     def name(self):
-        return f"{self.system.home.name} Current Special Function in {self.zone.name}"
+        return f"{self.name_prefix} Current Special Function"
 
     @property
     def native_value(self):
@@ -439,7 +462,7 @@ class ZoneCurrentSpecialFunctionSensor(ZoneEntity):
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}zone_current_special_function_{self.zone_index}"
+        return f"{DOMAIN}_{self.id_infix}_current_special_function"
 
     @property
     def entity_category(self) -> EntityCategory | None:
@@ -465,10 +488,16 @@ class CircuitSensor(CoordinatorEntity, SensorEntity):
         return self.system.circuits[self.circuit_index]
 
     @property
+    def name_prefix(self) -> str:
+        return f"{self.system.home.home_name or self.system.home.nomenclature} Circuit {self.circuit_index}"
+
+    @property
+    def id_infix(self) -> str:
+        return f"{self.system.id}_circuit_{self.circuit.index}"
+
+    @property
     def device_info(self):
-        return {
-            "identifiers": {(DOMAIN, f"circuit_{self.system.id}_{self.circuit.index}")}
-        }
+        return {"identifiers": {(DOMAIN, self.id_infix)}}
 
 
 class CircuitFlowTemperatureSensor(CircuitSensor):
@@ -478,7 +507,7 @@ class CircuitFlowTemperatureSensor(CircuitSensor):
 
     @property
     def name(self):
-        return f"{self.system.home.name} Current Flow Temperature in Circuit {self.circuit.index}"
+        return f"{self.name_prefix} Current Flow Temperature"
 
     @property
     def native_value(self):
@@ -490,13 +519,13 @@ class CircuitFlowTemperatureSensor(CircuitSensor):
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}circuit_flow_temperature_{self.circuit_index}"
+        return f"{DOMAIN}_{self.id_infix}_flow_temperature"
 
 
 class CircuitStateSensor(CircuitSensor):
     @property
     def name(self):
-        return f"{self.system.home.name} State in Circuit {self.circuit.index}"
+        return f"{self.name_prefix} State"
 
     @property
     def native_value(self):
@@ -512,9 +541,7 @@ class CircuitStateSensor(CircuitSensor):
 
     @property
     def unique_id(self) -> str:
-        return (
-            f"{get_unique_id_prefix(self.system.id)}circuit_state_{self.circuit_index}"
-        )
+        return f"{DOMAIN}_{self.id_infix}_state"
 
 
 class CircuitMinFlowTemperatureSetpointSensor(CircuitSensor):
@@ -524,7 +551,7 @@ class CircuitMinFlowTemperatureSetpointSensor(CircuitSensor):
 
     @property
     def name(self):
-        return f"{self.system.home.name} Min Flow Temperature Setpoint in Circuit {self.circuit.index}"
+        return f"{self.name_prefix} Min Flow Temperature Setpoint"
 
     @property
     def native_value(self):
@@ -536,7 +563,7 @@ class CircuitMinFlowTemperatureSetpointSensor(CircuitSensor):
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}circuit_min_flow_temperature_setpoint_{self.circuit_index}"
+        return f"{DOMAIN}_{self.id_infix}_min_flow_temperature_setpoint"
 
 
 class CircuitHeatingCurveSensor(CircuitSensor):
@@ -544,7 +571,7 @@ class CircuitHeatingCurveSensor(CircuitSensor):
 
     @property
     def name(self):
-        return f"{self.system.home.name} Heating Curve in Circuit {self.circuit.index}"
+        return f"{self.name_prefix} Heating Curve"
 
     @property
     def native_value(self):
@@ -559,7 +586,7 @@ class CircuitHeatingCurveSensor(CircuitSensor):
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}circuit_heating_curve_{self.circuit_index}"
+        return f"{DOMAIN}_{self.id_infix}_heating_curve"
 
 
 class DomesticHotWaterSensor(CoordinatorEntity, SensorEntity):
@@ -577,6 +604,14 @@ class DomesticHotWaterSensor(CoordinatorEntity, SensorEntity):
         return self.coordinator.data[self.system_index]
 
     @property
+    def name_prefix(self) -> str:
+        return f"{self.system.home.home_name or self.system.home.nomenclature} Domestic Hot Water {self.dhw_index}"
+
+    @property
+    def id_infix(self) -> str:
+        return f"{self.system.id}_domestic_hot_water_{self.dhw_index}"
+
+    @property
     def domestic_hot_water(self) -> DomesticHotWater:
         return self.system.domestic_hot_water[self.dhw_index]
 
@@ -586,7 +621,7 @@ class DomesticHotWaterSensor(CoordinatorEntity, SensorEntity):
             "identifiers": {
                 (
                     DOMAIN,
-                    f"domestic_hot_water_{self.system.id}_{self.domestic_hot_water.index}",
+                    self.id_infix,
                 )
             }
         }
@@ -599,7 +634,7 @@ class DomesticHotWaterTankTemperatureSensor(DomesticHotWaterSensor):
 
     @property
     def name(self):
-        return f"{self.system.home.name} Tank Temperature Domestic Hot Water {self.domestic_hot_water.index}"
+        return f"{self.name_prefix} Tank Temperature"
 
     @property
     def native_value(self):
@@ -607,7 +642,7 @@ class DomesticHotWaterTankTemperatureSensor(DomesticHotWaterSensor):
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}dhw_tank_temperature_{self.dhw_index}"
+        return f"{DOMAIN}_{self.id_infix}_tank_temperature"
 
 
 class DomesticHotWaterSetPointSensor(DomesticHotWaterSensor):
@@ -617,7 +652,7 @@ class DomesticHotWaterSetPointSensor(DomesticHotWaterSensor):
 
     @property
     def name(self):
-        return f"{self.system.home.name} Setpoint Domestic Hot Water {self.domestic_hot_water.index}"
+        return f"{self.name_prefix} Setpoint"
 
     @property
     def native_value(self) -> float | None:
@@ -625,13 +660,13 @@ class DomesticHotWaterSetPointSensor(DomesticHotWaterSensor):
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}dhw_set_point_{self.dhw_index}"
+        return f"{DOMAIN}_{self.id_infix}_set_point"
 
 
 class DomesticHotWaterOperationModeSensor(DomesticHotWaterSensor):
     @property
     def name(self):
-        return f"{self.system.home.name} Operation Mode Domestic Hot Water {self.domestic_hot_water.index}"
+        return f"{self.name_prefix} Operation Mode"
 
     @property
     def native_value(self):
@@ -643,15 +678,13 @@ class DomesticHotWaterOperationModeSensor(DomesticHotWaterSensor):
 
     @property
     def unique_id(self) -> str:
-        return (
-            f"{get_unique_id_prefix(self.system.id)}dhw_operation_mode_{self.dhw_index}"
-        )
+        return f"{DOMAIN}_{self.id_infix}_operation_mode"
 
 
 class DomesticHotWaterCurrentSpecialFunctionSensor(DomesticHotWaterSensor):
     @property
     def name(self):
-        return f"{self.system.home.name} Current Special Function Domestic Hot Water {self.domestic_hot_water.index}"
+        return f"{self.name_prefix} Current Special Function"
 
     @property
     def native_value(self):
@@ -663,7 +696,7 @@ class DomesticHotWaterCurrentSpecialFunctionSensor(DomesticHotWaterSensor):
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}dhw_current_special_function_{self.dhw_index}"
+        return f"{DOMAIN}_{self.id_infix}_current_special_function"
 
 
 class DataSensor(CoordinatorEntity, SensorEntity):
@@ -698,16 +731,15 @@ class DataSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def name(self):
-        if self.device is None or self.device_data is None:
+        if self.device_data is None:
             return None
-        name = self.device.name_display
         om = self.device_data.operation_mode.replace("_", " ").title()
         et = (
             self.device_data.energy_type.replace("_", " ").title() + " "
             if self.device_data.energy_type is not None
             else ""
         )
-        return f"{self.home_name} {self.de_index} {name} {et}{om}"
+        return f"{self.name_prefix} {et}{om}"
 
     @property
     def device_data(self) -> DeviceData | None:
@@ -746,17 +778,24 @@ class DataSensor(CoordinatorEntity, SensorEntity):
     def unique_id(self) -> str | None:
         if self.device is None:
             return None
-        return f"{get_unique_id_prefix(self.system_id)}{self.device.device_uuid}_{self.da_index}"
+        return f"{DOMAIN}_{self.system_id}_{self.device.device_uuid}_{self.da_index}"
+
+    @property
+    def name_prefix(self) -> str:
+        name_display = f" {self.device.name_display}" if self.device is not None else ""
+        return f"{self.home_name} Device {self.de_index}{name_display}"
+
+    @property
+    def id_infix(self) -> str:
+        return f"{self.system_id}_device_{self.device.device_uuid if self.device is not None else ''}"
 
     @property
     def device_info(self):
         if self.device is None:
             return None
         return DeviceInfo(
-            identifiers={
-                (DOMAIN, f"device_{self.system_id}_{self.device.device_uuid}")
-            },
-            name=f"{self.home_name} {self.de_index} {self.device.name_display}",
+            identifiers={(DOMAIN, self.id_infix)},
+            name=self.name_prefix,
             manufacturer=self.device.brand_name,
             model=self.device.product_name_display,
         )
@@ -840,9 +879,9 @@ class EfficiencySensor(CoordinatorEntity, SensorEntity):
             and self.de_index is not None
             and self.device_data_list[0].device is not None
         ):
-            return f"{get_unique_id_prefix(self.system_id)}{self.device_data_list[0].device.device_uuid}_heating_energy_efficiency"
+            return f"{DOMAIN}_{self.system_id}_device_{self.device_data_list[0].device.device_uuid}_heating_energy_efficiency"
         else:
-            return f"{get_unique_id_prefix(self.system_id)}heating_energy_efficiency"
+            return f"{DOMAIN}_{self.system_id}_heating_energy_efficiency"
 
     @property
     def device_info(self):
@@ -853,12 +892,12 @@ class EfficiencySensor(CoordinatorEntity, SensorEntity):
                 "identifiers": {
                     (
                         DOMAIN,
-                        f"device_{self.system_id}_{self.device_data_list[0].device.device_uuid}",
+                        f"{self.system_id}_device_{self.device_data_list[0].device.device_uuid}",
                     )
                 }
             }
         elif self.de_index is None:
-            return {"identifiers": {(DOMAIN, f"home_{self.system_id}")}}
+            return {"identifiers": {(DOMAIN, f"{self.system_id}_home")}}
         else:
             return None
 
@@ -876,7 +915,7 @@ class EfficiencySensor(CoordinatorEntity, SensorEntity):
             and self.de_index is not None
             and self.device_data_list[0].device is not None
         ):
-            return f"{self.home_name} {self.de_index} {self.device_data_list[0].device.name_display} Heating Energy Efficiency"
+            return f"{self.home_name} Device {self.de_index} {self.device_data_list[0].device.name_display} Heating Energy Efficiency"
         else:
             return f"{self.home_name} Heating Energy Efficiency"
 
@@ -892,6 +931,15 @@ class SystemDeviceSensor(CoordinatorEntity, SensorEntity):
         self.device_index = device_index
 
     @property
+    def name_prefix(self) -> str:
+        name_display = f" {self.device.name_display}" if self.device is not None else ""
+        return f"{self.system.home.home_name or self.system.home.nomenclature} Device {self.device_index}{name_display}"
+
+    @property
+    def id_infix(self) -> str:
+        return f"{self.system.id}_device_{self.device.device_uuid if self.device is not None else ''}"
+
+    @property
     def system(self) -> System:
         return self.coordinator.data[self.system_index]
 
@@ -901,7 +949,7 @@ class SystemDeviceSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, f"system_{self.system.id}")}}
+        return {"identifiers": {(DOMAIN, self.id_infix)}}
 
 
 class SystemDeviceWaterPressureSensor(SystemDeviceSensor):
@@ -911,7 +959,7 @@ class SystemDeviceWaterPressureSensor(SystemDeviceSensor):
 
     @property
     def name(self):
-        return f"{self.system.home.name} Water Pressure {self.device.name}"
+        return f"{self.name_prefix} Water Pressure"
 
     @property
     def native_value(self):
@@ -919,7 +967,7 @@ class SystemDeviceWaterPressureSensor(SystemDeviceSensor):
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}water_pressure_{self.device.device_uuid}"
+        return f"{DOMAIN}_{self.id_infix}_water_pressure"
 
     @property
     def entity_category(self) -> EntityCategory | None:

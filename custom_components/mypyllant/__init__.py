@@ -260,7 +260,10 @@ class DailyDataCoordinator(MyPyllantCoordinator):
             ):
                 if len(system.devices) == 0:
                     continue
-                data[system.id] = {"home_name": system.home.name, "devices_data": []}
+                data[system.id] = {
+                    "home_name": system.home.home_name or system.home.nomenclature,
+                    "devices_data": [],
+                }
                 for device in system.devices:
                     device_data = self.api.get_data_by_device(
                         device, DeviceDataBucketResolution.DAY, start, end

@@ -17,7 +17,6 @@ from myPyllant.models import Circuit, System
 
 from . import SystemCoordinator
 from .const import DOMAIN
-from .utils import get_unique_id_prefix
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,8 +62,16 @@ class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):
         return EntityCategory.DIAGNOSTIC
 
     @property
+    def id_infix(self) -> str:
+        return f"{self.system.id}_home"
+
+    @property
+    def name_prefix(self) -> str:
+        return f"{self.system.home.home_name or self.system.home.nomenclature}"
+
+    @property
     def device_info(self) -> DeviceInfo | None:
-        return {"identifiers": {(DOMAIN, f"home_{self.system.id}")}}
+        return {"identifiers": {(DOMAIN, self.id_infix)}}
 
 
 class ControlError(SystemControlEntity):
@@ -88,11 +95,11 @@ class ControlError(SystemControlEntity):
 
     @property
     def name(self) -> str:
-        return f"{self.system.home.name} Trouble Codes on {self.system.system_name}"
+        return f"{self.name_prefix} Trouble Codes"
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}control_error"
+        return f"{DOMAIN}_{self.id_infix}_control_error"
 
     @property
     def device_class(self) -> BinarySensorDeviceClass | None:
@@ -113,11 +120,11 @@ class ControlOnline(SystemControlEntity):
 
     @property
     def name(self) -> str:
-        return f"{self.system.home.name} Online Status"
+        return f"{self.name_prefix} Online Status"
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}control_online"
+        return f"{DOMAIN}_{self.id_infix}_control_online"
 
     @property
     def device_class(self) -> BinarySensorDeviceClass | None:
@@ -138,11 +145,11 @@ class FirmwareUpdateRequired(SystemControlEntity):
 
     @property
     def name(self) -> str:
-        return f"{self.system.home.name} Firmware Update Required"
+        return f"{self.name_prefix} Firmware Update Required"
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}firmware_update_required"
+        return f"{DOMAIN}_{self.id_infix}_firmware_update_required"
 
     @property
     def device_class(self) -> BinarySensorDeviceClass | None:
@@ -163,11 +170,11 @@ class FirmwareUpdateEnabled(SystemControlEntity):
 
     @property
     def name(self) -> str:
-        return f"{self.system.home.name} Firmware Update Enabled"
+        return f"{self.name_prefix} Firmware Update Enabled"
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}firmware_update_enabled"
+        return f"{DOMAIN}_{self.id_infix}_firmware_update_enabled"
 
 
 class CircuitEntity(CoordinatorEntity, BinarySensorEntity):
@@ -190,10 +197,18 @@ class CircuitEntity(CoordinatorEntity, BinarySensorEntity):
         return self.coordinator.data[self.system_index].circuits[self.circuit_index]
 
     @property
+    def name_prefix(self) -> str:
+        return f"{self.system.home.home_name or self.system.home.nomenclature} Circuit {self.circuit_index}"
+
+    @property
+    def id_infix(self) -> str:
+        return f"{self.system.id}_circuit_{self.circuit.index}"
+
+    @property
     def device_info(self) -> DeviceInfo | None:
         return DeviceInfo(
-            identifiers={(DOMAIN, f"circuit_{self.system.id}_{self.circuit.index}")},
-            name=f"{self.system.home.name} Circuit {self.circuit_index}",
+            identifiers={(DOMAIN, self.id_infix)},
+            name=self.name_prefix,
             manufacturer=self.system.brand_name,
         )
 
@@ -213,8 +228,8 @@ class CircuitIsCoolingAllowed(CircuitEntity):
 
     @property
     def name(self) -> str:
-        return f"{self.system.home.name} Cooling Allowed in {self.circuit_index}"
+        return f"{self.name_prefix} Cooling Allowed"
 
     @property
     def unique_id(self) -> str:
-        return f"{get_unique_id_prefix(self.system.id)}cooling_allowed_{self.circuit_index}"
+        return f"{DOMAIN} {self.id_infix}_cooling_allowed"
