@@ -45,7 +45,7 @@ from myPyllant.models import (
     ZoneTimeProgram,
 )
 
-from custom_components.mypyllant.utils import get_name_prefix, get_unique_id_prefix
+from custom_components.mypyllant.utils import get_unique_id_prefix
 
 from . import SystemCoordinator
 from .const import (
@@ -281,7 +281,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     def device_info(self) -> DeviceInfo:
         return DeviceInfo(
             identifiers={(DOMAIN, f"zone_{self.system.id}_{self.zone.index}")},
-            name=f"{get_name_prefix(self.system.home.name)}Zone {self.zone.name}{self.circuit_name_suffix}",
+            name=f"{self.system.home.name} Zone {self.zone.name}{self.circuit_name_suffix}",
             manufacturer=self.system.brand_name,
         )
 
@@ -291,7 +291,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def name(self) -> str:
-        return f"{get_name_prefix(self.system.home.name)}Climate Zone {self.zone.name}"
+        return f"{self.system.home.name} Climate Zone {self.zone.name}"
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
@@ -529,7 +529,7 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
         vname = [d for d in self.system.devices if d.type == "ventilation"][
             0
         ].name_display
-        return f"{get_name_prefix(self.system.home.name)}Ventilation {vname}"
+        return f"{self.system.home.name} Ventilation {vname}"
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:

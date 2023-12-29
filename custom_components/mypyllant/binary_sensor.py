@@ -17,7 +17,7 @@ from myPyllant.models import Circuit, System
 
 from . import SystemCoordinator
 from .const import DOMAIN
-from .utils import get_name_prefix, get_unique_id_prefix
+from .utils import get_unique_id_prefix
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -88,7 +88,7 @@ class ControlError(SystemControlEntity):
 
     @property
     def name(self) -> str:
-        return f"{get_name_prefix(self.system.home.name)}Trouble Codes on {self.system.system_name}"
+        return f"{self.system.home.name} Trouble Codes on {self.system.system_name}"
 
     @property
     def unique_id(self) -> str:
@@ -113,7 +113,7 @@ class ControlOnline(SystemControlEntity):
 
     @property
     def name(self) -> str:
-        return f"{get_name_prefix(self.system.home.name)}Online Status"
+        return f"{self.system.home.name} Online Status"
 
     @property
     def unique_id(self) -> str:
@@ -138,7 +138,7 @@ class FirmwareUpdateRequired(SystemControlEntity):
 
     @property
     def name(self) -> str:
-        return f"{get_name_prefix(self.system.home.name)}Firmware Update Required"
+        return f"{self.system.home.name} Firmware Update Required"
 
     @property
     def unique_id(self) -> str:
@@ -163,7 +163,7 @@ class FirmwareUpdateEnabled(SystemControlEntity):
 
     @property
     def name(self) -> str:
-        return f"{get_name_prefix(self.system.home.name)}Firmware Update Enabled"
+        return f"{self.system.home.name} Firmware Update Enabled"
 
     @property
     def unique_id(self) -> str:
@@ -193,7 +193,7 @@ class CircuitEntity(CoordinatorEntity, BinarySensorEntity):
     def device_info(self) -> DeviceInfo | None:
         return DeviceInfo(
             identifiers={(DOMAIN, f"circuit_{self.system.id}_{self.circuit.index}")},
-            name=f"{get_name_prefix(self.system.home.name)}Circuit {self.circuit_index}",
+            name=f"{self.system.home.name} Circuit {self.circuit_index}",
             manufacturer=self.system.brand_name,
         )
 
@@ -213,7 +213,7 @@ class CircuitIsCoolingAllowed(CircuitEntity):
 
     @property
     def name(self) -> str:
-        return f"{get_name_prefix(self.system.home.name)}Cooling Allowed in {self.circuit_index}"
+        return f"{self.system.home.name} Cooling Allowed in {self.circuit_index}"
 
     @property
     def unique_id(self) -> str:

@@ -8,10 +8,6 @@ def get_unique_id_prefix(system_id: str) -> str:
     return f"{DOMAIN}_{system_id}_"
 
 
-def get_name_prefix(home: str) -> str:
-    return f"{home} "
-
-
 def is_quota_exceeded_exception(exc_info: Exception) -> bool:
     """
     Returns True if the exception is a quota exceeded ClientResponseError

@@ -22,7 +22,7 @@ from myPyllant.models import (
     System,
 )
 
-from custom_components.mypyllant.utils import get_name_prefix, get_unique_id_prefix
+from custom_components.mypyllant.utils import get_unique_id_prefix
 
 from . import SystemCoordinator
 from .const import (
@@ -119,7 +119,7 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
 
     @property
     def name(self) -> str:
-        return f"{get_name_prefix(self.system.home.name)}Domestic Hot Water {self.dhw_index}"
+        return f"{self.system.home.name} Domestic Hot Water {self.dhw_index}"
 
     @property
     def supported_features(self) -> WaterHeaterEntityFeature:
