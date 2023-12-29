@@ -45,6 +45,8 @@ from myPyllant.models import (
     ZoneTimeProgram,
 )
 
+from custom_components.mypyllant.utils import shorten_zone_name
+
 from . import SystemCoordinator
 from .const import (
     DEFAULT_TIME_PROGRAM_OVERWRITE,
@@ -277,7 +279,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def name_prefix(self) -> str:
-        return f"{self.system.home.home_name or self.system.home.nomenclature} Zone {self.zone.name}{self.circuit_name_suffix}"
+        return f"{self.system.home.home_name or self.system.home.nomenclature} Zone {shorten_zone_name(self.zone.name)}{self.circuit_name_suffix}"
 
     @property
     def id_infix(self) -> str:

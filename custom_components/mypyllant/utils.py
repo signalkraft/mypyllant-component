@@ -3,6 +3,12 @@ from asyncio.exceptions import CancelledError
 from aiohttp.client_exceptions import ClientResponseError
 
 
+def shorten_zone_name(zone_name: str) -> str:
+    if zone_name.startswith("Zone "):
+        return zone_name[5:]
+    return zone_name
+
+
 def is_quota_exceeded_exception(exc_info: Exception) -> bool:
     """
     Returns True if the exception is a quota exceeded ClientResponseError
