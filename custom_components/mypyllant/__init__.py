@@ -9,12 +9,18 @@ from typing import TypedDict
 from aiohttp.client_exceptions import ClientResponseError
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import (
+    HomeAssistant,
+    SupportsResponse,
+    ServiceCall,
+    ServiceResponse,
+)
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+
 from myPyllant.api import MyPyllantAPI
 from myPyllant.const import DEFAULT_BRAND
 from myPyllant.models import DeviceData, DeviceDataBucketResolution, System
-
+from myPyllant.tests import generate_test_data
 from .const import (
     API_DOWN_PAUSE_INTERVAL,
     DEFAULT_COUNTRY,
@@ -26,6 +32,7 @@ from .const import (
     OPTION_REFRESH_DELAY,
     OPTION_UPDATE_INTERVAL,
     QUOTA_PAUSE_INTERVAL,
+    SERVICE_GENERATE_TEST_DATA,
 )
 from .utils import is_quota_exceeded_exception
 
@@ -85,6 +92,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN][entry.entry_id]["daily_data_coordinator"] = daily_data_coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    async def handle_generate_test_data(call: ServiceCall) -> ServiceResponse:
+        return await generate_test_data.main(
+            user=username,
+            password=password,
+            brand=brand,
+            country=country,
+            write_results=False,
+        )
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_GENERATE_TEST_DATA,
+        handle_generate_test_data,
+        supports_response=SupportsResponse.ONLY,
+    )
     return True
 
 

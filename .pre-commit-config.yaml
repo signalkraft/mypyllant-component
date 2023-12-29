@@ -34,7 +34,7 @@ repos:
           - aioresponses
           - pytest
           - types-requests
-          - myPyllant==0.6.4
+          - myPyllant==0.6.5
           - polyfactory
   - repo: local
     hooks:
