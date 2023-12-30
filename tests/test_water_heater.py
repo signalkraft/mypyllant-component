@@ -2,7 +2,7 @@ import pytest
 from homeassistant.const import ATTR_TEMPERATURE
 from myPyllant.api import MyPyllantAPI
 from myPyllant.models import DHWOperationMode
-from myPyllant.tests.test_api import list_test_data
+from myPyllant.tests.utils import list_test_data
 
 from custom_components.mypyllant.water_heater import DomesticHotWaterEntity
 
