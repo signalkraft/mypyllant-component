@@ -5,16 +5,26 @@ import logging
 from asyncio.exceptions import CancelledError
 from datetime import datetime, timedelta
 from typing import TypedDict
-
+import voluptuous as vol
 from aiohttp.client_exceptions import ClientResponseError
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import (
+    HomeAssistant,
+    SupportsResponse,
+    ServiceCall,
+    ServiceResponse,
+)
+from homeassistant.helpers import selector
+from homeassistant.helpers.template import as_datetime
+
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from myPyllant import export, report
+
 from myPyllant.api import MyPyllantAPI
 from myPyllant.const import DEFAULT_BRAND
 from myPyllant.models import DeviceData, DeviceDataBucketResolution, System
-
+from myPyllant.tests import generate_test_data
 from .const import (
     API_DOWN_PAUSE_INTERVAL,
     DEFAULT_COUNTRY,
@@ -26,6 +36,9 @@ from .const import (
     OPTION_REFRESH_DELAY,
     OPTION_UPDATE_INTERVAL,
     QUOTA_PAUSE_INTERVAL,
+    SERVICE_GENERATE_TEST_DATA,
+    SERVICE_EXPORT,
+    SERVICE_REPORT,
 )
 from .utils import is_quota_exceeded_exception
 
@@ -36,6 +49,11 @@ PLATFORMS: list[Platform] = [
     Platform.SENSOR,
     Platform.CLIMATE,
     Platform.WATER_HEATER,
+]
+
+_DEVICE_DATA_BUCKET_RESOLUTION_OPTIONS = [
+    selector.SelectOptionDict(value=v.value, label=v.value.title())
+    for v in DeviceDataBucketResolution
 ]
 
 
@@ -111,6 +129,79 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN][entry.entry_id]["daily_data_coordinator"] = daily_data_coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    async def handle_export(call: ServiceCall) -> ServiceResponse:
+        return {
+            "export": await export.main(
+                user=username,
+                password=password,
+                brand=brand,
+                country=country,
+                data=call.data.get("data", False),
+                resolution=call.data.get("resolution", DeviceDataBucketResolution.DAY),
+                start=call.data.get("start"),
+                end=call.data.get("end"),
+            )
+        }
+
+    async def handle_generate_test_data(call: ServiceCall) -> ServiceResponse:
+        return await generate_test_data.main(
+            user=username,
+            password=password,
+            brand=brand,
+            country=country,
+            write_results=False,
+        )
+
+    async def handle_report(call: ServiceCall) -> ServiceResponse:
+        return {
+            f.file_name: f.file_content
+            async for f in report.main(
+                user=username,
+                password=password,
+                brand=brand,
+                country=country,
+                year=call.data.get("year"),
+                write_results=False,
+            )
+        }
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_EXPORT,
+        handle_export,
+        schema=vol.Schema(
+            {
+                vol.Optional("data"): bool,
+                vol.Optional("resolution"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=_DEVICE_DATA_BUCKET_RESOLUTION_OPTIONS,
+                        mode=selector.SelectSelectorMode.LIST,
+                    ),
+                ),
+                vol.Optional("start"): vol.Coerce(as_datetime),
+                vol.Optional("end"): vol.Coerce(as_datetime),
+            }
+        ),
+        supports_response=SupportsResponse.ONLY,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_GENERATE_TEST_DATA,
+        handle_generate_test_data,
+        supports_response=SupportsResponse.ONLY,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_REPORT,
+        handle_report,
+        schema=vol.Schema(
+            {
+                vol.Required("year", default=datetime.now().year): vol.Coerce(int),
+            }
+        ),
+        supports_response=SupportsResponse.ONLY,
+    )
     return True
 
 

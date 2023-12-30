@@ -4,7 +4,7 @@ from homeassistant.components.climate.const import FAN_OFF, PRESET_AWAY
 from homeassistant.const import ATTR_TEMPERATURE
 from myPyllant.api import MyPyllantAPI
 from myPyllant.const import DEFAULT_QUICK_VETO_DURATION
-from myPyllant.tests.test_api import list_test_data
+from myPyllant.tests.utils import list_test_data
 
 from custom_components.mypyllant import SystemCoordinator
 from custom_components.mypyllant.climate import VentilationClimate, ZoneClimate

@@ -34,6 +34,10 @@ pip install -e ../myPyllant
 
 Now you can modify `myPyllant/src` and directly develop against these changes in `mypyllant-component`.
 
+### VSCode Dev Container
+
+There's also a VSCode dev container available in `.devcontainer.json`, provided by [github.com/ml1nk](https://github.com/ml1nk).
+
 ### Debugging
 
 When debugging or reporting issues, turn on debug logging by adding this to your `configuration.yaml` 
@@ -99,18 +103,28 @@ Copy the resulting dictionary into [https://github.com/signalkraft/myPyllant/blo
 
 Because the myVAILLANT API isn't documented, you can help the development of this library by contributing test data:
 
-```shell
-python3 -m myPyllant.tests.generate_test_data -h
-python3 -m myPyllant.tests.generate_test_data username password brand --country country
-```
+=== "Home Assistant Service"
+    
+    [![Open your Home Assistant instance and show your service developer tools with a specific service selected.](https://my.home-assistant.io/badges/developer_call_service.svg)](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.set_holiday)
+    
+    Select `mypyllant.generate_test_data` and call the service.
 
-..or use Docker:
+=== "Shell"
+    
+    ```shell
+    python3 -m myPyllant.tests.generate_test_data -h
+    python3 -m myPyllant.tests.generate_test_data username password brand --country country
+    ```
 
-```shell
-docker run -v $(pwd)/test_data:/build/src/myPyllant/tests/json -ti ghcr.io/signalkraft/mypyllant:latest python3 -m myPyllant.tests.generate_test_data username password brand --country country
-```
+=== "Docker"
+    
+    ```shell
+    docker run -v $(pwd)/test_data:/build/src/myPyllant/tests/json -ti ghcr.io/signalkraft/mypyllant:latest python3 -m myPyllant.tests.generate_test_data username password brand --country country
+    ```
+    
+    With docker, the results will be put into `test_data/`.
 
-With docker, the results will be put into `test_data/`.
+---
 
 You can then either create a PR with the created folder, or zip it and [attach it to an issue](https://github.com/signalkraft/myPyllant/issues/new).
 

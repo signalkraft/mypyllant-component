@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_registry import DATA_REGISTRY, EntityRegistry
 from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
 from myPyllant.api import MyPyllantAPI
-from myPyllant.tests.test_api import list_test_data
+from myPyllant.tests.utils import list_test_data
 
 from custom_components.mypyllant import DOMAIN, async_setup_entry, async_unload_entry
 from custom_components.mypyllant.config_flow import DATA_SCHEMA
@@ -18,7 +18,7 @@ from tests.conftest import TEST_OPTIONS, MockConfigEntry
 _LOGGER = logging.getLogger(__name__)
 
 
-data = {
+test_user_input = {
     "username": "username",
     "password": "password",
     "country": "germany",
@@ -57,7 +57,7 @@ async def test_user_flow_minimum_fields(hass: HomeAssistant):
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        user_input=data,
+        user_input=test_user_input,
     )
 
     assert result["type"] == data_entry_flow.RESULT_TYPE_FORM
@@ -68,7 +68,6 @@ async def test_async_setup(
     hass,
     mypyllant_aioresponses,
     mocked_api: MyPyllantAPI,
-    system_coordinator_mock,
     test_data,
 ):
     hass.data[DATA_COMPONENTS] = {}
@@ -78,7 +77,7 @@ async def test_async_setup(
         config_entry = MockConfigEntry(
             domain=DOMAIN,
             title="Mock Title",
-            data=data,
+            data=test_user_input,
             options=TEST_OPTIONS,
         )
         mock.patch("myPyllant.api.MyPyllantAPI", mocked_api)
