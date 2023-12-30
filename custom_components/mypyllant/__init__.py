@@ -39,6 +39,32 @@ PLATFORMS: list[Platform] = [
 ]
 
 
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
+    """Migrate old entry."""
+    _LOGGER.debug("Migrating from version %s", config_entry.version)
+
+    if config_entry.version == 1:
+        """
+        from homeassistant.helpers.entity_registry import async_migrate_entries, RegistryEntry
+        from homeassistant.helpers.device_registry import async_entries_for_config_entry
+        from homeassistant.core import callback
+
+        devices = async_entries_for_config_entry(
+            hass.data["device_registry"], config_entry.entry_id
+        )
+
+        @callback
+        def update_unique_id(entity_entry: RegistryEntry):
+            return {"new_unique_id": entity_entry.unique_id} # change entity_entry.unique_id
+
+        await async_migrate_entries(hass, config_entry.entry_id, update_unique_id)
+        config_entry.version = 2 # set to new version
+        """
+
+    _LOGGER.debug("Migration to version %s successful", config_entry.version)
+    return True
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if _LOGGER.isEnabledFor(logging.DEBUG):
         from importlib.metadata import version
