@@ -226,12 +226,8 @@ export:
     data:
       name: Data
       description: Whether to export device data (default off)
-      example: False
       selector:
-        select:
-          options:
-            - True
-            - False
+        boolean:
     resolution:
       name: Data Resolution
       description: The time resolution of the data export (default DAY)
