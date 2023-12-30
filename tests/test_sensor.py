@@ -1,7 +1,7 @@
 import pytest as pytest
 from myPyllant.api import MyPyllantAPI
 from myPyllant.models import CircuitState, DeviceData
-from myPyllant.tests.test_api import list_test_data
+from myPyllant.tests.utils import list_test_data
 
 from custom_components.mypyllant.sensor import (
     CircuitFlowTemperatureSensor,
