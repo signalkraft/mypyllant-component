@@ -3,7 +3,6 @@ repos:
     rev: v0.1.9
     hooks:
       - id: ruff
-        args: [ --fix ]
         files: ^(homeassistant|script|tests|custom_components)/.+\.py$
       - id: ruff-format
         files: ^(homeassistant|script|tests|custom_components)/.+\.py$
@@ -35,7 +34,7 @@ repos:
           - aioresponses
           - pytest
           - types-requests
-          - myPyllant==0.6.7
+          - myPyllant==0.6.4
           - polyfactory
   - repo: local
     hooks:

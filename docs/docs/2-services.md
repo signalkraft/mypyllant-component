@@ -14,12 +14,6 @@ Search for "myvaillant" in Developer Tools > Services in your Home Assistant ins
 
 [![Open your Home Assistant instance and show your service developer tools with a specific service selected.](https://my.home-assistant.io/badges/developer_call_service.svg)](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.set_holiday)
 
-## Exporting Data
-
-* `mypyllant.report` for exporting yearly energy reports (in CSV format)
-* `mypyllant.export` for exporting raw data of your system
-* `mypyllant.generate_test_data` for generating test data to contribute to the [myPyllant library](https://github.com/signalkraft/mypyllant)
-
 ## Setting a Time Program
 
 The following services can be used to set time programs:

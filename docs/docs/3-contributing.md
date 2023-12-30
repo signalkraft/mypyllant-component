@@ -103,28 +103,18 @@ Copy the resulting dictionary into [https://github.com/signalkraft/myPyllant/blo
 
 Because the myVAILLANT API isn't documented, you can help the development of this library by contributing test data:
 
-=== "Home Assistant Service"
-    
-    [![Open your Home Assistant instance and show your service developer tools with a specific service selected.](https://my.home-assistant.io/badges/developer_call_service.svg)](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.set_holiday)
-    
-    Select `mypyllant.generate_test_data` and call the service.
+```shell
+python3 -m myPyllant.tests.generate_test_data -h
+python3 -m myPyllant.tests.generate_test_data username password brand --country country
+```
 
-=== "Shell"
-    
-    ```shell
-    python3 -m myPyllant.tests.generate_test_data -h
-    python3 -m myPyllant.tests.generate_test_data username password brand --country country
-    ```
+..or use Docker:
 
-=== "Docker"
-    
-    ```shell
-    docker run -v $(pwd)/test_data:/build/src/myPyllant/tests/json -ti ghcr.io/signalkraft/mypyllant:latest python3 -m myPyllant.tests.generate_test_data username password brand --country country
-    ```
-    
-    With docker, the results will be put into `test_data/`.
+```shell
+docker run -v $(pwd)/test_data:/build/src/myPyllant/tests/json -ti ghcr.io/signalkraft/mypyllant:latest python3 -m myPyllant.tests.generate_test_data username password brand --country country
+```
 
----
+With docker, the results will be put into `test_data/`.
 
 You can then either create a PR with the created folder, or zip it and [attach it to an issue](https://github.com/signalkraft/myPyllant/issues/new).
 

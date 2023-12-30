@@ -1,12 +1,20 @@
 from asyncio.exceptions import CancelledError
 
 from aiohttp.client_exceptions import ClientResponseError
+from myPyllant.models import System
 
 
-def shorten_zone_name(zone_name: str) -> str:
-    if zone_name.startswith("Zone "):
-        return zone_name[5:]
-    return zone_name
+def get_system_sensor_unique_id(system: System) -> str:
+    """
+    If a primary heat generator exists, we use it as a unique id
+    Some sensor names are derived from it, so it made sense at the time to use it for the unique id
+
+    Otherwise, we fall back to the system id
+    """
+    if system.primary_heat_generator:
+        return system.primary_heat_generator.device_uuid
+    else:
+        return system.id
 
 
 def is_quota_exceeded_exception(exc_info: Exception) -> bool:
