@@ -8,9 +8,9 @@
             "problemMatcher": []
         },
         {
-            "label": "Run lint",
+            "label": "Run precommit",
             "type": "shell",
-            "command": "scripts/lint",
+            "command": "scripts/precommit",
             "problemMatcher": []
         }
     ]

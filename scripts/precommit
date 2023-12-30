@@ -4,4 +4,4 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-SKIP=pytest pre-commit run
+pre-commit run --all-files

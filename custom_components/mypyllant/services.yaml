@@ -218,3 +218,54 @@ set_dhw_circulation_time_program:
         sunday:
         - start_time: 450
           end_time: 1260
+
+export:
+  name: Export Data
+  description: Exports data from the mypyllant library
+  fields:
+    data:
+      name: Data
+      description: Whether to export device data (default off)
+      example: False
+      selector:
+        boolean:
+    resolution:
+      name: Data Resolution
+      description: The time resolution of the data export (default DAY)
+      example: DAY
+      selector:
+        select:
+          options:
+            - "HOUR"
+            - "DAY"
+            - "MONTH"
+    start:
+      name: Start Date
+      description: Start date od the data export
+      example: '"2023-01-01 14:00:00"'
+      selector:
+        datetime:
+    end:
+      name: End Date
+      description: End date of the data export
+      example: '"2023-01-02 0:00:00"'
+      selector:
+        datetime:
+
+generate_test_data:
+  name: Generate Test Data
+  description: Generates test data for the mypyllant library and returns it as YAML
+
+report:
+  name: Export Yearly Energy Reports
+  description: Exports energy reports in CSV format per year
+  fields:
+    year:
+      name: Year
+      description: The year of the energy report
+      example: 2023
+      required: true
+      selector:
+        number:
+          step: 1
+          mode: box

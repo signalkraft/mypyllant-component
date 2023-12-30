@@ -17,7 +17,6 @@ from myPyllant.models import Circuit, System
 
 from . import SystemCoordinator
 from .const import DOMAIN
-from .utils import get_system_sensor_unique_id
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,12 +62,16 @@ class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):
         return EntityCategory.DIAGNOSTIC
 
     @property
+    def id_infix(self) -> str:
+        return f"{self.system.id}_home"
+
+    @property
+    def name_prefix(self) -> str:
+        return f"{self.system.home.home_name or self.system.home.nomenclature}"
+
+    @property
     def device_info(self) -> DeviceInfo | None:
-        return {
-            "identifiers": {
-                (DOMAIN, f"device{get_system_sensor_unique_id(self.system)}")
-            }
-        }
+        return {"identifiers": {(DOMAIN, self.id_infix)}}
 
 
 class ControlError(SystemControlEntity):
@@ -78,7 +81,6 @@ class ControlError(SystemControlEntity):
         coordinator: SystemCoordinator,
     ):
         super().__init__(system_index, coordinator)
-        self.entity_id = f"{DOMAIN}.control_error_{system_index}"
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
@@ -93,11 +95,11 @@ class ControlError(SystemControlEntity):
 
     @property
     def name(self) -> str:
-        return f"Trouble Codes on {self.system.system_name}"
+        return f"{self.name_prefix} Trouble Codes"
 
     @property
     def unique_id(self) -> str:
-        return f"{DOMAIN}_control_error_{self.system_index}"
+        return f"{DOMAIN}_{self.id_infix}_control_error"
 
     @property
     def device_class(self) -> BinarySensorDeviceClass | None:
@@ -111,7 +113,6 @@ class ControlOnline(SystemControlEntity):
         coordinator: SystemCoordinator,
     ):
         super().__init__(system_index, coordinator)
-        self.entity_id = f"{DOMAIN}.control_online_{system_index}"
 
     @property
     def is_on(self) -> bool:
@@ -119,11 +120,11 @@ class ControlOnline(SystemControlEntity):
 
     @property
     def name(self) -> str:
-        return f"Online Status {self.system.system_name}"
+        return f"{self.name_prefix} Online Status"
 
     @property
     def unique_id(self) -> str:
-        return f"{DOMAIN}_control_online_{self.system_index}"
+        return f"{DOMAIN}_{self.id_infix}_control_online"
 
     @property
     def device_class(self) -> BinarySensorDeviceClass | None:
@@ -137,7 +138,6 @@ class FirmwareUpdateRequired(SystemControlEntity):
         coordinator: SystemCoordinator,
     ):
         super().__init__(system_index, coordinator)
-        self.entity_id = f"{DOMAIN}.firmware_update_required_{system_index}"
 
     @property
     def is_on(self) -> bool | None:
@@ -145,19 +145,15 @@ class FirmwareUpdateRequired(SystemControlEntity):
 
     @property
     def name(self) -> str:
-        return f"Firmware Update Required {self.system.home.name}"
+        return f"{self.name_prefix} Firmware Update Required"
 
     @property
     def unique_id(self) -> str:
-        return f"{DOMAIN}_firmware_update_required_{self.system_index}"
+        return f"{DOMAIN}_{self.id_infix}_firmware_update_required"
 
     @property
     def device_class(self) -> BinarySensorDeviceClass | None:
         return BinarySensorDeviceClass.UPDATE
-
-    @property
-    def device_info(self) -> DeviceInfo | None:
-        return {"identifiers": {(DOMAIN, f"home{self.system.id}")}}
 
 
 class FirmwareUpdateEnabled(SystemControlEntity):
@@ -167,7 +163,6 @@ class FirmwareUpdateEnabled(SystemControlEntity):
         coordinator: SystemCoordinator,
     ):
         super().__init__(system_index, coordinator)
-        self.entity_id = f"{DOMAIN}.firmware_update_enabled_{system_index}"
 
     @property
     def is_on(self) -> bool | None:
@@ -175,15 +170,11 @@ class FirmwareUpdateEnabled(SystemControlEntity):
 
     @property
     def name(self) -> str:
-        return f"Firmware Update Enabled {self.system.home.name}"
+        return f"{self.name_prefix} Firmware Update Enabled"
 
     @property
     def unique_id(self) -> str:
-        return f"{DOMAIN}_firmware_update_enabled_{self.system_index}"
-
-    @property
-    def device_info(self) -> DeviceInfo | None:
-        return {"identifiers": {(DOMAIN, f"home{self.system.id}")}}
+        return f"{DOMAIN}_{self.id_infix}_firmware_update_enabled"
 
 
 class CircuitEntity(CoordinatorEntity, BinarySensorEntity):
@@ -202,18 +193,22 @@ class CircuitEntity(CoordinatorEntity, BinarySensorEntity):
         return self.coordinator.data[self.system_index]
 
     @property
-    def circuit_name(self) -> str:
-        return f"Circuit {self.circuit_index}"
-
-    @property
     def circuit(self) -> Circuit:
         return self.coordinator.data[self.system_index].circuits[self.circuit_index]
 
     @property
+    def name_prefix(self) -> str:
+        return f"{self.system.home.home_name or self.system.home.nomenclature} Circuit {self.circuit_index}"
+
+    @property
+    def id_infix(self) -> str:
+        return f"{self.system.id}_circuit_{self.circuit.index}"
+
+    @property
     def device_info(self) -> DeviceInfo | None:
         return DeviceInfo(
-            identifiers={(DOMAIN, f"circuit{self.circuit.index}")},
-            name=self.circuit_name,
+            identifiers={(DOMAIN, self.id_infix)},
+            name=self.name_prefix,
             manufacturer=self.system.brand_name,
         )
 
@@ -226,7 +221,6 @@ class CircuitIsCoolingAllowed(CircuitEntity):
         coordinator: SystemCoordinator,
     ):
         super().__init__(system_index, circuit_index, coordinator)
-        self.entity_id = f"{DOMAIN}.circuit_is_cooling_allowed_{system_index}"
 
     @property
     def is_on(self) -> bool | None:
@@ -234,8 +228,8 @@ class CircuitIsCoolingAllowed(CircuitEntity):
 
     @property
     def name(self) -> str:
-        return f"Cooling Allowed in {self.circuit_name}"
+        return f"{self.name_prefix} Cooling Allowed"
 
     @property
     def unique_id(self) -> str:
-        return f"{DOMAIN}_cooling_allowed_{self.circuit_index}"
+        return f"{DOMAIN} {self.id_infix}_cooling_allowed"

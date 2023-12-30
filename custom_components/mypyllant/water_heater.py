@@ -81,7 +81,6 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
         super().__init__(coordinator)
         self.system_index = system_index
         self.dhw_index = dhw_index
-        self.entity_id = f"{DOMAIN}.domestic_hot_water_{dhw_index}"
 
     @property
     def system(self) -> System:
@@ -92,10 +91,21 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
         return self.system.domestic_hot_water[self.dhw_index]
 
     @property
+    def name_prefix(self) -> str:
+        return f"{self.system.home.home_name or self.system.home.nomenclature} Domestic Hot Water {self.dhw_index}"
+
+    @property
+    def id_infix(self) -> str:
+        return f"{self.system.id}_domestic_hot_water_{self.dhw_index}"
+
+    @property
     def device_info(self) -> DeviceInfo:
         return DeviceInfo(
             identifiers={
-                (DOMAIN, f"domestic_hot_water{self.domestic_hot_water.index}")
+                (
+                    DOMAIN,
+                    self.id_infix,
+                )
             },
             name=self.name,
             manufacturer=self.system.brand_name,
@@ -111,11 +121,11 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
 
     @property
     def unique_id(self) -> str:
-        return f"{DOMAIN}_domestic_hot_water_{self.dhw_index}"
+        return f"{DOMAIN}_{self.id_infix}_base"
 
     @property
     def name(self) -> str:
-        return f"Domestic Hot Water {self.dhw_index}"
+        return self.name_prefix
 
     @property
     def supported_features(self) -> WaterHeaterEntityFeature:
