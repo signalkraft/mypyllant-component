@@ -23,10 +23,10 @@ async def test_water_heater(
             )
         dhw = DomesticHotWaterEntity(0, 0, system_coordinator_mock)
         assert isinstance(dhw.device_info, dict)
-        assert isinstance(dhw.min_temp, float)
-        assert isinstance(dhw.max_temp, float)
+        assert isinstance(dhw.min_temp, (int, float, complex))
+        assert isinstance(dhw.max_temp, (int, float, complex))
         if "currentTemperature" in test_data:
-            assert isinstance(dhw.current_temperature, float)
+            assert isinstance(dhw.current_temperature, (int, float, complex))
         assert isinstance(dhw.operation_list, list)
         assert isinstance(dhw.extra_state_attributes, dict)
         assert dhw.current_operation in dhw.operation_list

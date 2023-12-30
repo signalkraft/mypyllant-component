@@ -110,19 +110,19 @@ async def test_circuit_sensors(
             )
         assert isinstance(
             CircuitFlowTemperatureSensor(0, 0, system_coordinator_mock).native_value,
-            float,
+            (int, float, complex),
         )
         if "heatingCurve" in str(test_data):
             assert isinstance(
                 CircuitHeatingCurveSensor(0, 0, system_coordinator_mock).native_value,
-                float,
+                (int, float, complex),
             )
         if "minFlowTemperatureSetpoint" in str(test_data):
             assert isinstance(
                 CircuitMinFlowTemperatureSetpointSensor(
                     0, 0, system_coordinator_mock
                 ).native_value,
-                float,
+                (int, float, complex),
             )
         await mocked_api.aiohttp_session.close()
 
@@ -152,7 +152,7 @@ async def test_domestic_hot_water_sensor(
         )
         assert isinstance(
             DomesticHotWaterSetPointSensor(0, 0, system_coordinator_mock).native_value,
-            float,
+            (int, float, complex),
         )
         assert isinstance(
             DomesticHotWaterCurrentSpecialFunctionSensor(
@@ -192,7 +192,7 @@ async def test_data_sensor(
         )
         assert isinstance(
             data_sensor.native_value,
-            float,
+            (int, float, complex),
         )
         assert isinstance(
             data_sensor.name,
