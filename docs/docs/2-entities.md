@@ -6,43 +6,47 @@ hide:
 
 # Entities
 
-You can expect these entities, although names may vary based on your installed devices (in this example "aroTHERM plus" 
-and "Hydraulic Station") or the naming of your heating zones (in this case "Zone 1"):
+You can expect these entities, although names will vary based on your home name (here "Home"),
+installed devices (in this example "aroTHERM plus" and "hydraulic station"),
+or the naming of your heating zones (in this case "Zone 1"):
 
-| Entity                                                          | Unit   | Class        | Sample                    |
-|-----------------------------------------------------------------|--------|--------------|---------------------------|
-| Outdoor Temperature                                             | °C     | temperature  | 16.7                      |
-| System Water Pressure                                           | bar    | pressure     | 1.0                       |
-| My Home VR 921                                                  |        |              | 0357.40.30                |
-| Desired Temperature in Zone 1                                   | °C     | temperature  | 5.0                       |
-| Current Temperature in Zone 1                                   | °C     | temperature  | 20.9                      |
-| Humidity in Zone 1                                              | %      | humidity     | 60.0                      |
-| Heating Operating Mode in Zone 1                                |        |              | Off                       |
-| Heating State in Zone 1                                         |        |              | Idle                      |
-| Current Special Function in Zone 1                              |        |              | None                      |
-| State in Circuit 0                                              |        |              | STANDBY                   |
-| Current Flow Temperature in Circuit 0                           | °C     | temperature  | 35.5                      |
-| Heating Curve in Circuit 0                                      |        |              | 0.68                      |
-| Tank Temperature Domestic Hot Water 255                         | °C     | temperature  | 48.5                      |
-| Setpoint Domestic Hot Water 255                                 | °C     | temperature  | 50.0                      |
-| Operation Mode Domestic Hot Water 255                           |        |              | Time Controlled           |
-| Current Special Function Domestic Hot Water 255                 |        |              | Regular                   |
-| Heating Energy Efficiency                                       |        |              | 3.0                       |
-| aroTHERM plus Consumed Electrical Energy Domestic Hot Water     | Wh     | energy       | 2000.0                    |
-| aroTHERM plus Consumed Electrical Energy Heating                | Wh     | energy       | 1000.0                    |
-| aroTHERM plus Earned Environment Energy Domestic Hot Water      | Wh     | energy       | 6000.0                    |
-| aroTHERM plus Earned Environment Energy Heating                 | Wh     | energy       | 0.0                       |
-| aroTHERM plus Heat Generated Heating                            | Wh     | energy       | 1000.0                    |
-| aroTHERM plus Heat Generated Domestic Hot Water                 | Wh     | energy       | 8000.0                    |
-| hydraulic station Consumed Electrical Energy Domestic Hot Water | Wh     | energy       | 0.0                       |
-| hydraulic station Consumed Electrical Energy Heating            | Wh     | energy       | 0.0                       |
-| Domestic Hot Water 0                                            |        |              | Time Controlled           |
-| Zone 1                                                          |        |              | off                       |
-| Trouble Codes on aroTHERM plus                                  |        | problem      | off                       |
-| Online Status aroTHERM plus                                     |        | connectivity | on                        |
-| Firmware Update Required My Home VR 921                         |        | update       | off                       |
-| Firmware Update Enabled My Home VR 921                          |        |              | on                        |
-| Cooling Allowed in Circuit 0                                    |        |              | off                       |
+| Entity                                                                        | Unit   | Class        | Sample                    |
+|-------------------------------------------------------------------------------|--------|--------------|---------------------------|
+| Home                                                                          |        |              | 0                         |
+| Home Outdoor Temperature                                                      | °C     | temperature  | 9.0                       |
+| Home System Water Pressure                                                    | bar    | pressure     | 1.4                       |
+| Home Firmware Version                                                         |        |              | 0357.40.32                |
+| Home Zone 1 (Circuit 0) Desired Temperature                                   | °C     | temperature  | 22.0                      |
+| Home Zone 1 (Circuit 0) Current Temperature                                   | °C     | temperature  | 21.7                      |
+| Home Zone 1 (Circuit 0) Humidity                                              | %      | humidity     | 48.0                      |
+| Home Zone 1 (Circuit 0) Heating Operating Mode                                |        |              | Time Controlled           |
+| Home Zone 1 (Circuit 0) Heating State                                         |        |              | Heating Up                |
+| Home Zone 1 (Circuit 0) Current Special Function                              |        |              | None                      |
+| Home Circuit 0 State                                                          |        |              | HEATING                   |
+| Home Circuit 0 Current Flow Temperature                                       | °C     | temperature  | 46.5                      |
+| Home Circuit 0 Heating Curve                                                  |        |              | 1.35                      |
+| Home Domestic Hot Water 0 Tank Temperature                                    | °C     | temperature  | 52.5                      |
+| Home Domestic Hot Water 0 Setpoint                                            | °C     | temperature  | 52.0                      |
+| Home Domestic Hot Water 0 Operation Mode                                      |        |              | Time Controlled           |
+| Home Domestic Hot Water 0 Current Special Function                            |        |              | Regular                   |
+| Home Heating Energy Efficiency                                                |        |              | 3.5                       |
+| Home Device 0 aroTHERM plus Heating Energy Efficiency                         |        |              | 3.5                       |
+| Home Device 0 aroTHERM plus Consumed Electrical Energy Domestic Hot Water     | Wh     | energy       | 2000.0                    |
+| Home Device 0 aroTHERM plus Consumed Electrical Energy Heating                | Wh     | energy       | 17000.0                   |
+| Home Device 0 aroTHERM plus Earned Environment Energy Domestic Hot Water      | Wh     | energy       | 5000.0                    |
+| Home Device 0 aroTHERM plus Earned Environment Energy Heating                 | Wh     | energy       | 43000.0                   |
+| Home Device 0 aroTHERM plus Heat Generated Heating                            | Wh     | energy       | 60000.0                   |
+| Home Device 0 aroTHERM plus Heat Generated Domestic Hot Water                 | Wh     | energy       | 7000.0                    |
+| Home Device 1 hydraulic station Heating Energy Efficiency                     |        |              | unknown                   |
+| Home Device 1 hydraulic station Consumed Electrical Energy Domestic Hot Water | Wh     | energy       | 0.0                       |
+| Home Device 1 hydraulic station Consumed Electrical Energy Heating            | Wh     | energy       | 0.0                       |
+| Home Zone 1 (Circuit 0) Climate                                               |        |              | auto                      |
+| Home Domestic Hot Water 0                                                     |        |              | Time Controlled           |
+| Home Trouble Codes                                                            |        | problem      | off                       |
+| Home Online Status                                                            |        | connectivity | on                        |
+| Home Firmware Update Required                                                 |        | update       | off                       |
+| Home Firmware Update Enabled                                                  |        |              | on                        |
+| Home Circuit 0 Cooling Allowed                                                |        |              | off                       |
 
 ## Extra State Attributes
 
