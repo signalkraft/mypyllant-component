@@ -16,17 +16,17 @@ Search for "myvaillant" in Developer Tools > Services in your Home Assistant ins
 
 ## Exporting Data
 
-* `mypyllant.report` for exporting yearly energy reports (in CSV format)
-* `mypyllant.export` for exporting raw data of your system
-* `mypyllant.generate_test_data` for generating test data to contribute to the [myPyllant library](https://github.com/signalkraft/mypyllant)
+* [mypyllant.report](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.report) for exporting yearly energy reports (in CSV format)
+* [mypyllant.export](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.export) for exporting raw data of your system
+* [mypyllant.generate_test_data](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.generate_test_data) for generating test data to contribute to the [myPyllant library](https://github.com/signalkraft/mypyllant)
 
 ## Setting a Time Program
 
 The following services can be used to set time programs:
 
-* `mypyllant.set_zone_time_program` for climate zones (requires an additional `program_type`)
-* `mypyllant.set_zone_time_program` for climate zones
-* `mypyllant.set_dhw_circulation_time_program` for circulation pumps on water heaters
+* [mypyllant.set_zone_time_program](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.set_zone_time_program) for climate zone temperature schedule (requires an additional `program_type`)
+* [mypyllant.set_dhw_time_program](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.set_dhw_time_program) for water heater temperature schedule
+* [mypyllant.set_dhw_circulation_time_program](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.set_dhw_circulation_time_program) for circulation pump schedule on water heaters
 
 You can look up your current time programs in the [developer states view](https://my.home-assistant.io/redirect/developer_states/)
 under attributes for your zones and water heater.
@@ -74,7 +74,7 @@ Times in the time program are given in minutes since midnight in UTC.
             setpoint: 20
         type: heating
     target:
-      entity_id: climate.zone_0
+      entity_id: climate.home_zone_1_circuit_0_climate
     ```
 
 === "Water Heater"
@@ -106,7 +106,7 @@ Times in the time program are given in minutes since midnight in UTC.
             end_time: 1290
         type: heating
     target:
-      entity_id: water_heater.domestic_hot_water_0
+      entity_id: water_heater.home_domestic_hot_water_0
     ```
 
 === "Circulation Pump"
@@ -138,5 +138,5 @@ Times in the time program are given in minutes since midnight in UTC.
             end_time: 1290
         type: heating
     target:
-      entity_id: water_heater.domestic_hot_water_0
+      entity_id: water_heater.home_domestic_hot_water_0
     ```
