@@ -20,12 +20,15 @@ from myPyllant.models import (
     Device,
     DeviceData,
     DeviceDataBucket,
-    DomesticHotWater,
     System,
     Zone,
 )
 
-from custom_components.mypyllant.utils import shorten_zone_name
+from custom_components.mypyllant.utils import (
+    shorten_zone_name,
+    SystemCoordinatorEntity,
+    DomesticHotWaterCoordinatorEntity,
+)
 
 from . import DailyDataCoordinator, SystemCoordinator
 from .const import DOMAIN
@@ -186,28 +189,8 @@ async def async_setup_entry(
     async_add_entities(await create_daily_data_sensors(hass, config))
 
 
-class SystemSensor(CoordinatorEntity, SensorEntity):
-    coordinator: SystemCoordinator
-
-    def __init__(self, index: int, coordinator: SystemCoordinator) -> None:
-        super().__init__(coordinator)
-        self.index = index
-
-    @property
-    def system(self) -> System:
-        return self.coordinator.data[self.index]
-
-    @property
-    def id_infix(self) -> str:
-        return f"{self.system.id}_home"
-
-    @property
-    def name_prefix(self) -> str:
-        return f"{self.system.home.home_name or self.system.home.nomenclature}"
-
-    @property
-    def device_info(self) -> DeviceInfo | None:
-        return {"identifiers": {(DOMAIN, self.id_infix)}}
+class SystemSensor(SystemCoordinatorEntity, SensorEntity):
+    pass
 
 
 class SystemOutdoorTemperatureSensor(SystemSensor):
@@ -591,45 +574,9 @@ class CircuitHeatingCurveSensor(CircuitSensor):
         return f"{DOMAIN}_{self.id_infix}_heating_curve"
 
 
-class DomesticHotWaterSensor(CoordinatorEntity, SensorEntity):
-    coordinator: SystemCoordinator
-
-    def __init__(
-        self, system_index: int, dhw_index: int, coordinator: SystemCoordinator
-    ) -> None:
-        super().__init__(coordinator)
-        self.system_index = system_index
-        self.dhw_index = dhw_index
-
-    @property
-    def system(self) -> System:
-        return self.coordinator.data[self.system_index]
-
-    @property
-    def name_prefix(self) -> str:
-        return f"{self.system.home.home_name or self.system.home.nomenclature} Domestic Hot Water {self.dhw_index}"
-
-    @property
-    def id_infix(self) -> str:
-        return f"{self.system.id}_domestic_hot_water_{self.dhw_index}"
-
-    @property
-    def domestic_hot_water(self) -> DomesticHotWater:
-        return self.system.domestic_hot_water[self.dhw_index]
-
-    @property
-    def device_info(self):
-        return {
-            "identifiers": {
-                (
-                    DOMAIN,
-                    self.id_infix,
-                )
-            }
-        }
-
-
-class DomesticHotWaterTankTemperatureSensor(DomesticHotWaterSensor):
+class DomesticHotWaterTankTemperatureSensor(
+    DomesticHotWaterCoordinatorEntity, SensorEntity
+):
     _attr_native_unit_of_measurement = TEMP_CELSIUS
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -647,7 +594,7 @@ class DomesticHotWaterTankTemperatureSensor(DomesticHotWaterSensor):
         return f"{DOMAIN}_{self.id_infix}_tank_temperature"
 
 
-class DomesticHotWaterSetPointSensor(DomesticHotWaterSensor):
+class DomesticHotWaterSetPointSensor(DomesticHotWaterCoordinatorEntity, SensorEntity):
     _attr_native_unit_of_measurement = TEMP_CELSIUS
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -665,7 +612,9 @@ class DomesticHotWaterSetPointSensor(DomesticHotWaterSensor):
         return f"{DOMAIN}_{self.id_infix}_set_point"
 
 
-class DomesticHotWaterOperationModeSensor(DomesticHotWaterSensor):
+class DomesticHotWaterOperationModeSensor(
+    DomesticHotWaterCoordinatorEntity, SensorEntity
+):
     @property
     def name(self):
         return f"{self.name_prefix} Operation Mode"
@@ -683,7 +632,9 @@ class DomesticHotWaterOperationModeSensor(DomesticHotWaterSensor):
         return f"{DOMAIN}_{self.id_infix}_operation_mode"
 
 
-class DomesticHotWaterCurrentSpecialFunctionSensor(DomesticHotWaterSensor):
+class DomesticHotWaterCurrentSpecialFunctionSensor(
+    DomesticHotWaterCoordinatorEntity, SensorEntity
+):
     @property
     def name(self):
         return f"{self.name_prefix} Current Special Function"

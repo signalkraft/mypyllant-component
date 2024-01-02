@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from asyncio.exceptions import CancelledError
-from datetime import datetime, timedelta
+from datetime import datetime as dt, timedelta
 from typing import TypedDict
 import voluptuous as vol
 from aiohttp.client_exceptions import ClientResponseError
@@ -46,8 +46,11 @@ _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
-    Platform.SENSOR,
     Platform.CLIMATE,
+    Platform.DATETIME,
+    Platform.NUMBER,
+    Platform.SENSOR,
+    Platform.SWITCH,
     Platform.WATER_HEATER,
 ]
 
@@ -197,7 +200,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         handle_report,
         schema=vol.Schema(
             {
-                vol.Required("year", default=datetime.now().year): vol.Coerce(int),
+                vol.Required("year", default=dt.now().year): vol.Coerce(int),
             }
         ),
         supports_response=SupportsResponse.ONLY,
@@ -248,26 +251,25 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
     async def _refresh_session(self):
         if (
             self.api.oauth_session_expires is None
-            or self.api.oauth_session_expires < datetime.now() + timedelta(seconds=180)
+            or self.api.oauth_session_expires < dt.now() + timedelta(seconds=180)
         ):
             _LOGGER.debug("Refreshing token for %s", self.api.username)
             await self.api.refresh_token()
         else:
-            delta = self.api.oauth_session_expires - (
-                datetime.now() + timedelta(seconds=180)
-            )
+            delta = self.api.oauth_session_expires - (dt.now() + timedelta(seconds=180))
             _LOGGER.debug(
                 "Waiting %ss until token refresh for %s",
                 delta.seconds,
                 self.api.username,
             )
 
-    async def async_request_refresh_delayed(self):
+    async def async_request_refresh_delayed(self, delay=None):
         """
         The API takes a long time to return updated values (i.e. after setting a new heating mode)
         This function waits for a few second and then refreshes
         """
-        delay = self.entry.options.get(OPTION_REFRESH_DELAY, DEFAULT_REFRESH_DELAY)
+        if not delay:
+            delay = self.entry.options.get(OPTION_REFRESH_DELAY, DEFAULT_REFRESH_DELAY)
         if delay:
             await asyncio.sleep(delay)
         await self.async_request_refresh()
@@ -278,7 +280,7 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
 
         Sets a quota time, so the API isn't queried as often while it is down
         """
-        self.hass_data["quota_time"] = datetime.now()
+        self.hass_data["quota_time"] = dt.now()
         self.hass_data["quota_exc_info"] = exc_info
         raise UpdateFailed(
             f"myVAILLANT API is down, skipping update of myVAILLANT data for another {QUOTA_PAUSE_INTERVAL}s"
@@ -290,7 +292,7 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         Raises UpdateFailed if a quota error is detected
         """
         if is_quota_exceeded_exception(exc_info):
-            self.hass_data["quota_time"] = datetime.now()
+            self.hass_data["quota_time"] = dt.now()
             self.hass_data["quota_exc_info"] = exc_info
             self._raise_if_quota_hit()
 
@@ -299,11 +301,11 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         Check if we previously hit a quota, and if the quota was hit within a certain interval
         If yes, we keep raising UpdateFailed() until after the interval to avoid spamming the API
         """
-        quota_time: datetime = self.hass_data["quota_time"]
+        quota_time: dt = self.hass_data["quota_time"]
         if not quota_time:
             return
 
-        time_elapsed = (datetime.now() - quota_time).seconds
+        time_elapsed = (dt.now() - quota_time).seconds
         exc_info: Exception = self.hass_data["quota_exc_info"]
 
         if is_quota_exceeded_exception(exc_info):
@@ -369,7 +371,7 @@ class DailyDataCoordinator(MyPyllantCoordinator):
         try:
             await self._refresh_session()
             data: dict[str, SystemWithDeviceData] = {}
-            start = datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
+            start = dt.now().replace(microsecond=0, second=0, minute=0, hour=0)
             end = start + timedelta(days=1)
             _LOGGER.debug("Getting data from %s to %s", start, end)
             async for system in await self.hass.async_add_executor_job(

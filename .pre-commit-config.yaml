@@ -22,26 +22,18 @@ repos:
       - id: check-executables-have-shebangs
         stages: [manual]
       - id: check-json
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.0.1
-    hooks:
-      - id: mypy
-        args:
-          - --pretty
-          - --show-error-codes
-          - --show-error-context
-        additional_dependencies:
-          - aiohttp
-          - aioresponses
-          - pytest
-          - types-requests
-          - myPyllant==0.6.8
-          - polyfactory
+  # These hooks require the locally installed venv (for example myPyllant for mypy)
   - repo: local
     hooks:
+    - id: mypy
+      name: mypy
+      entry: run_venv.sh mypy --pretty --show-error-codes --show-error-context
+      language: script
+      pass_filenames: true
+      files: ^(tests|custom_components)/.+\.py$
     - id: pytest
       name: pytest
-      entry: run_pytest.sh --no-cov
+      entry: run_venv.sh pytest --no-cov
       language: script
       pass_filenames: false
       files: ^(tests|custom_components)/.+\.(py|json|yaml)$

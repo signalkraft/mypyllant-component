@@ -307,6 +307,8 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             "time_program_heating": self.zone.heating.time_program_heating,
             "quick_veto_start_date_time": self.zone.quick_veto_start_date_time,
             "quick_veto_end_date_time": self.zone.quick_veto_end_date_time,
+            "holiday_start_date_time": self.zone.general.holiday_start_date_time,
+            "holiday_end_date_time": self.zone.general.holiday_end_date_time,
         }
         return attr | self.zone.extra_fields
 
@@ -475,7 +477,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                     == ZoneCurrentSpecialFunction.HOLIDAY
                 ):
                     # If holiday mode is set, we cancel that instead
-                    await self.coordinator.api.cancel_holiday(self.system)
+                    await self.cancel_holiday()
             if requested_mode == ZoneCurrentSpecialFunction.QUICK_VETO:
                 await self.coordinator.api.quick_veto_zone_temperature(
                     self.zone,
@@ -483,7 +485,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                     default_duration=self.default_quick_veto_duration,
                 )
             if requested_mode == ZoneCurrentSpecialFunction.HOLIDAY:
-                await self.coordinator.api.set_holiday(self.system)
+                await self.set_holiday()
 
             if requested_mode == ZoneCurrentSpecialFunction.SYSTEM_OFF:
                 # SYSTEM_OFF is a valid special function, but since there's no API endpoint we

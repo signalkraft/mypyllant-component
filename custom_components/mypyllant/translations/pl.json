@@ -26,6 +26,7 @@
           "update_interval": "Sekundy między skanowaniami (niższe wartości grożą błędami 'przekroczenia limitu' i tymczasowymi banami)",
           "refresh_delay": "Opóźnienie przed odświeżeniem danych po aktualizacji",
           "quick_veto_duration": "Domyślny czas trwania szybkiego weta w godzinach",
+          "holiday_duration": "Domyślny czas trwania wakacji w dniach",
           "time_program_overwrite": "Kontrola temperatury nadpisuje program czasowy zamiast ustawiać szybkie weto",
           "country": "Kraj",
           "brand": "Marka"

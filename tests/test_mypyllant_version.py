@@ -7,7 +7,6 @@ async def test_mypyllant_versions():
     Make sure myPyllant library is set to the same versions in all important files
     """
     files = [
-        Path(".").parent / ".pre-commit-config.yaml",
         Path(".").parent / "dev-requirements.txt",
         Path(".").parent / "custom_components/mypyllant/manifest.json",
     ]

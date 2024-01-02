@@ -20,6 +20,7 @@ from myPyllant.const import (
     COUNTRIES,
     DEFAULT_BRAND,
     DEFAULT_QUICK_VETO_DURATION,
+    DEFAULT_HOLIDAY_DURATION,
 )
 
 from .const import (
@@ -34,6 +35,7 @@ from .const import (
     OPTION_REFRESH_DELAY,
     OPTION_TIME_PROGRAM_OVERWRITE,
     OPTION_UPDATE_INTERVAL,
+    OPTION_DEFAULT_HOLIDAY_DURATION,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -123,6 +125,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         default=self.config_entry.options.get(
                             OPTION_DEFAULT_QUICK_VETO_DURATION,
                             DEFAULT_QUICK_VETO_DURATION,
+                        ),
+                    ): positive_int,
+                    vol.Required(
+                        OPTION_DEFAULT_HOLIDAY_DURATION,
+                        default=self.config_entry.options.get(
+                            OPTION_DEFAULT_HOLIDAY_DURATION,
+                            DEFAULT_HOLIDAY_DURATION,
                         ),
                     ): positive_int,
                     vol.Required(
