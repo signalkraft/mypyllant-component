@@ -10,7 +10,11 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from custom_components.mypyllant import DOMAIN, SystemCoordinator
-from custom_components.mypyllant.utils import HolidayEntity, SystemCoordinatorEntity
+from custom_components.mypyllant.utils import (
+    HolidayEntity,
+    SystemCoordinatorEntity,
+    ZoneCoordinatorEntity,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -29,6 +33,9 @@ async def async_setup_entry(
     sensors = []
     for index, system in enumerate(coordinator.data):
         sensors.append(SystemHolidayDurationNumber(index, coordinator))
+
+        for zone_index, zone in enumerate(system.zones):
+            sensors.append(ZoneQuickVetoDurationNumber(index, zone_index, coordinator))
     async_add_entities(sensors)
 
 
@@ -98,3 +105,32 @@ class SystemHolidayDurationNumber(HolidayEntity, NumberEntity):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_holiday_duration_remaining"
+
+
+class ZoneQuickVetoDurationNumber(ZoneCoordinatorEntity, NumberEntity):
+    _attr_native_unit_of_measurement = UnitOfTime.HOURS
+    _attr_icon = "mdi:rocket-launch"
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} Quick Veto Duration"
+
+    @property
+    def native_value(self):
+        return (
+            round(self.zone.quick_veto_remaining.total_seconds() / 3600)
+            if self.zone.quick_veto_remaining
+            else 0
+        )
+
+    async def async_set_native_value(self, value: float) -> None:
+        if value == 0:
+            await self.coordinator.api.cancel_quick_veto_zone_temperature(self.zone)
+            await self.coordinator.async_request_refresh_delayed()
+        else:
+            await self.coordinator.api.quick_veto_zone_duration(self.zone, value)
+            await self.coordinator.async_request_refresh_delayed()
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_quick_veto_duration"

@@ -3,12 +3,11 @@ from homeassistant.components.climate import HVACMode
 from homeassistant.components.climate.const import FAN_OFF, PRESET_AWAY
 from homeassistant.const import ATTR_TEMPERATURE
 from myPyllant.api import MyPyllantAPI
-from myPyllant.const import DEFAULT_QUICK_VETO_DURATION
 from myPyllant.tests.utils import list_test_data
 
 from custom_components.mypyllant import SystemCoordinator
 from custom_components.mypyllant.climate import VentilationClimate, ZoneClimate
-from custom_components.mypyllant.const import DEFAULT_TIME_PROGRAM_OVERWRITE
+from tests.utils import get_config_entry
 
 
 @pytest.mark.parametrize("test_data", list_test_data())
@@ -26,8 +25,7 @@ async def test_zone_climate(
             0,
             0,
             system_coordinator_mock,
-            DEFAULT_QUICK_VETO_DURATION,
-            DEFAULT_TIME_PROGRAM_OVERWRITE,
+            get_config_entry(),
         )
         assert isinstance(climate.device_info, dict)
         assert isinstance(climate.extra_state_attributes, dict)

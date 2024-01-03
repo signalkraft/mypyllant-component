@@ -6,13 +6,15 @@ from asyncio.exceptions import CancelledError
 from datetime import datetime, timedelta
 
 from aiohttp.client_exceptions import ClientResponseError
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from custom_components.mypyllant.const import DOMAIN
+from custom_components.mypyllant.const import DOMAIN, OPTION_DEFAULT_HOLIDAY_DURATION
+from myPyllant.const import DEFAULT_HOLIDAY_DURATION
 
 if typing.TYPE_CHECKING:
     from custom_components.mypyllant import SystemCoordinator
-    from myPyllant.models import System, DomesticHotWater
+    from myPyllant.models import System, DomesticHotWater, Zone
 
 logger = logging.getLogger(__name__)
 
@@ -42,21 +44,20 @@ class SystemCoordinatorEntity(CoordinatorEntity):
 
 
 class HolidayEntity(SystemCoordinatorEntity):
-    default_holiday_duration: int
-
     def __init__(
         self,
         index: int,
         coordinator: "SystemCoordinator",
-        default_holiday_duration: int,
+        config: ConfigEntry,
     ) -> None:
         super().__init__(index, coordinator)
-        logging.debug(
-            "Initializing %s with default holiday duration %s",
-            self.__class__.__name__,
-            default_holiday_duration,
+        self.config = config
+
+    @property
+    def default_holiday_duration(self):
+        return self.config.options.get(
+            OPTION_DEFAULT_HOLIDAY_DURATION, DEFAULT_HOLIDAY_DURATION
         )
-        self.default_holiday_duration = default_holiday_duration
 
     @property
     def extra_state_attributes(self) -> typing.Mapping[str, typing.Any] | None:
@@ -156,3 +157,49 @@ class DomesticHotWaterCoordinatorEntity(CoordinatorEntity):
                 )
             }
         }
+
+
+class ZoneCoordinatorEntity(CoordinatorEntity):
+    coordinator: SystemCoordinator
+
+    def __init__(
+        self, system_index: int, zone_index: int, coordinator: SystemCoordinator
+    ) -> None:
+        super().__init__(coordinator)
+        self.system_index = system_index
+        self.zone_index = zone_index
+
+    @property
+    def system(self) -> System:
+        return self.coordinator.data[self.system_index]
+
+    @property
+    def zone(self) -> Zone:
+        return self.system.zones[self.zone_index]
+
+    @property
+    def circuit_name_suffix(self) -> str:
+        if self.zone.associated_circuit_index is None:
+            return ""
+        else:
+            return f" (Circuit {self.zone.associated_circuit_index})"
+
+    @property
+    def name_prefix(self) -> str:
+        return f"{self.system.home.home_name or self.system.home.nomenclature} Zone {shorten_zone_name(self.zone.name)}{self.circuit_name_suffix}"
+
+    @property
+    def id_infix(self) -> str:
+        return f"{self.system.id}_zone_{self.zone.index}"
+
+    @property
+    def device_info(self):
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.id_infix)},
+            name=self.name_prefix,
+            manufacturer=self.system.brand_name,
+        )
+
+    @property
+    def available(self) -> bool | None:
+        return self.zone.is_active

@@ -21,6 +21,7 @@ from myPyllant.models import (
     DomesticHotWater,
     System,
 )
+from myPyllant.utils import prepare_field_value_for_dict
 
 from . import SystemCoordinator
 from .const import (
@@ -117,7 +118,7 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
             "time_program_dhw": self.domestic_hot_water.time_program_dhw,
             "time_program_circulation_pump": self.domestic_hot_water.time_program_circulation_pump,
         }
-        return attr | self.domestic_hot_water.extra_fields
+        return attr | prepare_field_value_for_dict(self.domestic_hot_water.extra_fields)
 
     @property
     def unique_id(self) -> str:

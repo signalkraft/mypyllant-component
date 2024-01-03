@@ -1,5 +1,6 @@
 from unittest import mock
 
+
 from custom_components.mypyllant import (
     DOMAIN,
     async_setup_entry,
@@ -43,3 +44,12 @@ async def call_service(
                 **service_kwargs,
             )
     return result
+
+
+def get_config_entry():
+    return MockConfigEntry(
+        domain=DOMAIN,
+        title="Mock Title",
+        data=test_user_input,
+        options=TEST_OPTIONS,
+    )

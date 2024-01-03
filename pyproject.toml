@@ -14,6 +14,7 @@ show_missing = true
 testpaths = ["tests"]
 norecursedirs = [".git"]
 addopts = """
+-n4
 --strict-markers
 --cov=custom_components"""
 asyncio_mode = "auto"

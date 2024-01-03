@@ -9,9 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from custom_components.mypyllant import DOMAIN, SystemCoordinator
-from custom_components.mypyllant.const import OPTION_DEFAULT_HOLIDAY_DURATION
 from custom_components.mypyllant.utils import HolidayEntity
-from myPyllant.const import DEFAULT_HOLIDAY_DURATION
 from myPyllant.utils import get_default_holiday_dates
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,19 +26,10 @@ async def async_setup_entry(
         _LOGGER.warning("No system data, skipping date time entities")
         return
 
-    default_holiday_duration = config.options.get(
-        OPTION_DEFAULT_HOLIDAY_DURATION, DEFAULT_HOLIDAY_DURATION
-    )
     sensors = []
     for index, system in enumerate(coordinator.data):
-        sensors.append(
-            SystemHolidayStartDateTimeEntity(
-                index, coordinator, default_holiday_duration
-            )
-        )
-        sensors.append(
-            SystemHolidayEndDateTimeEntity(index, coordinator, default_holiday_duration)
-        )
+        sensors.append(SystemHolidayStartDateTimeEntity(index, coordinator, config))
+        sensors.append(SystemHolidayEndDateTimeEntity(index, coordinator, config))
     async_add_entities(sensors)
 
 
@@ -61,11 +50,12 @@ class SystemHolidayStartDateTimeEntity(HolidayEntity, DateTimeEntity):
 
     async def async_set_value(self, value: datetime) -> None:
         _, end = get_default_holiday_dates(
-            self.holiday_start, self.holiday_end, self.default_holiday_duration
+            self.holiday_start,
+            self.holiday_end,
+            self.system.timezone,
+            self.default_holiday_duration,
         )
-        await self.coordinator.api.set_holiday(
-            self.system, start=value.replace(tzinfo=None), end=end
-        )
+        await self.coordinator.api.set_holiday(self.system, start=value, end=end)
         # Holiday values need a long time to show up in the API
         await self.coordinator.async_request_refresh_delayed(10)
 
@@ -92,7 +82,7 @@ class SystemHolidayEndDateTimeEntity(SystemHolidayStartDateTimeEntity):
     async def async_set_value(self, value: datetime) -> None:
         # TODO: Make API tz-aware
         await self.coordinator.api.set_holiday(
-            self.system, start=self.holiday_start, end=value.replace(tzinfo=None)
+            self.system, start=self.holiday_start, end=value
         )
         # Holiday values need a long time to show up in the API
         await self.coordinator.async_request_refresh_delayed(10)

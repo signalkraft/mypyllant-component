@@ -21,14 +21,14 @@ from myPyllant.models import (
     DeviceData,
     DeviceDataBucket,
     System,
-    Zone,
 )
 
 from custom_components.mypyllant.utils import (
-    shorten_zone_name,
     SystemCoordinatorEntity,
     DomesticHotWaterCoordinatorEntity,
+    ZoneCoordinatorEntity,
 )
+from myPyllant.utils import prepare_field_value_for_dict
 
 from . import DailyDataCoordinator, SystemCoordinator
 from .const import DOMAIN
@@ -291,53 +291,7 @@ class HomeEntity(CoordinatorEntity, SensorEntity):
         return f"{self.system.home.home_name or self.system.home.nomenclature} Firmware Version"
 
 
-class ZoneEntity(CoordinatorEntity, SensorEntity):
-    coordinator: SystemCoordinator
-
-    def __init__(
-        self, system_index: int, zone_index: int, coordinator: SystemCoordinator
-    ) -> None:
-        super().__init__(coordinator)
-        self.system_index = system_index
-        self.zone_index = zone_index
-
-    @property
-    def system(self) -> System:
-        return self.coordinator.data[self.system_index]
-
-    @property
-    def zone(self) -> Zone:
-        return self.system.zones[self.zone_index]
-
-    @property
-    def circuit_name_suffix(self) -> str:
-        if self.zone.associated_circuit_index is None:
-            return ""
-        else:
-            return f" (Circuit {self.zone.associated_circuit_index})"
-
-    @property
-    def name_prefix(self) -> str:
-        return f"{self.system.home.home_name or self.system.home.nomenclature} Zone {shorten_zone_name(self.zone.name)}{self.circuit_name_suffix}"
-
-    @property
-    def id_infix(self) -> str:
-        return f"{self.system.id}_zone_{self.zone.index}"
-
-    @property
-    def device_info(self):
-        return DeviceInfo(
-            identifiers={(DOMAIN, self.id_infix)},
-            name=self.name_prefix,
-            manufacturer=self.system.brand_name,
-        )
-
-    @property
-    def available(self) -> bool | None:
-        return self.zone.is_active
-
-
-class ZoneDesiredRoomTemperatureSetpointSensor(ZoneEntity):
+class ZoneDesiredRoomTemperatureSetpointSensor(ZoneCoordinatorEntity, SensorEntity):
     _attr_native_unit_of_measurement = TEMP_CELSIUS
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -360,7 +314,7 @@ class ZoneDesiredRoomTemperatureSetpointSensor(ZoneEntity):
         return f"{DOMAIN}_{self.id_infix}_desired_temperature"
 
 
-class ZoneCurrentRoomTemperatureSensor(ZoneEntity):
+class ZoneCurrentRoomTemperatureSensor(ZoneCoordinatorEntity, SensorEntity):
     _attr_native_unit_of_measurement = TEMP_CELSIUS
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -382,7 +336,7 @@ class ZoneCurrentRoomTemperatureSensor(ZoneEntity):
         return f"{DOMAIN}_{self.id_infix}_current_temperature"
 
 
-class ZoneHumiditySensor(ZoneEntity):
+class ZoneHumiditySensor(ZoneCoordinatorEntity, SensorEntity):
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_device_class = SensorDeviceClass.HUMIDITY
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -400,7 +354,7 @@ class ZoneHumiditySensor(ZoneEntity):
         return f"{DOMAIN}_{self.id_infix}_humidity"
 
 
-class ZoneHeatingOperatingModeSensor(ZoneEntity):
+class ZoneHeatingOperatingModeSensor(ZoneCoordinatorEntity, SensorEntity):
     @property
     def name(self):
         return f"{self.name_prefix} Heating Operating Mode"
@@ -418,7 +372,7 @@ class ZoneHeatingOperatingModeSensor(ZoneEntity):
         return EntityCategory.DIAGNOSTIC
 
 
-class ZoneHeatingStateSensor(ZoneEntity):
+class ZoneHeatingStateSensor(ZoneCoordinatorEntity, SensorEntity):
     @property
     def name(self):
         return f"{self.name_prefix} Heating State"
@@ -436,7 +390,7 @@ class ZoneHeatingStateSensor(ZoneEntity):
         return EntityCategory.DIAGNOSTIC
 
 
-class ZoneCurrentSpecialFunctionSensor(ZoneEntity):
+class ZoneCurrentSpecialFunctionSensor(ZoneCoordinatorEntity, SensorEntity):
     @property
     def name(self):
         return f"{self.name_prefix} Current Special Function"
@@ -522,7 +476,7 @@ class CircuitStateSensor(CircuitSensor):
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
-        return self.circuit.extra_fields
+        return prepare_field_value_for_dict(self.circuit.extra_fields)
 
     @property
     def unique_id(self) -> str:

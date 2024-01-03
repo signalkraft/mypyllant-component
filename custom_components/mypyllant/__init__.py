@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from asyncio.exceptions import CancelledError
-from datetime import datetime as dt, timedelta
+from datetime import datetime as dt, timedelta, timezone
 from typing import TypedDict
 import voluptuous as vol
 from aiohttp.client_exceptions import ClientResponseError
@@ -251,12 +251,15 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
     async def _refresh_session(self):
         if (
             self.api.oauth_session_expires is None
-            or self.api.oauth_session_expires < dt.now() + timedelta(seconds=180)
+            or self.api.oauth_session_expires
+            < dt.now(timezone.utc) + timedelta(seconds=180)
         ):
             _LOGGER.debug("Refreshing token for %s", self.api.username)
             await self.api.refresh_token()
         else:
-            delta = self.api.oauth_session_expires - (dt.now() + timedelta(seconds=180))
+            delta = self.api.oauth_session_expires - (
+                dt.now(timezone.utc) + timedelta(seconds=180)
+            )
             _LOGGER.debug(
                 "Waiting %ss until token refresh for %s",
                 delta.seconds,
@@ -345,7 +348,7 @@ class SystemCoordinator(MyPyllantCoordinator):
             data = [
                 s
                 async for s in await self.hass.async_add_executor_job(
-                    self.api.get_systems, True, True, True
+                    self.api.get_systems, True, True
                 )
             ]
             return data

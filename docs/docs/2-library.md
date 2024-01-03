@@ -104,10 +104,11 @@ parser.add_argument(
 async def main(user, password, brand, country):
     async with MyPyllantAPI(user, password, brand, country) as api:
         async for system in api.get_systems():
-            print(await api.get_time_zone(system))
             print(
                 await api.set_holiday(
-                    system, datetime.now(), datetime.now() + timedelta(days=7)
+                    system,
+                    datetime.now(system.timezone),
+                    datetime.now(system.timezone) + timedelta(days=7),
                 )
             )
             print(await api.cancel_holiday(system))

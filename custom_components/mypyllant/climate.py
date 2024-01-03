@@ -107,12 +107,6 @@ async def async_setup_entry(
     coordinator: SystemCoordinator = hass.data[DOMAIN][config.entry_id][
         "system_coordinator"
     ]
-    default_quick_veto_duration = config.options.get(
-        OPTION_DEFAULT_QUICK_VETO_DURATION, DEFAULT_QUICK_VETO_DURATION
-    )
-    time_program_overwrite = config.options.get(
-        OPTION_TIME_PROGRAM_OVERWRITE, DEFAULT_TIME_PROGRAM_OVERWRITE
-    )
     if not coordinator.data:
         _LOGGER.warning("No system data, skipping climate")
         return
@@ -127,8 +121,7 @@ async def async_setup_entry(
                     index,
                     zone_index,
                     coordinator,
-                    default_quick_veto_duration,
-                    time_program_overwrite,
+                    config,
                 )
             )
         for ventilation_index, _ in enumerate(system.ventilation):
@@ -253,14 +246,24 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         system_index: int,
         zone_index: int,
         coordinator: SystemCoordinator,
-        default_quick_veto_duration: float,
-        time_program_overwrite: bool,
+        config: ConfigEntry,
     ) -> None:
         super().__init__(coordinator)
         self.system_index = system_index
         self.zone_index = zone_index
-        self.default_quick_veto_duration = default_quick_veto_duration
-        self.time_program_overwrite = time_program_overwrite
+        self.config = config
+
+    @property
+    def default_quick_veto_duration(self):
+        return self.config.options.get(
+            OPTION_DEFAULT_QUICK_VETO_DURATION, DEFAULT_QUICK_VETO_DURATION
+        )
+
+    @property
+    def time_program_overwrite(self):
+        return self.config.options.get(
+            OPTION_TIME_PROGRAM_OVERWRITE, DEFAULT_TIME_PROGRAM_OVERWRITE
+        )
 
     @property
     def system(self) -> System:

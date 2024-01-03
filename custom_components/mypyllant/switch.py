@@ -8,12 +8,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from custom_components.mypyllant import DOMAIN, SystemCoordinator
-from custom_components.mypyllant.const import OPTION_DEFAULT_HOLIDAY_DURATION
 from custom_components.mypyllant.utils import (
     HolidayEntity,
     DomesticHotWaterCoordinatorEntity,
 )
-from myPyllant.const import DEFAULT_HOLIDAY_DURATION
 from myPyllant.models import DHWCurrentSpecialFunction
 from myPyllant.utils import get_default_holiday_dates
 
@@ -31,15 +29,9 @@ async def async_setup_entry(
         _LOGGER.warning("No system data, skipping switch entities")
         return
 
-    default_holiday_duration = config.options.get(
-        OPTION_DEFAULT_HOLIDAY_DURATION, DEFAULT_HOLIDAY_DURATION
-    )
-
     sensors = []
     for index, system in enumerate(coordinator.data):
-        sensors.append(
-            SystemHolidaySwitch(index, coordinator, default_holiday_duration)
-        )
+        sensors.append(SystemHolidaySwitch(index, coordinator, config))
 
         for dhw_index, dhw in enumerate(system.domestic_hot_water):
             sensors.append(DomesticHotWaterBoostSwitch(index, dhw_index, coordinator))
@@ -59,7 +51,10 @@ class SystemHolidaySwitch(HolidayEntity, SwitchEntity):
 
     async def async_turn_on(self, **kwargs):
         _, end = get_default_holiday_dates(
-            self.holiday_start, self.holiday_end, self.default_holiday_duration
+            self.holiday_start,
+            self.holiday_end,
+            self.system.timezone,
+            self.default_holiday_duration,
         )
         await self.coordinator.api.set_holiday(self.system, end=end)
         # Holiday values need a long time to show up in the API

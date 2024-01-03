@@ -15,25 +15,25 @@ repos:
           - --ignore-words-list=hass,alot,datas,dof,dur,farenheit,hist,iff,ines,ist,lightsensor,mut,nd,pres,referer,ser,serie,te,technik,ue,uint,visability,wan,wanna,withing
           - --skip="./.*,*.csv,*.json"
           - --quiet-level=2
-        exclude_types: [csv, json]
+        exclude_types: [ csv, json ]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
       - id: check-executables-have-shebangs
-        stages: [manual]
+        stages: [ manual ]
       - id: check-json
   # These hooks require the locally installed venv (for example myPyllant for mypy)
   - repo: local
     hooks:
-    - id: mypy
-      name: mypy
-      entry: run_venv.sh mypy --pretty --show-error-codes --show-error-context
-      language: script
-      pass_filenames: true
-      files: ^(tests|custom_components)/.+\.py$
-    - id: pytest
-      name: pytest
-      entry: run_venv.sh pytest --no-cov
-      language: script
-      pass_filenames: false
-      files: ^(tests|custom_components)/.+\.(py|json|yaml)$
+      - id: mypy
+        name: mypy
+        entry: run_venv.sh mypy --pretty --show-error-codes --show-error-context
+        language: script
+        pass_filenames: true
+        files: ^(tests|custom_components)/.+\.py$
+      - id: pytest
+        name: pytest
+        entry: run_venv.sh pytest --no-cov
+        language: script
+        pass_filenames: false
+        files: ^(tests|custom_components)/.+\.(py|json|yaml)$
