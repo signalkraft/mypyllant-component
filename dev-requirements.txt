@@ -8,6 +8,7 @@ pre-commit~=2.21.0
 polyfactory~=2.9.0
 pytest-asyncio~=0.21.0
 ruff~=0.1.9
+pyright~=1.1.344
 
 # Need specific versions
 pytest==7.4.3

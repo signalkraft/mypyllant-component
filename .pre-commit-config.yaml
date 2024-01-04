@@ -31,6 +31,12 @@ repos:
         language: script
         pass_filenames: true
         files: ^(tests|custom_components)/.+\.py$
+      - id: pyright
+        name: pyright
+        entry: run_venv.sh pyright
+        language: script
+        pass_filenames: true
+        files: ^(tests|custom_components)/.+\.py$
       - id: pytest
         name: pytest
         entry: run_venv.sh pytest --no-cov
