@@ -1,5 +1,5 @@
 from asyncio import CancelledError
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest as pytest
 from aiohttp import RequestInfo
@@ -26,7 +26,9 @@ async def test_quota(
         status=403,
         message="Quota Exceeded",
     )
-    with freeze_time(datetime.now() - timedelta(seconds=QUOTA_PAUSE_INTERVAL + 180)):
+    with freeze_time(
+        datetime.now(timezone.utc) - timedelta(seconds=QUOTA_PAUSE_INTERVAL + 180)
+    ):
         with mypyllant_aioresponses(raise_exception=quota_exception) as _:
             with pytest.raises(UpdateFailed, match=r"Quota.*") as _:
                 system_coordinator_mock.data = (
@@ -34,7 +36,9 @@ async def test_quota(
                 )
 
     # Quota error should still raise before the interval is over
-    with freeze_time(datetime.now() - timedelta(seconds=QUOTA_PAUSE_INTERVAL / 2)):
+    with freeze_time(
+        datetime.now(timezone.utc) - timedelta(seconds=QUOTA_PAUSE_INTERVAL / 2)
+    ):
         with mypyllant_aioresponses() as _:
             with pytest.raises(UpdateFailed, match=r"Quota.*") as _:
                 system_coordinator_mock.data = (
@@ -60,7 +64,7 @@ async def test_api_down(
             )
 
     # Quota error should still raise before API_DOWN_PAUSE_INTERVAL is over
-    with freeze_time(datetime.now() + timedelta(seconds=10)):
+    with freeze_time(datetime.now(timezone.utc) + timedelta(seconds=10)):
         with mypyllant_aioresponses() as _:
             with pytest.raises(UpdateFailed, match=r"myVAILLANT API is down.*") as _:
                 system_coordinator_mock.data = (
@@ -69,7 +73,7 @@ async def test_api_down(
 
     # No more error after API_DOWN_PAUSE_INTERVAL is over
     with freeze_time(
-        datetime.now() + timedelta(seconds=(API_DOWN_PAUSE_INTERVAL + 10))
+        datetime.now(timezone.utc) + timedelta(seconds=(API_DOWN_PAUSE_INTERVAL + 10))
     ):
         with mypyllant_aioresponses(test_data=list_test_data()[0]) as _:
             system_coordinator_mock.data = (

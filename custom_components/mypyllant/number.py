@@ -97,7 +97,7 @@ class SystemHolidayDurationNumber(HolidayEntity, NumberEntity):
         else:
             if self.native_unit_of_measurement == UnitOfTime.DAYS:
                 value = value * 24
-            end = datetime.now() + timedelta(hours=value)
+            end = datetime.now(self.system.timezone) + timedelta(hours=value)
             await self.coordinator.api.set_holiday(self.system, end=end)
             # Holiday values need a long time to show up in the API
             await self.coordinator.async_request_refresh_delayed(10)
@@ -134,3 +134,7 @@ class ZoneQuickVetoDurationNumber(ZoneCoordinatorEntity, NumberEntity):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_quick_veto_duration"
+
+    @property
+    def available(self) -> bool:
+        return self.zone.quick_veto_ongoing

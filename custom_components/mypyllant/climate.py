@@ -330,7 +330,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                     "Can't set end and duration_hours arguments at the same time for set_holiday"
                 )
             if not start:
-                start = datetime.now()
+                start = datetime.now(self.system.timezone)
             end = start + timedelta(hours=duration_hours)
         await self.coordinator.api.set_holiday(self.system, start, end)
         await self.coordinator.async_request_refresh_delayed()

@@ -283,7 +283,7 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
 
         Sets a quota time, so the API isn't queried as often while it is down
         """
-        self.hass_data["quota_time"] = dt.now()
+        self.hass_data["quota_time"] = dt.now(timezone.utc)
         self.hass_data["quota_exc_info"] = exc_info
         raise UpdateFailed(
             f"myVAILLANT API is down, skipping update of myVAILLANT data for another {QUOTA_PAUSE_INTERVAL}s"
@@ -295,7 +295,7 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         Raises UpdateFailed if a quota error is detected
         """
         if is_quota_exceeded_exception(exc_info):
-            self.hass_data["quota_time"] = dt.now()
+            self.hass_data["quota_time"] = dt.now(timezone.utc)
             self.hass_data["quota_exc_info"] = exc_info
             self._raise_if_quota_hit()
 
@@ -308,7 +308,7 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         if not quota_time:
             return
 
-        time_elapsed = (dt.now() - quota_time).seconds
+        time_elapsed = (dt.now(timezone.utc) - quota_time).seconds
         exc_info: Exception = self.hass_data["quota_exc_info"]
 
         if is_quota_exceeded_exception(exc_info):
@@ -374,12 +374,16 @@ class DailyDataCoordinator(MyPyllantCoordinator):
         try:
             await self._refresh_session()
             data: dict[str, SystemWithDeviceData] = {}
-            start = dt.now().replace(microsecond=0, second=0, minute=0, hour=0)
-            end = start + timedelta(days=1)
-            _LOGGER.debug("Getting data from %s to %s", start, end)
             async for system in await self.hass.async_add_executor_job(
                 self.api.get_systems
             ):
+                start = dt.now(system.timezone).replace(
+                    microsecond=0, second=0, minute=0, hour=0
+                )
+                end = start + timedelta(days=1)
+                _LOGGER.debug(
+                    "Getting daily data for %s from %s to %s", system, start, end
+                )
                 if len(system.devices) == 0:
                     continue
                 data[system.id] = {
