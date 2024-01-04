@@ -12,7 +12,7 @@ hide:
 
 ![myPyllant](https://raw.githubusercontent.com/signalkraft/myPyllant/main/logo.png){ align=right }
 
-Home Assistant component that interfaces with the myVAILLANT API 
+Home Assistant component that interfaces with the myVAILLANT API
 (and branded versions of it, such as the MiGo Link app from Saunier Duval & Bulex).
 Uses the [myPyllant library](https://github.com/signalkraft/mypyllant).
 
@@ -34,9 +34,11 @@ Uses the [myPyllant library](https://github.com/signalkraft/mypyllant).
 ### Manual
 
 1. Download [the latest release](https://github.com/signalkraft/mypyllant-component/releases)
-2. Extract the `custom_components` folder to your Home Assistant's config folder, the resulting folder structure should be `config/custom_components/mypyllant`
+2. Extract the `custom_components` folder to your Home Assistant's config folder, the resulting folder structure should
+   be `config/custom_components/mypyllant`
 3. Restart Home Assistant
-4. [Add myVaillant integration](https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant), or go to Settings > Integrations and add myVAILLANT
+4. [Add myVaillant integration](https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant), or go to
+   Settings > Integrations and add myVAILLANT
 5. Sign in with the email & password you used in the myVAILLANT app (or MiGo app for Saunier Duval)
 
 ## Tested Setups
@@ -55,7 +57,8 @@ Uses the [myPyllant library](https://github.com/signalkraft/mypyllant).
 
 * Supports climate & hot water controls, as well as sensor information
 * Control operating modes, target temperature, and presets such as holiday more or quick veto
-* Set the schedule for climate zones, water heaters, and circulation pumps with [a custom service](https://signalkraft.com/mypyllant-component/2-services/#setting-a-time-program)
+* Set the schedule for climate zones, water heaters, and circulation pumps
+  with [a custom service](https://signalkraft.com/mypyllant-component/2-services/#setting-a-time-program)
 * Track sensor information of devices, such as temperature, humidity, operating mode, energy usage, or energy efficiency
 * See diagnostic information, such as the current heating curve, flow temperature, firmware versions, or water pressure
 * Custom services to set holiday mode or quick veto temperature overrides, and their duration
@@ -73,9 +76,14 @@ The Vaillant takes some time to return the updated values.
 
 ### Default duration in hours for quick veto
 
-When setting the temperature with the climate controls, the integration uses the "quick veto" feature of the myVAILLANT app.
+When setting the temperature with the climate controls, the integration uses the "quick veto" feature of the myVAILLANT
+app.
 
 With this option you can set for how long the temperature should stay set, before returning to the default value.
+
+### Default duration in days for away mode
+
+When the away mode preset is activated, this duration is used to for the end date (default is 365 days).
 
 ### Temperature controls overwrite time program instead of setting quick veto
 
@@ -83,7 +91,7 @@ When raising or lowering the desired temperature in the myVAILLANT app, it sets 
 with that new temperature, if the zone is in time controlled mode. If you want to permanently change the desired
 temperature, you need to update the time schedule.
 
-By default, this integration has the same behavior. But when enabling this option, the Home Assistant climate controls 
+By default, this integration has the same behavior. But when enabling this option, the Home Assistant climate controls
 instead overwrite the temperatures set in the time schedule with the new value (unless quick veto is already active).
 
 ### Country
@@ -156,5 +164,6 @@ Brand of your HVAC equipment and app, pick Saunier Duval if you use the MiGo Lin
 ### Lack of Test Data for Different Systems
 
 Your HVAC system might differ from the ones in [Tested Setups](#tested-setups) above.
-If you don't see any entities, or get an error during setup, please check [Debugging](3-contributing.md#debugging) and create an issue.
+If you don't see any entities, or get an error during setup, please check [Debugging](3-contributing.md#debugging) and
+create an issue.
 With debugging enabled, there's a chance to find the culprit in the data returned by the myVAILLANT API and fix it.
