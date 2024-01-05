@@ -15,11 +15,11 @@ from custom_components.mypyllant import (
     DOMAIN,
     OPTION_BRAND,
     OPTION_COUNTRY,
-    OPTION_REFRESH_DELAY,
     OPTION_UPDATE_INTERVAL,
     DailyDataCoordinator,
     SystemCoordinator,
 )
+from custom_components.mypyllant.const import OPTION_REFRESH_DELAY
 
 TEST_OPTIONS = {
     OPTION_COUNTRY: DEFAULT_COUNTRY,

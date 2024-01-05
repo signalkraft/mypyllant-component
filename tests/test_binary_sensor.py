@@ -4,12 +4,12 @@ from myPyllant.models import System
 from myPyllant.tests.utils import list_test_data
 
 from custom_components.mypyllant.binary_sensor import (
-    CircuitEntity,
     CircuitIsCoolingAllowed,
     ControlError,
     ControlOnline,
-    SystemControlEntity,
 )
+from custom_components.mypyllant.entities.circuit import CircuitFlowTemperatureSensor
+from custom_components.mypyllant.entities.system import SystemOutdoorTemperatureSensor
 
 
 @pytest.mark.parametrize("test_data", list_test_data())
@@ -20,10 +20,10 @@ async def test_system_binary_sensors(
         system_coordinator_mock.data = (
             await system_coordinator_mock._async_update_data()
         )
-        system = SystemControlEntity(0, system_coordinator_mock)
+        system = SystemOutdoorTemperatureSensor(0, system_coordinator_mock)
         assert isinstance(system.device_info, dict)
 
-        circuit = CircuitEntity(0, 0, system_coordinator_mock)
+        circuit = CircuitFlowTemperatureSensor(0, 0, system_coordinator_mock)
         assert isinstance(circuit.device_info, dict)
         assert isinstance(circuit.system, System)
 
