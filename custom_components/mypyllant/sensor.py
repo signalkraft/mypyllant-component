@@ -307,6 +307,8 @@ class ZoneDesiredRoomTemperatureSetpointSensor(ZoneCoordinatorEntity, SensorEnti
         elif self.zone.desired_room_temperature_setpoint_cooling:
             return self.zone.desired_room_temperature_setpoint_cooling
         else:
+            if self.zone.is_eco_mode:
+                return self.zone.heating.set_back_temperature
             return self.zone.desired_room_temperature_setpoint
 
     @property

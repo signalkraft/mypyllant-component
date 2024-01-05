@@ -20,6 +20,7 @@ from homeassistant.components.climate.const import (
     PRESET_BOOST,
     PRESET_NONE,
     PRESET_SLEEP,
+    PRESET_ECO,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
@@ -77,6 +78,7 @@ ZONE_HVAC_MODE_MAP = {
 
 ZONE_PRESET_MAP = {
     PRESET_BOOST: ZoneCurrentSpecialFunction.QUICK_VETO,
+    PRESET_ECO: ZoneCurrentSpecialFunction.NONE,
     PRESET_NONE: ZoneCurrentSpecialFunction.NONE,
     PRESET_AWAY: ZoneCurrentSpecialFunction.HOLIDAY,
     PRESET_SLEEP: ZoneCurrentSpecialFunction.SYSTEM_OFF,
@@ -383,6 +385,8 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def target_temperature(self) -> float | None:
+        if self.zone.is_eco_mode:
+            return self.zone.heating.set_back_temperature
         return self.zone.desired_room_temperature_setpoint
 
     @property
@@ -446,7 +450,9 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             await self.coordinator.async_request_refresh_delayed()
 
     @property
-    def preset_mode(self) -> PRESET_BOOST | PRESET_NONE:
+    def preset_mode(self) -> str:
+        if self.zone.is_eco_mode:
+            return PRESET_ECO
         return [
             k
             for k, v in ZONE_PRESET_MAP.items()
