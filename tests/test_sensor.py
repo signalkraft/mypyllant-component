@@ -174,19 +174,19 @@ async def test_domestic_hot_water_sensor(
 async def test_data_sensor(
     mypyllant_aioresponses,
     mocked_api: MyPyllantAPI,
-    daily_data_coordinator_mock,
+    device_data_coordinator_mock,
     test_data,
 ):
     with mypyllant_aioresponses(test_data) as _:
-        daily_data_coordinator_mock.data = (
-            await daily_data_coordinator_mock._async_update_data()
+        device_data_coordinator_mock.data = (
+            await device_data_coordinator_mock._async_update_data()
         )
-        for index, data in enumerate(daily_data_coordinator_mock.data):
+        for index, data in enumerate(device_data_coordinator_mock.data):
             if len(data) == 0:
                 await mocked_api.aiohttp_session.close()
                 pytest.skip(f"No devices in system {index}, skipping data sensor tests")
 
-            data_sensor = DataSensor(index, 0, 0, daily_data_coordinator_mock)
+            data_sensor = DataSensor(index, 0, 0, device_data_coordinator_mock)
             assert isinstance(
                 data_sensor.device_data,
                 DeviceData,

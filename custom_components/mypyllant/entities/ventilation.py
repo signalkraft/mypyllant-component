@@ -29,7 +29,7 @@ from myPyllant.models import (
 )
 from custom_components.mypyllant import SystemCoordinator
 
-from custom_components.mypyllant.entities.base import BaseSystemCoordinator
+from custom_components.mypyllant.entities.base import BaseSystemCoordinatorEntity
 
 
 ZONE_HVAC_MODE_MAP = {
@@ -58,7 +58,7 @@ VENTILATION_FAN_MODE_MAP = {
 }
 
 
-class VentilationClimate(BaseSystemCoordinator, ClimateEntity):
+class VentilationClimate(BaseSystemCoordinatorEntity, ClimateEntity):
     _attr_fan_modes = [str(k) for k in VENTILATION_FAN_MODE_MAP.keys()]
     _attr_hvac_modes = [str(k) for k in VENTILATION_HVAC_MODE_MAP.keys()]
     _attr_temperature_unit = UnitOfTemperature.CELSIUS

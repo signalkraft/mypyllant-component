@@ -26,7 +26,14 @@ async def async_setup_entry(
 
     sensors = []
     for index, system in enumerate(coordinator.data):
-        sensors.append(SystemHolidaySwitch(index, coordinator, config))
+        if system.zones:
+            # Holiday entities require a zone
+            sensors.append(SystemHolidaySwitch(index, coordinator, config))
+        else:
+            _LOGGER.info(
+                "Skipping SystemHolidaySwitch, because there are no zones on %s",
+                str(system),
+            )
 
         for dhw_index, dhw in enumerate(system.domestic_hot_water):
             sensors.append(DomesticHotWaterBoostSwitch(index, dhw_index, coordinator))

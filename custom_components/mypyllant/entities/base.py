@@ -12,10 +12,10 @@ from homeassistant.const import PERCENTAGE, UnitOfTemperature, UnitOfPressure
 from myPyllant.models import System, DeviceData
 
 from custom_components.mypyllant.const import DOMAIN
-from custom_components.mypyllant.coordinator import DailyDataCoordinator
+from custom_components.mypyllant.coordinator import DeviceDataCoordinator
 
 
-class Base:
+class BaseEntity:
     @property
     @abstractmethod
     def id_infix(self) -> str:
@@ -45,7 +45,7 @@ class Base:
         return f"{self.name_prefix} {self.name_suffix}"
 
 
-class BaseSystemCoordinator(Base, CoordinatorEntity):
+class BaseSystemCoordinatorEntity(BaseEntity, CoordinatorEntity):
     coordinator: SystemCoordinator
     system_index: int
 
@@ -74,11 +74,11 @@ class BaseSystemCoordinator(Base, CoordinatorEntity):
         )
 
 
-class BaseSystemDailyCoordinator(Base, CoordinatorEntity):
-    coordinator: DailyDataCoordinator
+class BaseDeviceDataCoordinatorEntity(BaseEntity, CoordinatorEntity):
+    coordinator: DeviceDataCoordinator
     system_index: int
 
-    def __init__(self, system_index: int, coordinator: DailyDataCoordinator) -> None:
+    def __init__(self, system_index: int, coordinator: DeviceDataCoordinator) -> None:
         super().__init__(coordinator)
         self.system_index = system_index
 

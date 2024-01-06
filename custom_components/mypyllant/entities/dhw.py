@@ -1,6 +1,6 @@
 from custom_components.mypyllant import SystemCoordinator
 from custom_components.mypyllant.entities.base import (
-    BaseSystemCoordinator,
+    BaseSystemCoordinatorEntity,
     BaseTemperatureEntity,
 )
 from myPyllant.models import (
@@ -24,7 +24,7 @@ from myPyllant.utils import prepare_field_value_for_dict
 from homeassistant.components.switch import SwitchEntity
 
 
-class BaseDomesticHotWater(BaseSystemCoordinator):
+class BaseDomesticHotWater(BaseSystemCoordinatorEntity):
     def __init__(
         self, system_index: int, dhw_index: int, coordinator: SystemCoordinator
     ) -> None:

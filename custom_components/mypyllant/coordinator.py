@@ -169,7 +169,7 @@ class SystemWithDeviceData(TypedDict):
     devices_data: list[list[DeviceData]]
 
 
-class DailyDataCoordinator(MyPyllantCoordinator):
+class DeviceDataCoordinator(MyPyllantCoordinator):
     data: list[SystemWithDeviceData]
 
     async def _async_update_data(self) -> list[SystemWithDeviceData]:

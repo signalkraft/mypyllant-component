@@ -28,6 +28,13 @@ async def async_setup_entry(
 
     sensors = []
     for index, system in enumerate(coordinator.data):
-        sensors.append(SystemHolidayStartDateTimeEntity(index, coordinator, config))
-        sensors.append(SystemHolidayEndDateTimeEntity(index, coordinator, config))
+        if system.zones:
+            # Holiday entities require a zone
+            sensors.append(SystemHolidayStartDateTimeEntity(index, coordinator, config))
+            sensors.append(SystemHolidayEndDateTimeEntity(index, coordinator, config))
+        else:
+            _LOGGER.info(
+                "Skipping holiday date time entities, because there are no zones on %s",
+                str(system),
+            )
     async_add_entities(sensors)

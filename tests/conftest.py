@@ -16,7 +16,7 @@ from custom_components.mypyllant import (
     OPTION_BRAND,
     OPTION_COUNTRY,
     OPTION_UPDATE_INTERVAL,
-    DailyDataCoordinator,
+    DeviceDataCoordinator,
     SystemCoordinator,
 )
 from custom_components.mypyllant.const import OPTION_REFRESH_DELAY
@@ -86,7 +86,7 @@ async def system_coordinator_mock(hass, mocked_api) -> SystemCoordinator:
 
 
 @pytest.fixture
-async def daily_data_coordinator_mock(hass, mocked_api) -> DailyDataCoordinator:
+async def device_data_coordinator_mock(hass, mocked_api) -> DeviceDataCoordinator:
     with mock.patch(
         "homeassistant.config_entries.ConfigEntry",
         new_callable=mock.PropertyMock,
@@ -100,7 +100,7 @@ async def daily_data_coordinator_mock(hass, mocked_api) -> DailyDataCoordinator:
                 }
             }
         }
-        return DailyDataCoordinator(hass, mocked_api, entry, timedelta(seconds=10))
+        return DeviceDataCoordinator(hass, mocked_api, entry, timedelta(seconds=10))
 
 
 class MockConfigEntry(config_entries.ConfigEntry):

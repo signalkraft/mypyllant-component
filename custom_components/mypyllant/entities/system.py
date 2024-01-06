@@ -1,10 +1,10 @@
 from typing import Any, Mapping
-from custom_components.mypyllant.coordinator import DailyDataCoordinator
+from custom_components.mypyllant.coordinator import DeviceDataCoordinator
 from custom_components.mypyllant.entities.base import (
-    BaseSystemDailyCoordinator,
+    BaseDeviceDataCoordinatorEntity,
     BaseEfficiencyEntity,
     BasePressureEntity,
-    BaseSystemCoordinator,
+    BaseSystemCoordinatorEntity,
     BaseTemperatureEntity,
 )
 
@@ -18,7 +18,7 @@ from homeassistant.components.binary_sensor import (
 from myPyllant.models import DeviceData
 
 
-class BaseSystem(BaseSystemCoordinator):
+class BaseSystem(BaseSystemCoordinatorEntity):
     @property
     def id_infix(self) -> str:
         return f"{super().id_infix}_home"
@@ -188,8 +188,8 @@ class FirmwareUpdateEnabled(BaseSystem, BinarySensorEntity):
         return self.system.home.firmware.get("update_enabled", None)
 
 
-class SystemEfficiencySensor(BaseSystemDailyCoordinator, BaseEfficiencyEntity):
-    def __init__(self, system_index: int, coordinator: DailyDataCoordinator) -> None:
+class SystemEfficiencySensor(BaseDeviceDataCoordinatorEntity, BaseEfficiencyEntity):
+    def __init__(self, system_index: int, coordinator: DeviceDataCoordinator) -> None:
         super().__init__(system_index, coordinator)
 
     @property

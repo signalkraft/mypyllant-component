@@ -1,13 +1,13 @@
 import logging
 from custom_components.mypyllant.coordinator import (
-    DailyDataCoordinator,
+    DeviceDataCoordinator,
     SystemCoordinator,
 )
 from custom_components.mypyllant.entities.base import (
-    BaseSystemDailyCoordinator,
+    BaseDeviceDataCoordinatorEntity,
     BaseEfficiencyEntity,
     BasePressureEntity,
-    BaseSystemCoordinator,
+    BaseSystemCoordinatorEntity,
 )
 from myPyllant.models import Device
 from homeassistant.helpers.entity import EntityCategory
@@ -29,7 +29,7 @@ DATA_UNIT_MAP = {
 _LOGGER = logging.getLogger(__name__)
 
 
-class BaseDevice(BaseSystemCoordinator):
+class BaseDevice(BaseSystemCoordinatorEntity):
     def __init__(
         self, system_index: int, device_index: int, coordinator: SystemCoordinator
     ) -> None:
@@ -68,7 +68,7 @@ class SystemDeviceWaterPressureSensor(BaseDevice, BasePressureEntity):
         return EntityCategory.DIAGNOSTIC
 
 
-class DataSensor(BaseSystemDailyCoordinator, SensorEntity):
+class DataSensor(BaseDeviceDataCoordinatorEntity, SensorEntity):
     _attr_state_class = SensorStateClass.TOTAL_INCREASING
 
     def __init__(
@@ -76,7 +76,7 @@ class DataSensor(BaseSystemDailyCoordinator, SensorEntity):
         system_index: int,
         de_index: int,
         da_index: int,
-        coordinator: DailyDataCoordinator,
+        coordinator: DeviceDataCoordinator,
     ) -> None:
         super().__init__(system_index, coordinator)
         self.da_index = da_index
@@ -175,9 +175,12 @@ class DataSensor(BaseSystemDailyCoordinator, SensorEntity):
         )
 
 
-class DeviceEfficiencySensor(BaseSystemDailyCoordinator, BaseEfficiencyEntity):
+class DeviceEfficiencySensor(BaseDeviceDataCoordinatorEntity, BaseEfficiencyEntity):
     def __init__(
-        self, system_index: int, de_index: int | None, coordinator: DailyDataCoordinator
+        self,
+        system_index: int,
+        de_index: int | None,
+        coordinator: DeviceDataCoordinator,
     ) -> None:
         super().__init__(system_index, coordinator)
         self.de_index = de_index

@@ -2,7 +2,7 @@ from abc import ABC
 from custom_components.mypyllant import SystemCoordinator
 from custom_components.mypyllant.const import DOMAIN
 from custom_components.mypyllant.entities.base import (
-    BaseSystemCoordinator,
+    BaseSystemCoordinatorEntity,
     BaseTemperatureEntity,
 )
 
@@ -20,7 +20,7 @@ from custom_components.mypyllant.entities.zone import zone_device_name
 from myPyllant.utils import prepare_field_value_for_dict
 
 
-class BaseCircuit(BaseSystemCoordinator, ABC):
+class BaseCircuit(BaseSystemCoordinatorEntity, ABC):
     def __init__(
         self, system_index: int, circuit_index: int, coordinator: SystemCoordinator
     ) -> None:

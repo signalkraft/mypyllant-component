@@ -25,7 +25,7 @@ from myPyllant.tests import generate_test_data
 
 
 from custom_components.mypyllant.coordinator import (
-    DailyDataCoordinator,
+    DeviceDataCoordinator,
     SystemCoordinator,
 )
 from .const import (
@@ -131,10 +131,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN][entry.entry_id]["system_coordinator"] = system_coordinator
 
     # Daily data coordinator is updated hourly, but requests data for the whole day
-    daily_data_coordinator = DailyDataCoordinator(hass, api, entry, timedelta(hours=1))
+    device_data_coordinator = DeviceDataCoordinator(
+        hass, api, entry, timedelta(hours=1)
+    )
     _LOGGER.debug("Refreshing DailyDataCoordinator")
-    await daily_data_coordinator.async_refresh()
-    hass.data[DOMAIN][entry.entry_id]["daily_data_coordinator"] = daily_data_coordinator
+    await device_data_coordinator.async_refresh()
+    hass.data[DOMAIN][entry.entry_id][
+        "device_data_coordinator"
+    ] = device_data_coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
@@ -221,7 +225,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "system_coordinator"
         ].api.aiohttp_session.close()
         await hass.data[DOMAIN][entry.entry_id][
-            "daily_data_coordinator"
+            "device_data_coordinator"
         ].api.aiohttp_session.close()
         hass.data[DOMAIN].pop(entry.entry_id)
 

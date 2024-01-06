@@ -28,7 +28,14 @@ async def async_setup_entry(
 
     sensors = []
     for index, system in enumerate(coordinator.data):
-        sensors.append(SystemHolidayDurationNumber(index, coordinator, config))
+        if system.zones:
+            # Holiday entities require a zone
+            sensors.append(SystemHolidayDurationNumber(index, coordinator, config))
+        else:
+            _LOGGER.info(
+                "Skipping SystemHolidayDurationNumber, because there are no zones on %s",
+                str(system),
+            )
 
         for zone_index, zone in enumerate(system.zones):
             sensors.append(ZoneQuickVetoDurationNumber(index, zone_index, coordinator))

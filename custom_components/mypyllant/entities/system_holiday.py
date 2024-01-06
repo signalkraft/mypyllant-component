@@ -9,6 +9,7 @@ from homeassistant.config_entries import ConfigEntry
 from datetime import datetime, timedelta
 from homeassistant.const import UnitOfTime
 
+from myPyllant.models import Zone
 from myPyllant.utils import get_default_holiday_dates
 from homeassistant.components.datetime import DateTimeEntity
 
@@ -23,6 +24,10 @@ class SystemHolidayBase(BaseSystem):
         config: ConfigEntry,
     ) -> None:
         super().__init__(system_index, coordinator)
+        if not self.system.zones:
+            raise ValueError(
+                f"System {self.system} requires zones for system holiday entities"
+            )
         self.config = config
 
     @property
@@ -34,9 +39,7 @@ class SystemHolidayBase(BaseSystem):
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
         return {
-            "holiday_ongoing": self.zone.general.holiday_ongoing
-            if self.zone
-            else False,
+            "holiday_ongoing": self.zone.general.holiday_ongoing,
             "holiday_remaining_seconds": self.zone.general.holiday_remaining.total_seconds()
             if self.zone.general.holiday_remaining
             else None,
@@ -45,14 +48,14 @@ class SystemHolidayBase(BaseSystem):
         }
 
     @property
-    def zone(self):
-        return self.system.zones[0] if self.system.zones else None
+    def zone(self) -> Zone:
+        return self.system.zones[0]
 
     @property
     def holiday_start(self) -> datetime | None:
         return (
             self.zone.general.holiday_start_date_time
-            if self.zone and self.zone.general.holiday_planned
+            if self.zone.general.holiday_planned
             else None
         )
 
@@ -60,13 +63,13 @@ class SystemHolidayBase(BaseSystem):
     def holiday_end(self) -> datetime | None:
         return (
             self.zone.general.holiday_end_date_time
-            if self.zone and self.zone.general.holiday_planned
+            if self.zone.general.holiday_planned
             else None
         )
 
     @property
     def holiday_remaining(self) -> timedelta | None:
-        return self.zone.general.holiday_remaining if self.zone else None
+        return self.zone.general.holiday_remaining
 
 
 class SystemHolidaySwitch(SystemHolidayBase, SwitchEntity):
@@ -82,7 +85,7 @@ class SystemHolidaySwitch(SystemHolidayBase, SwitchEntity):
 
     @property
     def is_on(self):
-        return self.zone.general.holiday_planned if self.zone else False
+        return self.zone.general.holiday_planned
 
     async def async_turn_on(self, **kwargs):
         _, end = get_default_holiday_dates(

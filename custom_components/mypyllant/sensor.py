@@ -41,7 +41,7 @@ from custom_components.mypyllant.entities.zone import (
 )
 
 
-from . import DailyDataCoordinator, SystemCoordinator
+from . import DeviceDataCoordinator, SystemCoordinator
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -147,23 +147,23 @@ async def create_system_sensors(
     return sensors
 
 
-async def create_daily_data_sensors(
+async def create_device_data_sensors(
     hass: HomeAssistant, config: ConfigEntry
 ) -> list[SensorEntity]:
-    daily_data_coordinator: DailyDataCoordinator = hass.data[DOMAIN][config.entry_id][
-        "daily_data_coordinator"
+    device_data_coordinator: DeviceDataCoordinator = hass.data[DOMAIN][config.entry_id][
+        "device_data_coordinator"
     ]
 
-    _LOGGER.debug("Daily data: %s", daily_data_coordinator.data)
+    _LOGGER.debug("Daily data: %s", device_data_coordinator.data)
 
-    if not daily_data_coordinator.data:
+    if not device_data_coordinator.data:
         _LOGGER.warning("No daily data, skipping sensors")
         return []
 
     sensors: list[SensorEntity] = []
-    for system_index, system_devices in enumerate(daily_data_coordinator.data):
+    for system_index, system_devices in enumerate(device_data_coordinator.data):
         _LOGGER.debug("Creating efficiency sensor for System %s", system_index)
-        sensors.append(SystemEfficiencySensor(system_index, daily_data_coordinator))
+        sensors.append(SystemEfficiencySensor(system_index, device_data_coordinator))
         for de_index, devices_data in enumerate(system_devices["devices_data"]):
             if len(devices_data) == 0:
                 continue
@@ -173,13 +173,15 @@ async def create_daily_data_sensors(
                 de_index,
             )
             sensors.append(
-                DeviceEfficiencySensor(system_index, de_index, daily_data_coordinator)
+                DeviceEfficiencySensor(system_index, de_index, device_data_coordinator)
             )
             for da_index, _ in enumerate(
-                daily_data_coordinator.data[system_index]["devices_data"][de_index]
+                device_data_coordinator.data[system_index]["devices_data"][de_index]
             ):
                 sensors.append(
-                    DataSensor(system_index, de_index, da_index, daily_data_coordinator)
+                    DataSensor(
+                        system_index, de_index, da_index, device_data_coordinator
+                    )
                 )
 
     return sensors
@@ -189,4 +191,4 @@ async def async_setup_entry(
     hass: HomeAssistant, config: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     async_add_entities(await create_system_sensors(hass, config))
-    async_add_entities(await create_daily_data_sensors(hass, config))
+    async_add_entities(await create_device_data_sensors(hass, config))

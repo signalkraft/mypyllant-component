@@ -36,7 +36,7 @@ from myPyllant.models import (
 from custom_components.mypyllant import SystemCoordinator
 from custom_components.mypyllant.entities.base import (
     BaseHumidityEntity,
-    BaseSystemCoordinator,
+    BaseSystemCoordinatorEntity,
     BaseTemperatureEntity,
 )
 
@@ -83,7 +83,7 @@ def zone_device_name(system: System, zone: Zone):
     return f"Zone {shorten_zone_name(zone.name)}{circuit_name_suffix(zone)}"
 
 
-class BaseZone(BaseSystemCoordinator, ABC):
+class BaseZone(BaseSystemCoordinatorEntity, ABC):
     def __init__(
         self, system_index: int, zone_index: int, coordinator: SystemCoordinator
     ) -> None:
