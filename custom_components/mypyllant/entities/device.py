@@ -179,7 +179,7 @@ class DeviceEfficiencySensor(BaseDeviceDataCoordinatorEntity, BaseEfficiencyEnti
     def __init__(
         self,
         system_index: int,
-        de_index: int | None,
+        de_index: int,
         coordinator: DeviceDataCoordinator,
     ) -> None:
         super().__init__(system_index, coordinator)
@@ -191,7 +191,7 @@ class DeviceEfficiencySensor(BaseDeviceDataCoordinatorEntity, BaseEfficiencyEnti
 
     @property
     def device_data_list(self) -> list[DeviceData]:
-        return [item for row in self.devices for item in row]
+        return self.devices[self.de_index]
 
     @property
     def name_suffix(self):
@@ -199,7 +199,7 @@ class DeviceEfficiencySensor(BaseDeviceDataCoordinatorEntity, BaseEfficiencyEnti
 
     @property
     def id_infix(self) -> str:
-        return f"{self.system.id}_device_{self.device.device_uuid if self.device is not None else ''}"
+        return f"{super().id_infix}_device_{self.device.device_uuid if self.device is not None else ''}"
 
     @property
     def id_suffix(self) -> str:
