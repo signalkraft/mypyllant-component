@@ -26,3 +26,13 @@ SERVICE_SET_VENTILATION_FAN_STAGE = "set_ventilation_fan_stage"
 SERVICE_EXPORT = "export"
 SERVICE_GENERATE_TEST_DATA = "generate_test_data"
 SERVICE_REPORT = "report"
+
+WEEKDAYS_TO_RFC5545 = {
+    "monday": "MO",
+    "tuesday": "TU",
+    "wednesday": "WE",
+    "thursday": "TH",
+    "friday": "FR",
+    "saturday": "SA",
+    "sunday": "SU",
+}
