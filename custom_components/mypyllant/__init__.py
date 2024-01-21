@@ -23,11 +23,13 @@ from myPyllant.const import DEFAULT_BRAND
 from myPyllant.models import DeviceDataBucketResolution
 from myPyllant.tests import generate_test_data
 
-
 from custom_components.mypyllant.coordinator import (
     DeviceDataCoordinator,
     SystemCoordinator,
 )
+
+from custom_components.mypyllant.utils import async_remove_orphaned_devices
+
 from .const import (
     DEFAULT_COUNTRY,
     DEFAULT_UPDATE_INTERVAL,
@@ -146,6 +148,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     ] = device_data_coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    # Cleanup orphaned devices
+    await async_remove_orphaned_devices(hass, entry)
 
     async def handle_export(call: ServiceCall) -> ServiceResponse:
         return {
