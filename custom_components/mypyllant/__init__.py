@@ -150,7 +150,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # Cleanup orphaned devices
-    await async_remove_orphaned_devices(hass, entry)
+    try:
+        await async_remove_orphaned_devices(hass, entry)
+    except Exception:  # pylint: disable=broad-except
+        _LOGGER.exception("Error in async_remove_orphaned_devices")
 
     async def handle_export(call: ServiceCall) -> ServiceResponse:
         return {
