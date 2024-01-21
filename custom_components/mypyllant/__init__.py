@@ -82,6 +82,11 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
                         "_heating_energy_efficiency", "_home_heating_energy_efficiency"
                     )
                 }
+            # old: {DOMAIN} {self.system.id} => {DOMAIN}_{self.system.id}
+            if entity_entry.unique_id.count(
+                "_"
+            ) == 4 and entity_entry.unique_id.endswith("_cooling_allowed"):
+                return {"new_unique_id": entity_entry.unique_id.replace(" ", "_")}
             return None
 
         await async_migrate_entries(hass, config_entry.entry_id, update_unique_id)
