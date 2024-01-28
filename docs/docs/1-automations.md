@@ -152,14 +152,26 @@ cards:
     cards:
       - type: custom:mushroom-entity-card
         entity: water_heater.home_domestic_hot_water_0
-        name: Wasser
+        name: Hot Water
         icon: mdi:thermometer-water
       - type: custom:mushroom-entity-card
         entity: switch.home_domestic_hot_water_0_boost
-        name: Wasser Boost
+        name: Hot Water Boost
         icon: mdi:thermometer-chevron-up
         tap_action:
           action: toggle
 ```
+
+## Customizing Schedules in the Calendar
+
+<video autoplay muted loop playsinline style="max-width: 600px; width: 100%; margin: 0 auto;">
+    <source src="/mypyllant-component/assets/calendar.mp4" type="video/mp4">
+</video>
+
+Time programs can be updated from the Home Assistant calendar. You can:
+
+* Create new time slots (make sure to select weekly repetition, and set a target temperature as the event summary)
+* Update existing time slots by changing start time, end time, weekdays, or the target temperature in the event summary
+* Delete time slots on a specific weekday
 
 [^1]: Contributed by CommanderROR in the [Home Assistant Community](https://community.home-assistant.io/t/myvaillant-integration/542610/70)
