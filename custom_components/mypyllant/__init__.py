@@ -90,6 +90,11 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
                 "_"
             ) == 4 and entity_entry.unique_id.endswith("_cooling_allowed"):
                 return {"new_unique_id": entity_entry.unique_id.replace(" ", "_")}
+
+            # old: {DOMAIN}_{self.system.id}_{self.device.device_uuid}_{self.da_index} => {DOMAIN}_{self.system.id}_device_{self.device.device_uuid}_{self.da_index}
+            sep = entity_entry.unique_id.split("_")
+            if len(sep) == 4 and len(sep[3]) == 1 and sep[3].isnumeric():
+                return {"new_unique_id": f"{sep[0]}_{sep[1]}_device_{sep[2]}_{sep[3]}"}
             return None
 
         await async_migrate_entries(hass, config_entry.entry_id, update_unique_id)
