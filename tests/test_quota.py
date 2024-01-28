@@ -9,7 +9,10 @@ from homeassistant.helpers.update_coordinator import UpdateFailed
 from myPyllant.api import MyPyllantAPI
 from myPyllant.tests.utils import list_test_data
 
-from custom_components.mypyllant import API_DOWN_PAUSE_INTERVAL, QUOTA_PAUSE_INTERVAL
+from custom_components.mypyllant.const import (
+    API_DOWN_PAUSE_INTERVAL,
+    QUOTA_PAUSE_INTERVAL,
+)
 
 
 async def test_quota(

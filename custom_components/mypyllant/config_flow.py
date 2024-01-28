@@ -169,7 +169,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignore
-    VERSION = 1  # This needs to be changed if a migration is necessary
+    VERSION = 2  # This needs to be changed if a migration is necessary
     CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
 
     @staticmethod

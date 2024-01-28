@@ -2,18 +2,13 @@ from __future__ import annotations
 
 import logging
 
-from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from custom_components.mypyllant import DOMAIN, SystemCoordinator
-from custom_components.mypyllant.utils import (
-    HolidayEntity,
-    DomesticHotWaterCoordinatorEntity,
-)
-from myPyllant.models import DHWCurrentSpecialFunction
-from myPyllant.utils import get_default_holiday_dates
+from custom_components.mypyllant.entities.dhw import DomesticHotWaterBoostSwitch
+from custom_components.mypyllant.entities.system_holiday import SystemHolidaySwitch
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -31,69 +26,15 @@ async def async_setup_entry(
 
     sensors = []
     for index, system in enumerate(coordinator.data):
-        sensors.append(SystemHolidaySwitch(index, coordinator, config))
+        if system.zones:
+            # Holiday entities require a zone
+            sensors.append(SystemHolidaySwitch(index, coordinator, config))
+        else:
+            _LOGGER.info(
+                "Skipping SystemHolidaySwitch, because there are no zones on %s",
+                str(system),
+            )
 
         for dhw_index, dhw in enumerate(system.domestic_hot_water):
             sensors.append(DomesticHotWaterBoostSwitch(index, dhw_index, coordinator))
     async_add_entities(sensors)
-
-
-class SystemHolidaySwitch(HolidayEntity, SwitchEntity):
-    _attr_icon = "mdi:account-arrow-right"
-
-    @property
-    def name(self):
-        return f"{self.name_prefix} Away Mode"
-
-    @property
-    def is_on(self):
-        return self.zone.general.holiday_planned if self.zone else False
-
-    async def async_turn_on(self, **kwargs):
-        _, end = get_default_holiday_dates(
-            self.holiday_start,
-            self.holiday_end,
-            self.system.timezone,
-            self.default_holiday_duration,
-        )
-        await self.coordinator.api.set_holiday(self.system, end=end)
-        # Holiday values need a long time to show up in the API
-        await self.coordinator.async_request_refresh_delayed(10)
-
-    async def async_turn_off(self, **kwargs):
-        await self.coordinator.api.cancel_holiday(self.system)
-        # Holiday values need a long time to show up in the API
-        await self.coordinator.async_request_refresh_delayed(10)
-
-    @property
-    def unique_id(self) -> str:
-        return f"{DOMAIN}_{self.id_infix}_holiday_switch"
-
-
-class DomesticHotWaterBoostSwitch(DomesticHotWaterCoordinatorEntity, SwitchEntity):
-    @property
-    def name(self):
-        return f"{self.name_prefix} Boost"
-
-    @property
-    def is_on(self):
-        return (
-            self.domestic_hot_water.current_special_function
-            == DHWCurrentSpecialFunction.CYLINDER_BOOST
-        )
-
-    async def async_turn_on(self, **kwargs):
-        await self.coordinator.api.boost_domestic_hot_water(
-            self.domestic_hot_water,
-        )
-        await self.coordinator.async_request_refresh_delayed()
-
-    async def async_turn_off(self, **kwargs):
-        await self.coordinator.api.cancel_hot_water_boost(
-            self.domestic_hot_water,
-        )
-        await self.coordinator.async_request_refresh_delayed()
-
-    @property
-    def unique_id(self) -> str:
-        return f"{DOMAIN}_{self.id_infix}_boost_switch"
