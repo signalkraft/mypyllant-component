@@ -152,11 +152,11 @@ cards:
     cards:
       - type: custom:mushroom-entity-card
         entity: water_heater.home_domestic_hot_water_0
-        name: Wasser
+        name: Hot Water
         icon: mdi:thermometer-water
       - type: custom:mushroom-entity-card
         entity: switch.home_domestic_hot_water_0_boost
-        name: Wasser Boost
+        name: Hot Water Boost
         icon: mdi:thermometer-chevron-up
         tap_action:
           action: toggle
