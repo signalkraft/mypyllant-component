@@ -95,7 +95,7 @@ class BaseZone(BaseSystemCoordinatorEntity, ABC):
         return self.system.zones[self.zone_index]
 
     @property
-    def available(self) -> bool:
+    def available(self) -> bool | None:
         return self.zone.is_active
 
     @property
