@@ -16,11 +16,11 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from myPyllant.models import (
-    ZoneTimeProgramDay,
+    ZoneTimeProgramSlot,
     ZoneTimeProgramType,
-    BaseTimeProgram,
-    BaseTimeProgramDay,
-    DHWTimeProgramDay,
+    TimeProgram,
+    TimeProgramSlot,
+    DHWTimeProgramSlot,
     DHWTimeProgram,
     ZoneTimeProgram,
 )
@@ -61,13 +61,13 @@ class BaseCalendarEntity(CalendarEntity):
     _has_setpoint = False
 
     @property
-    def time_program(self) -> BaseTimeProgram:
+    def time_program(self) -> TimeProgram:
         raise NotImplementedError
 
     def _get_calendar_id_prefix(self):
         raise NotImplementedError
 
-    def _get_uid(self, time_program: BaseTimeProgramDay, date) -> str:
+    def _get_uid(self, time_program: TimeProgramSlot, date) -> str:
         return f"{self._get_calendar_id_prefix()}_{time_program.weekday_name}_{time_program.index}_{date.isoformat()}"
 
     def _parse_uid(self, recurrence_id: str) -> tuple[str, int, datetime.datetime]:
@@ -76,10 +76,10 @@ class BaseCalendarEntity(CalendarEntity):
         ).split("_")
         return weekday, int(index), datetime.datetime.fromisoformat(date)
 
-    def _get_recurrence_id(self, time_program: BaseTimeProgramDay) -> str:
+    def _get_recurrence_id(self, time_program: TimeProgramSlot) -> str:
         return f"{self._get_calendar_id_prefix()}_{time_program.weekday_name}_{time_program.index}"
 
-    def _get_rrule(self, time_program_day: BaseTimeProgramDay) -> str:
+    def _get_rrule(self, time_program_day: TimeProgramSlot) -> str:
         matching_weekdays = self.time_program.matching_weekdays(time_program_day)
         return f"FREQ=WEEKLY;INTERVAL=1;BYDAY={','.join([WEEKDAYS_TO_RFC5545[d] for d in matching_weekdays])}"
 
@@ -250,7 +250,7 @@ class ZoneHeatingCalendar(BaseCalendarEntity, ZoneCoordinatorEntity):
 
     def build_event(
         self,
-        time_program_day: ZoneTimeProgramDay,
+        time_program_day: ZoneTimeProgramSlot,
         start: datetime.datetime,
         end: datetime.datetime,
     ):
@@ -288,7 +288,7 @@ class DomesticHotWaterCalendar(BaseCalendarEntity, DomesticHotWaterCoordinatorEn
 
     def build_event(
         self,
-        time_program_day: DHWTimeProgramDay,
+        time_program_day: DHWTimeProgramSlot,
         start: datetime.datetime,
         end: datetime.datetime,
     ):
