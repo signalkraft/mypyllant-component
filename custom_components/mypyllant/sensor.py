@@ -10,7 +10,13 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ENERGY_WATT_HOUR, PERCENTAGE, PRESSURE_BAR, TEMP_CELSIUS
+from homeassistant.const import (
+    UnitOfEnergy,
+    PERCENTAGE,
+    UnitOfPressure,
+    UnitOfTemperature,
+    UnitOfTime,
+)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -36,11 +42,11 @@ from .const import DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 DATA_UNIT_MAP = {
-    "CONSUMED_ELECTRICAL_ENERGY": ENERGY_WATT_HOUR,
-    "EARNED_ENVIRONMENT_ENERGY": ENERGY_WATT_HOUR,
-    "HEAT_GENERATED": ENERGY_WATT_HOUR,
-    "CONSUMED_PRIMARY_ENERGY": ENERGY_WATT_HOUR,
-    "EARNED_SOLAR_ENERGY": ENERGY_WATT_HOUR,
+    "CONSUMED_ELECTRICAL_ENERGY": UnitOfEnergy.WATT_HOUR,
+    "EARNED_ENVIRONMENT_ENERGY": UnitOfEnergy.WATT_HOUR,
+    "HEAT_GENERATED": UnitOfEnergy.WATT_HOUR,
+    "CONSUMED_PRIMARY_ENERGY": UnitOfEnergy.WATT_HOUR,
+    "EARNED_SOLAR_ENERGY": UnitOfEnergy.WATT_HOUR,
 }
 
 
@@ -69,6 +75,18 @@ async def create_system_sensors(
             if "water_pressure" in device.operational_data:
                 sensors.append(
                     SystemDeviceWaterPressureSensor(
+                        index, device_index, system_coordinator
+                    )
+                )
+            if device.operation_time is not None:
+                sensors.append(
+                    SystemDeviceOperationTimeSensor(
+                        index, device_index, system_coordinator
+                    )
+                )
+            if device.on_off_cycles is not None:
+                sensors.append(
+                    SystemDeviceOnOffCyclesSensor(
                         index, device_index, system_coordinator
                     )
                 )
@@ -194,7 +212,7 @@ class SystemSensor(SystemCoordinatorEntity, SensorEntity):
 
 
 class SystemOutdoorTemperatureSensor(SystemSensor):
-    _attr_native_unit_of_measurement = TEMP_CELSIUS
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
 
@@ -215,7 +233,7 @@ class SystemOutdoorTemperatureSensor(SystemSensor):
 
 
 class SystemWaterPressureSensor(SystemSensor):
-    _attr_native_unit_of_measurement = PRESSURE_BAR
+    _attr_native_unit_of_measurement = UnitOfPressure.BAR
     _attr_device_class = SensorDeviceClass.PRESSURE
     _attr_state_class = SensorStateClass.MEASUREMENT
 
@@ -258,7 +276,9 @@ class HomeEntity(CoordinatorEntity, SensorEntity):
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
-        return self.system.home.extra_fields | self.system.extra_fields
+        return (
+            self.system.home.extra_fields | self.system.extra_fields | self.system.rts
+        )
 
     @property
     def name_prefix(self) -> str:
@@ -292,7 +312,7 @@ class HomeEntity(CoordinatorEntity, SensorEntity):
 
 
 class ZoneDesiredRoomTemperatureSetpointSensor(ZoneCoordinatorEntity, SensorEntity):
-    _attr_native_unit_of_measurement = TEMP_CELSIUS
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
 
@@ -317,7 +337,7 @@ class ZoneDesiredRoomTemperatureSetpointSensor(ZoneCoordinatorEntity, SensorEnti
 
 
 class ZoneCurrentRoomTemperatureSensor(ZoneCoordinatorEntity, SensorEntity):
-    _attr_native_unit_of_measurement = TEMP_CELSIUS
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
 
@@ -442,7 +462,7 @@ class CircuitSensor(CoordinatorEntity, SensorEntity):
 
 
 class CircuitFlowTemperatureSensor(CircuitSensor):
-    _attr_native_unit_of_measurement = TEMP_CELSIUS
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
 
@@ -486,7 +506,7 @@ class CircuitStateSensor(CircuitSensor):
 
 
 class CircuitMinFlowTemperatureSetpointSensor(CircuitSensor):
-    _attr_native_unit_of_measurement = TEMP_CELSIUS
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
 
@@ -533,7 +553,7 @@ class CircuitHeatingCurveSensor(CircuitSensor):
 class DomesticHotWaterTankTemperatureSensor(
     DomesticHotWaterCoordinatorEntity, SensorEntity
 ):
-    _attr_native_unit_of_measurement = TEMP_CELSIUS
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
 
@@ -551,7 +571,7 @@ class DomesticHotWaterTankTemperatureSensor(
 
 
 class DomesticHotWaterSetPointSensor(DomesticHotWaterCoordinatorEntity, SensorEntity):
-    _attr_native_unit_of_measurement = TEMP_CELSIUS
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
 
@@ -862,7 +882,7 @@ class SystemDeviceSensor(CoordinatorEntity, SensorEntity):
 
 
 class SystemDeviceWaterPressureSensor(SystemDeviceSensor):
-    _attr_native_unit_of_measurement = PRESSURE_BAR
+    _attr_native_unit_of_measurement = UnitOfPressure.BAR
     _attr_device_class = SensorDeviceClass.PRESSURE
     _attr_state_class = SensorStateClass.MEASUREMENT
 
@@ -881,3 +901,52 @@ class SystemDeviceWaterPressureSensor(SystemDeviceSensor):
     @property
     def entity_category(self) -> EntityCategory | None:
         return EntityCategory.DIAGNOSTIC
+
+
+class SystemDeviceOperationTimeSensor(SystemDeviceSensor):
+    _attr_native_unit_of_measurement = UnitOfTime.HOURS
+    _attr_device_class = SensorDeviceClass.DURATION
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def native_value(self):
+        if self.device.operation_time is not None:
+            return round(self.device.operation_time / 60, 1)
+        else:
+            return None
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_operation_time"
+
+    @property
+    def entity_category(self) -> EntityCategory | None:
+        return EntityCategory.DIAGNOSTIC
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} Operation Time"
+
+
+class SystemDeviceOnOffCyclesSensor(SystemDeviceSensor):
+    _attr_native_unit_of_measurement = UnitOfTime.HOURS
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def native_value(self):
+        if self.device.on_off_cycles is not None:
+            return self.device.on_off_cycles
+        else:
+            return None
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_on_off_cycles"
+
+    @property
+    def entity_category(self) -> EntityCategory | None:
+        return EntityCategory.DIAGNOSTIC
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} On/Off Cycles"

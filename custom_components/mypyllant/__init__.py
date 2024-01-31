@@ -349,7 +349,7 @@ class SystemCoordinator(MyPyllantCoordinator):
             data = [
                 s
                 async for s in await self.hass.async_add_executor_job(
-                    self.api.get_systems, True, True
+                    self.api.get_systems, True, True, True
                 )
             ]
             return data

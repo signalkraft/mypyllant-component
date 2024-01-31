@@ -21,6 +21,8 @@ from custom_components.mypyllant.sensor import (
     ZoneDesiredRoomTemperatureSetpointSensor,
     ZoneHeatingOperatingModeSensor,
     ZoneHumiditySensor,
+    SystemDeviceOnOffCyclesSensor,
+    SystemDeviceOperationTimeSensor,
 )
 
 
@@ -199,4 +201,33 @@ async def test_data_sensor(
             str,
         )
         assert data_sensor.last_reset is None
+        await mocked_api.aiohttp_session.close()
+
+
+@pytest.mark.parametrize("test_data", list_test_data())
+async def test_device_sensor(
+    mypyllant_aioresponses,
+    mocked_api: MyPyllantAPI,
+    system_coordinator_mock,
+    test_data,
+):
+    with mypyllant_aioresponses(test_data) as _:
+        system_coordinator_mock.data = (
+            await system_coordinator_mock._async_update_data()
+        )
+
+        if "on_off_cycles" in str(test_data):
+            assert isinstance(
+                SystemDeviceOnOffCyclesSensor(
+                    0, 0, system_coordinator_mock
+                ).native_value,
+                int,
+            )
+        if "operation_time" in str(test_data):
+            assert isinstance(
+                SystemDeviceOperationTimeSensor(
+                    0, 0, system_coordinator_mock
+                ).native_value,
+                float,
+            )
         await mocked_api.aiohttp_session.close()
