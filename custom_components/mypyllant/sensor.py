@@ -929,8 +929,8 @@ class SystemDeviceOperationTimeSensor(SystemDeviceSensor):
 
 
 class SystemDeviceOnOffCyclesSensor(SystemDeviceSensor):
-    _attr_native_unit_of_measurement = UnitOfTime.HOURS
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:counter"
 
     @property
     def native_value(self):
