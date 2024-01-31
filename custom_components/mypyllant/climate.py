@@ -70,12 +70,6 @@ _MANUAL_SETPOINT_TYPES_OPTIONS = [
     for k, v in MANUAL_SETPOINT_TYPES.items()
 ]
 
-ZONE_HVAC_MODE_MAP = {
-    HVACMode.OFF: ZoneHeatingOperatingMode.OFF,
-    HVACMode.HEAT_COOL: ZoneHeatingOperatingMode.MANUAL,
-    HVACMode.AUTO: ZoneHeatingOperatingMode.TIME_CONTROLLED,
-}
-
 ZONE_PRESET_MAP = {
     PRESET_BOOST: ZoneCurrentSpecialFunction.QUICK_VETO,
     PRESET_ECO: ZoneCurrentSpecialFunction.NONE,
@@ -240,7 +234,6 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     coordinator: SystemCoordinator
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
-    _attr_hvac_modes = [str(k) for k in ZONE_HVAC_MODE_MAP.keys()]
     _attr_preset_modes = [str(k) for k in ZONE_PRESET_MAP.keys()]
 
     def __init__(
@@ -254,6 +247,25 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         self.system_index = system_index
         self.zone_index = zone_index
         self.config = config
+
+    @property
+    def hvac_modes(self) -> list[HVACMode]:
+        return [k for k in self.hvac_mode_map.keys()]
+
+    @property
+    def hvac_mode_map(self):
+        if self.zone.control_identifier == "vrc700":
+            return {
+                HVACMode.OFF: ZoneHeatingOperatingMode.OFF,
+                HVACMode.HEAT_COOL: ZoneHeatingOperatingMode.MANUAL,
+                HVACMode.AUTO: ZoneHeatingOperatingMode.AUTO,
+            }
+        else:
+            return {
+                HVACMode.OFF: ZoneHeatingOperatingMode.OFF,
+                HVACMode.HEAT_COOL: ZoneHeatingOperatingMode.MANUAL,
+                HVACMode.AUTO: ZoneHeatingOperatingMode.TIME_CONTROLLED,
+            }
 
     @property
     def default_quick_veto_duration(self):
@@ -401,14 +413,14 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     def hvac_mode(self) -> HVACMode:
         return [
             k
-            for k, v in ZONE_HVAC_MODE_MAP.items()
+            for k, v in self.hvac_mode_map.items()
             if v == self.zone.heating.operation_mode_heating
         ][0]
 
     async def async_set_hvac_mode(self, hvac_mode):
         await self.coordinator.api.set_zone_heating_operating_mode(
             self.zone,
-            ZONE_HVAC_MODE_MAP[hvac_mode],
+            self.hvac_mode_map[hvac_mode],
         )
         await self.coordinator.async_request_refresh_delayed()
 
@@ -463,8 +475,8 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         """
         When setting a new preset, sometimes the old one needs to be canceled
 
-        :param preset_mode:
-        :return:
+        Parameters:
+            preset_mode (str): The new preset mode to set
         """
         if preset_mode not in ZONE_PRESET_MAP:
             raise ValueError(

@@ -40,7 +40,8 @@ action:
 mode: single
 ```
 
-1. You can customize the frequency and weekday here, see [Time condition documentation](https://www.home-assistant.io/docs/scripts/conditions/#time-condition)
+1. You can customize the frequency and weekday here,
+   see [Time condition documentation](https://www.home-assistant.io/docs/scripts/conditions/#time-condition)
 2. Here you can set the target temperature for legionella protection
 3. This is the duration. Make sure it covers the time period where your water heater is turned on
 4. This should be your regular water temperature
@@ -58,7 +59,7 @@ trigger:
       - climate.home_zone_1_circuit_0_climate # (1)
     attribute: preset_mode
     to: away
-condition: []
+condition: [ ]
 action:
   - service: water_heater.set_operation_mode
     target:
@@ -81,7 +82,7 @@ trigger:
       - climate.home_zone_1_circuit_0_climate # (1)
     attribute: preset_mode
     from: away
-condition: []
+condition: [ ]
 action:
   - service: water_heater.set_operation_mode
     target:
@@ -94,6 +95,40 @@ mode: single
 
 1. Pick your climate entity
 2. Pick your water heater entity
+
+## Control Heating Schedule based on Solar Power
+
+This automation delays heating until after sunrise on sunny days, to make the most of solar power.
+You could also use your water heater schedule, to boost tank temperature at the end of the day
+when solar power is still available.
+
+```yaml
+alias: myVAILLANT Delay Heating on Sunny Days
+description: ""
+trigger:
+  - platform: calendar
+    event: start
+    offset: "0:30:0"
+    entity_id: calendar.home_zone_1_circuit_0_heating_schedule # (1)
+condition:
+  - condition: numeric_state
+    entity_id: sensor.openweathermap_forecast_cloud_coverage # (2)
+    below: 50
+  - condition: sun
+    before: sunrise
+action:
+  - service: mypyllant.set_holiday
+    target:
+      entity_id: climate.home_zone_1_circuit_0_climate # (3)
+    data:
+      end: "{{ (as_timestamp(states.sensor.sun_next_rising.state) + 1.5 * 3600) | timestamp_local }}" # (4)
+mode: single
+```
+
+1. Pick your calendar entity. The offset makes sure that a little bit of heating still happens at the scheduled start
+2. Uses OpenWeatherMap to determine forecasted cloud coverage, only triggers if cloud coverage is below 50%
+3. Pick your climate entity
+4. Delays heating until 1,5h after sunrise
 
 ## Climate Control Cards with Away Mode Datepickers
 
@@ -174,4 +209,5 @@ Time programs can be updated from the Home Assistant calendar. You can:
 * Update existing time slots by changing start time, end time, weekdays, or the target temperature in the event summary
 * Delete time slots on a specific weekday
 
-[^1]: Contributed by CommanderROR in the [Home Assistant Community](https://community.home-assistant.io/t/myvaillant-integration/542610/70)
+[^1]: Contributed by CommanderROR in
+the [Home Assistant Community](https://community.home-assistant.io/t/myvaillant-integration/542610/70)
