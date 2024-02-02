@@ -1,0 +1,37 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "password": "Heslo",
+          "username": "Uživatelské jméno",
+          "country": "Země",
+          "brand": "Značka"
+        },
+        "title": "Přihlašovací údaje",
+        "description": "Stejné jako přihlašovací údaje myVAILLANT"
+      }
+    },
+    "error": {
+      "login_endpoint_invalid": "Pro tuto kombinaci značky a země se nenašel žádný způsob přihlášení",
+      "realm_invalid": "Tato značka vyžaduje výběr země",
+      "authentication_failed": "Ověření selhalo, zkontrolujte svoje uživatelské jméno a heslo a ujistěte se, že jste vybrali správnou značku zařízení a zemi.",
+      "unknown": "Neočekávaná chyba"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "update_interval": "Sekundy mezi kontrolami (při nižších hodnotách hrozí riziko překročení kvóty a dočasné zákazy)",
+          "refresh_delay": "Zpoždění před obnovením dat po aktualizacích",
+          "quick_veto_duration": "Nastavené trvání v hodinách pro rychlé veto",
+          "holiday_duration": "Nastavená doba trvání dovolené ve dnech",
+          "time_program_overwrite": "Regulátory teploty přepisují časový program namísto nastavení rychlého veta",
+          "country": "Země",
+          "brand": "Značka"
+        }
+      }
+    }
+  }
+}

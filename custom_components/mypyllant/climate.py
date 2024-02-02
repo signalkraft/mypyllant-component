@@ -43,6 +43,7 @@ from myPyllant.models import (
     Zone,
     ZoneCurrentSpecialFunction,
     ZoneHeatingOperatingMode,
+    ZoneHeatingOperatingModeVRC700,
     ZoneTimeProgram,
 )
 
@@ -254,11 +255,11 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def hvac_mode_map(self):
-        if self.zone.control_identifier == "vrc700":
+        if self.zone.control_identifier.is_vrc700:
             return {
-                HVACMode.OFF: ZoneHeatingOperatingMode.OFF,
-                HVACMode.HEAT_COOL: ZoneHeatingOperatingMode.MANUAL,
-                HVACMode.AUTO: ZoneHeatingOperatingMode.AUTO,
+                HVACMode.OFF: ZoneHeatingOperatingModeVRC700.OFF,
+                HVACMode.HEAT_COOL: ZoneHeatingOperatingModeVRC700.DAY,
+                HVACMode.AUTO: ZoneHeatingOperatingModeVRC700.AUTO,
             }
         else:
             return {

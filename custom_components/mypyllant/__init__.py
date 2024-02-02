@@ -355,7 +355,7 @@ class SystemCoordinator(MyPyllantCoordinator):
             return data
         except ClientResponseError as e:
             self._set_quota_and_raise(e)
-            raise UpdateFailed() from e
+            raise UpdateFailed(str(e)) from e
         except (CancelledError, TimeoutError) as e:
             self._raise_api_down(e)
             return []  # mypy
@@ -401,7 +401,7 @@ class DailyDataCoordinator(MyPyllantCoordinator):
             return data
         except ClientResponseError as e:
             self._set_quota_and_raise(e)
-            raise UpdateFailed() from e
+            raise UpdateFailed(str(e)) from e
         except (CancelledError, TimeoutError) as e:
             self._raise_api_down(e)
             return {}  # mypy
