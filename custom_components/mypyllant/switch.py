@@ -12,7 +12,7 @@ from custom_components.mypyllant.utils import (
     HolidayEntity,
     DomesticHotWaterCoordinatorEntity,
 )
-from myPyllant.models import DHWCurrentSpecialFunction
+from myPyllant.enums import DHWCurrentSpecialFunction
 from myPyllant.utils import get_default_holiday_dates
 
 _LOGGER = logging.getLogger(__name__)

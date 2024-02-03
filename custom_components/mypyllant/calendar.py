@@ -17,13 +17,13 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from myPyllant.models import (
     ZoneTimeProgramDay,
-    ZoneTimeProgramType,
     BaseTimeProgram,
     BaseTimeProgramDay,
     DHWTimeProgramDay,
     DHWTimeProgram,
     ZoneTimeProgram,
 )
+from myPyllant.enums import ZoneTimeProgramType
 
 from . import SystemCoordinator
 from .const import DOMAIN, WEEKDAYS_TO_RFC5545, RFC5545_TO_WEEKDAYS

@@ -29,7 +29,7 @@ async def test_zone_climate(
         )
         assert isinstance(climate.device_info, dict)
         assert isinstance(climate.extra_state_attributes, dict)
-        assert isinstance(climate.target_temperature, float)
+        assert isinstance(climate.target_temperature, float | int)
         assert isinstance(climate.extra_state_attributes, dict)
 
         await climate.set_holiday()

@@ -23,7 +23,8 @@ from myPyllant import export, report
 
 from myPyllant.api import MyPyllantAPI
 from myPyllant.const import DEFAULT_BRAND
-from myPyllant.models import DeviceData, DeviceDataBucketResolution, System
+from myPyllant.models import DeviceData, System
+from myPyllant.enums import DeviceDataBucketResolution
 from myPyllant.tests import generate_test_data
 from .const import (
     API_DOWN_PAUSE_INTERVAL,

@@ -1,6 +1,7 @@
 import pytest as pytest
 from myPyllant.api import MyPyllantAPI
-from myPyllant.models import CircuitState, DeviceData
+from myPyllant.models import DeviceData
+from myPyllant.enums import CircuitState
 from myPyllant.tests.utils import list_test_data
 
 from custom_components.mypyllant.sensor import (
@@ -80,7 +81,7 @@ async def test_zone_sensors(
             ZoneDesiredRoomTemperatureSetpointSensor(
                 0, 0, system_coordinator_mock
             ).native_value,
-            float,
+            float | int,
         )
         assert isinstance(
             ZoneCurrentSpecialFunctionSensor(

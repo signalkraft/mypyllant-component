@@ -15,11 +15,15 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from myPyllant.models import (
-    DHWCurrentSpecialFunction,
-    DHWOperationMode,
     DHWTimeProgram,
     DomesticHotWater,
     System,
+)
+from myPyllant.enums import (
+    DHWCurrentSpecialFunction,
+    DHWOperationMode,
+    DHWOperationModeVRC700,
+    DHWCurrentSpecialFunctionVRC700,
 )
 from myPyllant.utils import prepare_field_value_for_dict
 
@@ -73,15 +77,23 @@ async def async_setup_entry(
 class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
     coordinator: SystemCoordinator
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
-    _attr_operation_list = [d.display_value for d in DHWOperationMode] + [
-        DHWCurrentSpecialFunction.CYLINDER_BOOST.display_value
-    ]
 
     def __init__(self, system_index, dhw_index, coordinator) -> None:
         """Initialize entity."""
         super().__init__(coordinator)
         self.system_index = system_index
         self.dhw_index = dhw_index
+
+    @property
+    def operation_list(self):
+        if self.domestic_hot_water.control_identifier.is_vrc700:
+            return [d.display_value for d in DHWOperationModeVRC700] + [
+                DHWCurrentSpecialFunction.CYLINDER_BOOST.display_value
+            ]
+        else:
+            return [d.display_value for d in DHWOperationMode] + [
+                DHWCurrentSpecialFunctionVRC700.CYLINDER_BOOST.display_value
+            ]
 
     @property
     def system(self) -> System:

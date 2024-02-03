@@ -38,13 +38,15 @@ from myPyllant.const import (
 from myPyllant.models import (
     System,
     Ventilation,
-    VentilationFanStageType,
-    VentilationOperationMode,
     Zone,
-    ZoneCurrentSpecialFunction,
+    ZoneTimeProgram,
+)
+from myPyllant.enums import (
     ZoneHeatingOperatingMode,
     ZoneHeatingOperatingModeVRC700,
-    ZoneTimeProgram,
+    ZoneCurrentSpecialFunction,
+    VentilationOperationMode,
+    VentilationFanStageType,
 )
 
 from custom_components.mypyllant.utils import shorten_zone_name
