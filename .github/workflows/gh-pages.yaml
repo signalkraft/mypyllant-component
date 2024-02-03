@@ -13,6 +13,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: docker build -t mypyllant-docs . -f docs/Dockerfile
       - run: docker run -v ~/.ssh:/root/.ssh mypyllant-docs gh-deploy --force
