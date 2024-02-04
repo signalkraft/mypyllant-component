@@ -64,6 +64,8 @@ from .const import (
     SERVICE_SET_QUICK_VETO,
     SERVICE_SET_VENTILATION_FAN_STAGE,
     SERVICE_SET_ZONE_TIME_PROGRAM,
+    OPTION_DEFAULT_HOLIDAY_SETPOINT,
+    DEFAULT_HOLIDAY_SETPOINT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -183,6 +185,7 @@ async def async_setup_entry(
                 vol.Optional("duration_hours"): vol.All(
                     vol.Coerce(float), vol.Clamp(min=1)
                 ),
+                vol.Optional("setpoint"): vol.All(vol.Coerce(float), vol.Clamp(min=0)),
             },
             "set_holiday",
         )
@@ -341,6 +344,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         start = kwargs.get("start")
         end = kwargs.get("end")
         duration_hours = kwargs.get("duration_hours")
+        setpoint = kwargs.get("setpoint")
         if duration_hours:
             if end:
                 raise ValueError(
@@ -349,7 +353,13 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             if not start:
                 start = datetime.now(self.system.timezone)
             end = start + timedelta(hours=duration_hours)
-        await self.coordinator.api.set_holiday(self.system, start, end)
+        if self.system.control_identifier.is_vrc700 and setpoint is None:
+            setpoint = self.config.options.get(
+                OPTION_DEFAULT_HOLIDAY_SETPOINT, DEFAULT_HOLIDAY_SETPOINT
+            )
+        await self.coordinator.api.set_holiday(
+            self.system, start, end, setpoint=setpoint
+        )
         await self.coordinator.async_request_refresh_delayed()
 
     async def cancel_holiday(self):

@@ -92,6 +92,14 @@ set_holiday:
         number:
           min: 1
           mode: box
+    setpoint:
+      name: Setpoint
+      description: Setpoint temperature, required on VRC700
+      example: 10
+      selector:
+        number:
+          min: 0
+          mode: box
 
 cancel_holiday:
   name: Cancel Holiday

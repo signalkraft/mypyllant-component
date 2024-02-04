@@ -36,6 +36,8 @@ from .const import (
     OPTION_TIME_PROGRAM_OVERWRITE,
     OPTION_UPDATE_INTERVAL,
     OPTION_DEFAULT_HOLIDAY_DURATION,
+    OPTION_DEFAULT_HOLIDAY_SETPOINT,
+    DEFAULT_HOLIDAY_SETPOINT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -139,6 +141,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         default=self.config_entry.options.get(
                             OPTION_TIME_PROGRAM_OVERWRITE,
                             DEFAULT_TIME_PROGRAM_OVERWRITE,
+                        ),
+                    ): bool,
+                    vol.Required(
+                        OPTION_DEFAULT_HOLIDAY_SETPOINT,
+                        default=self.config_entry.options.get(
+                            OPTION_DEFAULT_HOLIDAY_SETPOINT,
+                            DEFAULT_HOLIDAY_SETPOINT,
                         ),
                     ): bool,
                     vol.Required(
