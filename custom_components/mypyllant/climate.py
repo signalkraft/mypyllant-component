@@ -585,11 +585,17 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def hvac_mode(self) -> HVACMode:
-        return [
-            k
-            for k, v in VENTILATION_HVAC_MODE_MAP.items()
-            if v == self.ventilation.operation_mode_ventilation
-        ][0]
+        if (
+            self.ventilation.operation_mode_ventilation
+            in VENTILATION_HVAC_MODE_MAP.values()
+        ):
+            return [
+                k
+                for k, v in VENTILATION_HVAC_MODE_MAP.items()
+                if v == self.ventilation.operation_mode_ventilation
+            ][0]
+        else:
+            return HVACMode.FAN_ONLY
 
     async def async_set_hvac_mode(self, hvac_mode):
         await self.coordinator.api.set_ventilation_operation_mode(

@@ -76,6 +76,7 @@ async def test_ventilation_climate(
         )
         assert isinstance(ventilation.device_info, dict)
         assert isinstance(ventilation.extra_state_attributes, dict)
+        assert isinstance(ventilation.hvac_mode, HVACMode)
         assert isinstance(ventilation.fan_mode, str)
 
         await ventilation.async_set_fan_mode(FAN_OFF)
