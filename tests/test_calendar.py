@@ -24,6 +24,11 @@ async def test_zone_heating_calendar(
             await system_coordinator_mock._async_update_data()
         )
         calendar = ZoneHeatingCalendar(0, 0, system_coordinator_mock)
+        if not calendar.time_program.has_time_program:
+            await mocked_api.aiohttp_session.close()
+            pytest.skip(
+                f"No time program in zone {system_coordinator_mock.data[0].zones[0]}, skipping calendar test"
+            )
         with freezegun.freeze_time("2023-01-01T00:00:00+00:00"):
             events = await calendar.async_get_events(
                 hass,
