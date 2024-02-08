@@ -111,9 +111,10 @@ async def create_system_sensors(
             sensors.append(
                 ZoneHeatingOperatingModeSensor(index, zone_index, system_coordinator)
             )
-            sensors.append(
-                ZoneHeatingStateSensor(index, zone_index, system_coordinator)
-            )
+            if zone.heating_state is not None:
+                sensors.append(
+                    ZoneHeatingStateSensor(index, zone_index, system_coordinator)
+                )
             sensors.append(
                 ZoneCurrentSpecialFunctionSensor(index, zone_index, system_coordinator)
             )
