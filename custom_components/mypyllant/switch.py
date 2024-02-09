@@ -12,7 +12,6 @@ from custom_components.mypyllant.utils import (
     HolidayEntity,
     DomesticHotWaterCoordinatorEntity,
 )
-from myPyllant.enums import DHWCurrentSpecialFunction, DHWCurrentSpecialFunctionVRC700
 from myPyllant.utils import get_default_holiday_dates
 
 _LOGGER = logging.getLogger(__name__)
@@ -77,10 +76,7 @@ class DomesticHotWaterBoostSwitch(DomesticHotWaterCoordinatorEntity, SwitchEntit
 
     @property
     def is_on(self):
-        return self.domestic_hot_water.current_special_function in [
-            DHWCurrentSpecialFunction.CYLINDER_BOOST,
-            DHWCurrentSpecialFunctionVRC700.CYLINDER_BOOST,
-        ]
+        return self.domestic_hot_water.is_cylinder_boosting
 
     async def async_turn_on(self, **kwargs):
         await self.coordinator.api.boost_domestic_hot_water(

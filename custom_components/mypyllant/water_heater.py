@@ -88,11 +88,11 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
     def operation_list(self):
         if self.domestic_hot_water.control_identifier.is_vrc700:
             return [d.display_value for d in DHWOperationModeVRC700] + [
-                DHWCurrentSpecialFunction.CYLINDER_BOOST.display_value
+                DHWCurrentSpecialFunctionVRC700.CYLINDER_BOOST.display_value
             ]
         else:
             return [d.display_value for d in DHWOperationMode] + [
-                DHWCurrentSpecialFunctionVRC700.CYLINDER_BOOST.display_value
+                DHWCurrentSpecialFunction.CYLINDER_BOOST.display_value
             ]
 
     @property
@@ -168,10 +168,7 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
 
     @property
     def current_operation(self) -> str:
-        if (
-            self.domestic_hot_water.current_special_function
-            == DHWCurrentSpecialFunction.CYLINDER_BOOST
-        ):
+        if self.domestic_hot_water.is_cylinder_boosting:
             return str(DHWCurrentSpecialFunction.CYLINDER_BOOST.display_value)
         return str(self.domestic_hot_water.operation_mode_dhw.display_value)
 
@@ -186,15 +183,15 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
         self, operation_mode: str, **kwargs: Any
     ) -> None:
         enum_value = operation_mode.upper().replace(" ", "_")
-        if enum_value == str(DHWCurrentSpecialFunction.CYLINDER_BOOST):
+        if enum_value in [
+            str(DHWCurrentSpecialFunction.CYLINDER_BOOST),
+            str(DHWCurrentSpecialFunctionVRC700.CYLINDER_BOOST),
+        ]:
             # Boost was requested
             await self.coordinator.api.boost_domestic_hot_water(
                 self.domestic_hot_water,
             )
-        elif (
-            self.domestic_hot_water.current_special_function
-            == DHWCurrentSpecialFunction.CYLINDER_BOOST
-        ):
+        elif self.domestic_hot_water.is_cylinder_boosting:
             # Something other than boost was requested, but boost mode is currently active
             await self.coordinator.api.cancel_hot_water_boost(
                 self.domestic_hot_water,
