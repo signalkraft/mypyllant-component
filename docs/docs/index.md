@@ -106,7 +106,7 @@ Brand of your HVAC equipment and app, pick Saunier Duval if you use the MiGo Lin
 
 !!! note "Missing a Country?"
 
-    If a country is missing, please [open an issue](https://github.com/signalkraft/mypyllant-component/issues/new)
+    If a country is missing, please [open an issue](https://github.com/signalkraft/myPyllant/issues/new/choose)
     or [contribute a new country to the myPyllant library](3-contributing.md#supporting-new-countries).
 
 - Vaillant
