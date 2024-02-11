@@ -1,13 +1,59 @@
+from unittest import mock
+
 import pytest as pytest
 from homeassistant.components.climate import HVACMode
 from homeassistant.components.climate.const import FAN_OFF, PRESET_AWAY
 from homeassistant.const import ATTR_TEMPERATURE
+from homeassistant.helpers.entity_registry import DATA_REGISTRY, EntityRegistry
+from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
+
 from myPyllant.api import MyPyllantAPI
 from myPyllant.tests.utils import list_test_data
 
-from custom_components.mypyllant import SystemCoordinator
-from custom_components.mypyllant.climate import VentilationClimate, ZoneClimate
+from custom_components.mypyllant import SystemCoordinator, DOMAIN
+from custom_components.mypyllant.climate import (
+    VentilationClimate,
+    ZoneClimate,
+    async_setup_entry,
+)
 from tests.utils import get_config_entry
+from tests.conftest import MockConfigEntry, TEST_OPTIONS
+from tests.test_init import test_user_input
+
+
+@pytest.mark.parametrize("test_data", list_test_data())
+async def test_async_setup_climate(
+    hass,
+    mypyllant_aioresponses,
+    mocked_api: MyPyllantAPI,
+    system_coordinator_mock,
+    test_data,
+):
+    hass.data[DATA_COMPONENTS] = {}
+    hass.data[DATA_INTEGRATIONS] = {}
+    hass.data[DATA_REGISTRY] = EntityRegistry(hass)
+    with mypyllant_aioresponses(test_data) as _:
+        config_entry = MockConfigEntry(
+            domain=DOMAIN,
+            title="Mock Title",
+            data=test_user_input,
+            options=TEST_OPTIONS,
+        )
+        system_coordinator_mock.data = (
+            await system_coordinator_mock._async_update_data()
+        )
+        hass.data[DOMAIN] = {
+            config_entry.entry_id: {"system_coordinator": system_coordinator_mock}
+        }
+        mock_async_register_entity_service = mock.Mock(return_value=None)
+        async_add_entities_mock = mock.Mock(return_value=None)
+        with mock.patch(
+            "homeassistant.helpers.entity_platform.async_get_current_platform",
+            side_effect=lambda *args, **kwargs: mock_async_register_entity_service,
+        ):
+            await async_setup_entry(hass, config_entry, async_add_entities_mock)
+        async_add_entities_mock.assert_called()
+    await mocked_api.aiohttp_session.close()
 
 
 @pytest.mark.parametrize("test_data", list_test_data())

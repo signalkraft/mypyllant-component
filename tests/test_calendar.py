@@ -1,14 +1,53 @@
 from datetime import datetime, timedelta, timezone
+from unittest.mock import Mock
 
 import freezegun
 import pytest
+from homeassistant.helpers.entity_registry import DATA_REGISTRY, EntityRegistry
+from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
+
+from custom_components.mypyllant import DOMAIN
 from myPyllant.api import MyPyllantAPI
 from myPyllant.tests.utils import list_test_data
 
 from custom_components.mypyllant.calendar import (
     ZoneHeatingCalendar,
     DomesticHotWaterCalendar,
+    async_setup_entry,
 )
+from tests.conftest import MockConfigEntry, TEST_OPTIONS
+from tests.test_init import test_user_input
+
+
+@pytest.mark.parametrize("test_data", list_test_data())
+async def test_async_setup_calendar(
+    hass,
+    mypyllant_aioresponses,
+    mocked_api: MyPyllantAPI,
+    system_coordinator_mock,
+    test_data,
+):
+    hass.data[DATA_COMPONENTS] = {}
+    hass.data[DATA_INTEGRATIONS] = {}
+    hass.data[DATA_REGISTRY] = EntityRegistry(hass)
+    with mypyllant_aioresponses(test_data) as _:
+        config_entry = MockConfigEntry(
+            domain=DOMAIN,
+            title="Mock Title",
+            data=test_user_input,
+            options=TEST_OPTIONS,
+        )
+        system_coordinator_mock.data = (
+            await system_coordinator_mock._async_update_data()
+        )
+        hass.data[DOMAIN] = {
+            config_entry.entry_id: {"system_coordinator": system_coordinator_mock}
+        }
+        mock = Mock(return_value=None)
+        await async_setup_entry(hass, config_entry, mock)
+        mock.assert_called_once()
+        assert len(mock.call_args.args[0]) > 0
+    await mocked_api.aiohttp_session.close()
 
 
 @pytest.mark.parametrize("test_data", list_test_data())

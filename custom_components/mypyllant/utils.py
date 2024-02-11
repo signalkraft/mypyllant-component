@@ -3,7 +3,9 @@ from __future__ import annotations
 import logging
 import typing
 from asyncio.exceptions import CancelledError
+from collections.abc import MutableSequence
 from datetime import datetime, timedelta
+from typing import TypeVar
 
 from aiohttp.client_exceptions import ClientResponseError
 from homeassistant.config_entries import ConfigEntry
@@ -17,6 +19,59 @@ if typing.TYPE_CHECKING:
     from myPyllant.models import System, DomesticHotWater, Zone
 
 logger = logging.getLogger(__name__)
+
+_T = TypeVar("_T")
+
+
+class EntityList(MutableSequence[_T]):
+    """
+    A list that takes a callable for the item value, calls it, and logs exceptions without raising them
+    When adding multiple entities in a setup function, an error on one entity
+    doesn't prevent the others from being added
+    """
+
+    def __init__(self, *args):
+        self.list = list()
+        self.extend(list(args))
+
+    def __len__(self):
+        return len(self.list)
+
+    def __getitem__(self, i):
+        return self.list[i]
+
+    def __delitem__(self, i):
+        del self.list[i]
+
+    def __setitem__(self, i, value):
+        value, raised = self.call_and_log(value)
+        if not raised:
+            self.list[i] = value
+        else:
+            del self.list[i]
+
+    def call_and_log(self, value):
+        if callable(value):
+            try:
+                return value(), False
+            except Exception as e:
+                logger.error(f"Error initializing entity: {e}", exc_info=e)
+                return None, True
+        else:
+            return value, False
+
+    def append(self, value):
+        value, raised = self.call_and_log(value)
+        if not raised:
+            self.list.append(value)
+
+    def insert(self, i, value):
+        value, raised = self.call_and_log(value)
+        if not raised:
+            self.list.insert(i, self.call_and_log(value))
+
+    def __str__(self):
+        return str(self.list)
 
 
 class SystemCoordinatorEntity(CoordinatorEntity):

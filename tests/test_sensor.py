@@ -1,4 +1,7 @@
 import pytest as pytest
+from homeassistant.helpers.entity_registry import DATA_REGISTRY, EntityRegistry
+from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
+
 from myPyllant.api import MyPyllantAPI
 from myPyllant.models import DeviceData
 from myPyllant.enums import CircuitState
@@ -24,7 +27,41 @@ from custom_components.mypyllant.sensor import (
     ZoneHumiditySensor,
     SystemDeviceOnOffCyclesSensor,
     SystemDeviceOperationTimeSensor,
+    create_system_sensors,
 )
+from custom_components.mypyllant.const import DOMAIN
+from tests.conftest import MockConfigEntry, TEST_OPTIONS
+from tests.test_init import test_user_input
+
+
+@pytest.mark.parametrize("test_data", list_test_data())
+async def test_create_system_sensors(
+    hass,
+    mypyllant_aioresponses,
+    mocked_api: MyPyllantAPI,
+    system_coordinator_mock,
+    test_data,
+):
+    hass.data[DATA_COMPONENTS] = {}
+    hass.data[DATA_INTEGRATIONS] = {}
+    hass.data[DATA_REGISTRY] = EntityRegistry(hass)
+    with mypyllant_aioresponses(test_data) as _:
+        config_entry = MockConfigEntry(
+            domain=DOMAIN,
+            title="Mock Title",
+            data=test_user_input,
+            options=TEST_OPTIONS,
+        )
+        system_coordinator_mock.data = (
+            await system_coordinator_mock._async_update_data()
+        )
+        hass.data[DOMAIN] = {
+            config_entry.entry_id: {"system_coordinator": system_coordinator_mock}
+        }
+        sensors = await create_system_sensors(hass, config_entry)
+        assert len(sensors) > 0
+
+        await mocked_api.aiohttp_session.close()
 
 
 @pytest.mark.parametrize("test_data", list_test_data())

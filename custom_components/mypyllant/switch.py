@@ -11,6 +11,7 @@ from custom_components.mypyllant import DOMAIN, SystemCoordinator
 from custom_components.mypyllant.utils import (
     HolidayEntity,
     DomesticHotWaterCoordinatorEntity,
+    EntityList,
 )
 from myPyllant.utils import get_default_holiday_dates
 
@@ -28,12 +29,14 @@ async def async_setup_entry(
         _LOGGER.warning("No system data, skipping switch entities")
         return
 
-    sensors = []
+    sensors: EntityList[SwitchEntity] = EntityList()
     for index, system in enumerate(coordinator.data):
-        sensors.append(SystemHolidaySwitch(index, coordinator, config))
+        sensors.append(lambda: SystemHolidaySwitch(index, coordinator, config))
 
         for dhw_index, dhw in enumerate(system.domestic_hot_water):
-            sensors.append(DomesticHotWaterBoostSwitch(index, dhw_index, coordinator))
+            sensors.append(
+                lambda: DomesticHotWaterBoostSwitch(index, dhw_index, coordinator)
+            )
     async_add_entities(sensors)
 
 

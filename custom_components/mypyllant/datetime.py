@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from custom_components.mypyllant import DOMAIN, SystemCoordinator
-from custom_components.mypyllant.utils import HolidayEntity
+from custom_components.mypyllant.utils import HolidayEntity, EntityList
 from myPyllant.utils import get_default_holiday_dates
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,10 +26,14 @@ async def async_setup_entry(
         _LOGGER.warning("No system data, skipping date time entities")
         return
 
-    sensors = []
+    sensors: EntityList[DateTimeEntity] = EntityList()
     for index, system in enumerate(coordinator.data):
-        sensors.append(SystemHolidayStartDateTimeEntity(index, coordinator, config))
-        sensors.append(SystemHolidayEndDateTimeEntity(index, coordinator, config))
+        sensors.append(
+            lambda: SystemHolidayStartDateTimeEntity(index, coordinator, config)
+        )
+        sensors.append(
+            lambda: SystemHolidayEndDateTimeEntity(index, coordinator, config)
+        )
     async_add_entities(sensors)
 
 

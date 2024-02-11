@@ -49,7 +49,7 @@ from myPyllant.enums import (
     VentilationFanStageType,
 )
 
-from custom_components.mypyllant.utils import shorten_zone_name
+from custom_components.mypyllant.utils import shorten_zone_name, EntityList
 
 from . import SystemCoordinator
 from .const import (
@@ -112,13 +112,13 @@ async def async_setup_entry(
         _LOGGER.warning("No system data, skipping climate")
         return
 
-    zone_entities: list[ClimateEntity] = []
-    ventilation_entities: list[ClimateEntity] = []
+    zone_entities: EntityList[ClimateEntity] = EntityList()
+    ventilation_entities: EntityList[ClimateEntity] = EntityList()
 
     for index, system in enumerate(coordinator.data):
         for zone_index, _ in enumerate(system.zones):
             zone_entities.append(
-                ZoneClimate(
+                lambda: ZoneClimate(
                     index,
                     zone_index,
                     coordinator,
@@ -127,7 +127,7 @@ async def async_setup_entry(
             )
         for ventilation_index, _ in enumerate(system.ventilation):
             ventilation_entities.append(
-                VentilationClimate(
+                lambda: VentilationClimate(
                     index,
                     ventilation_index,
                     coordinator,

@@ -17,6 +17,7 @@ from myPyllant.models import Circuit, System
 
 from . import SystemCoordinator
 from .const import DOMAIN
+from .utils import EntityList
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,14 +33,16 @@ async def async_setup_entry(
         _LOGGER.warning("No system data, skipping binary sensors")
         return
 
-    sensors: list[BinarySensorEntity] = []
+    sensors: EntityList[BinarySensorEntity] = EntityList()
     for index, system in enumerate(coordinator.data):
-        sensors.append(ControlError(index, coordinator))
-        sensors.append(ControlOnline(index, coordinator))
-        sensors.append(FirmwareUpdateRequired(index, coordinator))
-        sensors.append(FirmwareUpdateEnabled(index, coordinator))
+        sensors.append(lambda: ControlError(index, coordinator))
+        sensors.append(lambda: ControlOnline(index, coordinator))
+        sensors.append(lambda: FirmwareUpdateRequired(index, coordinator))
+        sensors.append(lambda: FirmwareUpdateEnabled(index, coordinator))
         for circuit_index, circuit in enumerate(system.circuits):
-            sensors.append(CircuitIsCoolingAllowed(index, circuit_index, coordinator))
+            sensors.append(
+                lambda: CircuitIsCoolingAllowed(index, circuit_index, coordinator)
+            )
 
     async_add_entities(sensors)
 

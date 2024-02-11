@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, Iterable, Sequence
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -33,6 +33,7 @@ from custom_components.mypyllant.utils import (
     SystemCoordinatorEntity,
     DomesticHotWaterCoordinatorEntity,
     ZoneCoordinatorEntity,
+    EntityList,
 )
 from myPyllant.utils import prepare_field_value_for_dict
 
@@ -52,7 +53,7 @@ DATA_UNIT_MAP = {
 
 async def create_system_sensors(
     hass: HomeAssistant, config: ConfigEntry
-) -> list[SensorEntity]:
+) -> Sequence[SensorEntity]:
     system_coordinator: SystemCoordinator = hass.data[DOMAIN][config.entry_id][
         "system_coordinator"
     ]
@@ -60,33 +61,35 @@ async def create_system_sensors(
         _LOGGER.warning("No system data, skipping sensors")
         return []
 
-    sensors: list[SensorEntity] = []
+    sensors: EntityList[SensorEntity] = EntityList()
     _LOGGER.debug("Creating system sensors for %s", system_coordinator.data)
     for index, system in enumerate(system_coordinator.data):
         if system.outdoor_temperature is not None:
-            sensors.append(SystemOutdoorTemperatureSensor(index, system_coordinator))
+            sensors.append(
+                lambda: SystemOutdoorTemperatureSensor(index, system_coordinator)
+            )
         if system.water_pressure is not None:
-            sensors.append(SystemWaterPressureSensor(index, system_coordinator))
-        sensors.append(HomeEntity(index, system_coordinator))
+            sensors.append(lambda: SystemWaterPressureSensor(index, system_coordinator))
+        sensors.append(lambda: HomeEntity(index, system_coordinator))
 
         for device_index, device in enumerate(system.devices):
             _LOGGER.debug("Creating SystemDevice sensors for %s", device)
 
             if "water_pressure" in device.operational_data:
                 sensors.append(
-                    SystemDeviceWaterPressureSensor(
+                    lambda: SystemDeviceWaterPressureSensor(
                         index, device_index, system_coordinator
                     )
                 )
             if device.operation_time is not None:
                 sensors.append(
-                    SystemDeviceOperationTimeSensor(
+                    lambda: SystemDeviceOperationTimeSensor(
                         index, device_index, system_coordinator
                     )
                 )
             if device.on_off_cycles is not None:
                 sensors.append(
-                    SystemDeviceOnOffCyclesSensor(
+                    lambda: SystemDeviceOnOffCyclesSensor(
                         index, device_index, system_coordinator
                     )
                 )
@@ -94,47 +97,57 @@ async def create_system_sensors(
         for zone_index, zone in enumerate(system.zones):
             _LOGGER.debug("Creating Zone sensors for %s", zone)
             sensors.append(
-                ZoneDesiredRoomTemperatureSetpointSensor(
+                lambda: ZoneDesiredRoomTemperatureSetpointSensor(
                     index, zone_index, system_coordinator
                 )
             )
             if zone.current_room_temperature is not None:
                 sensors.append(
-                    ZoneCurrentRoomTemperatureSensor(
+                    lambda: ZoneCurrentRoomTemperatureSensor(
                         index, zone_index, system_coordinator
                     )
                 )
             if zone.current_room_humidity is not None:
                 sensors.append(
-                    ZoneHumiditySensor(index, zone_index, system_coordinator)
+                    lambda: ZoneHumiditySensor(index, zone_index, system_coordinator)
                 )
             sensors.append(
-                ZoneHeatingOperatingModeSensor(index, zone_index, system_coordinator)
+                lambda: ZoneHeatingOperatingModeSensor(
+                    index, zone_index, system_coordinator
+                )
             )
             if zone.heating_state is not None:
                 sensors.append(
-                    ZoneHeatingStateSensor(index, zone_index, system_coordinator)
+                    lambda: ZoneHeatingStateSensor(
+                        index, zone_index, system_coordinator
+                    )
                 )
             sensors.append(
-                ZoneCurrentSpecialFunctionSensor(index, zone_index, system_coordinator)
+                lambda: ZoneCurrentSpecialFunctionSensor(
+                    index, zone_index, system_coordinator
+                )
             )
 
         for circuit_index, circuit in enumerate(system.circuits):
             _LOGGER.debug("Creating Circuit sensors for %s", circuit)
-            sensors.append(CircuitStateSensor(index, circuit_index, system_coordinator))
+            sensors.append(
+                lambda: CircuitStateSensor(index, circuit_index, system_coordinator)
+            )
             if circuit.current_circuit_flow_temperature is not None:
                 sensors.append(
-                    CircuitFlowTemperatureSensor(
+                    lambda: CircuitFlowTemperatureSensor(
                         index, circuit_index, system_coordinator
                     )
                 )
             if circuit.heating_curve is not None:
                 sensors.append(
-                    CircuitHeatingCurveSensor(index, circuit_index, system_coordinator)
+                    lambda: CircuitHeatingCurveSensor(
+                        index, circuit_index, system_coordinator
+                    )
                 )
             if circuit.min_flow_temperature_setpoint is not None:
                 sensors.append(
-                    CircuitMinFlowTemperatureSetpointSensor(
+                    lambda: CircuitMinFlowTemperatureSetpointSensor(
                         index, circuit_index, system_coordinator
                     )
                 )
@@ -143,20 +156,22 @@ async def create_system_sensors(
             _LOGGER.debug("Creating Domestic Hot Water sensors for %s", dhw)
             if dhw.current_dhw_temperature:
                 sensors.append(
-                    DomesticHotWaterTankTemperatureSensor(
+                    lambda: DomesticHotWaterTankTemperatureSensor(
                         index, dhw_index, system_coordinator
                     )
                 )
             sensors.append(
-                DomesticHotWaterSetPointSensor(index, dhw_index, system_coordinator)
-            )
-            sensors.append(
-                DomesticHotWaterOperationModeSensor(
+                lambda: DomesticHotWaterSetPointSensor(
                     index, dhw_index, system_coordinator
                 )
             )
             sensors.append(
-                DomesticHotWaterCurrentSpecialFunctionSensor(
+                lambda: DomesticHotWaterOperationModeSensor(
+                    index, dhw_index, system_coordinator
+                )
+            )
+            sensors.append(
+                lambda: DomesticHotWaterCurrentSpecialFunctionSensor(
                     index, dhw_index, system_coordinator
                 )
             )
@@ -165,7 +180,7 @@ async def create_system_sensors(
 
 async def create_daily_data_sensors(
     hass: HomeAssistant, config: ConfigEntry
-) -> list[SensorEntity]:
+) -> Iterable[SensorEntity]:
     daily_data_coordinator: DailyDataCoordinator = hass.data[DOMAIN][config.entry_id][
         "daily_data_coordinator"
     ]
@@ -176,10 +191,12 @@ async def create_daily_data_sensors(
         _LOGGER.warning("No daily data, skipping sensors")
         return []
 
-    sensors: list[SensorEntity] = []
+    sensors: EntityList[SensorEntity] = EntityList()
     for system_id, system_devices in daily_data_coordinator.data.items():
         _LOGGER.debug("Creating efficiency sensor for System %s", system_id)
-        sensors.append(EfficiencySensor(system_id, None, daily_data_coordinator))
+        sensors.append(
+            lambda: EfficiencySensor(system_id, None, daily_data_coordinator)
+        )
         for de_index, devices_data in enumerate(system_devices["devices_data"]):
             if len(devices_data) == 0:
                 continue
@@ -189,13 +206,15 @@ async def create_daily_data_sensors(
                 de_index,
             )
             sensors.append(
-                EfficiencySensor(system_id, de_index, daily_data_coordinator)
+                lambda: EfficiencySensor(system_id, de_index, daily_data_coordinator)
             )
             for da_index, _ in enumerate(
                 daily_data_coordinator.data[system_id]["devices_data"][de_index]
             ):
                 sensors.append(
-                    DataSensor(system_id, de_index, da_index, daily_data_coordinator)
+                    lambda: DataSensor(
+                        system_id, de_index, da_index, daily_data_coordinator
+                    )
                 )
 
     return sensors

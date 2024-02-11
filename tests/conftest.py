@@ -125,7 +125,7 @@ class MockConfigEntry(config_entries.ConfigEntry):
     ):
         """Initialize a mock config entry."""
         kwargs = {
-            "entry_id": entry_id or uuid.uuid4(),
+            "entry_id": entry_id or str(uuid.uuid4()),
             "domain": domain,
             "data": data or {},
             "pref_disable_new_entities": pref_disable_new_entities,

@@ -14,6 +14,7 @@ from custom_components.mypyllant.utils import (
     HolidayEntity,
     SystemCoordinatorEntity,
     ZoneCoordinatorEntity,
+    EntityList,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -30,12 +31,14 @@ async def async_setup_entry(
         _LOGGER.warning("No system data, skipping number entities")
         return
 
-    sensors = []
+    sensors: EntityList[NumberEntity] = EntityList()
     for index, system in enumerate(coordinator.data):
-        sensors.append(SystemHolidayDurationNumber(index, coordinator))
+        sensors.append(lambda: SystemHolidayDurationNumber(index, coordinator))
 
         for zone_index, zone in enumerate(system.zones):
-            sensors.append(ZoneQuickVetoDurationNumber(index, zone_index, coordinator))
+            sensors.append(
+                lambda: ZoneQuickVetoDurationNumber(index, zone_index, coordinator)
+            )
     async_add_entities(sensors)
 
 

@@ -27,7 +27,11 @@ from myPyllant.enums import ZoneTimeProgramType
 
 from . import SystemCoordinator
 from .const import DOMAIN, WEEKDAYS_TO_RFC5545, RFC5545_TO_WEEKDAYS
-from .utils import ZoneCoordinatorEntity, DomesticHotWaterCoordinatorEntity
+from .utils import (
+    ZoneCoordinatorEntity,
+    DomesticHotWaterCoordinatorEntity,
+    EntityList,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,12 +47,14 @@ async def async_setup_entry(
         _LOGGER.warning("No system data, skipping calendar entities")
         return
 
-    sensors: list[CalendarEntity] = []
+    sensors: EntityList[CalendarEntity] = EntityList()
     for index, system in enumerate(coordinator.data):
         for zone_index, zone in enumerate(system.zones):
-            sensors.append(ZoneHeatingCalendar(index, zone_index, coordinator))
+            sensors.append(lambda: ZoneHeatingCalendar(index, zone_index, coordinator))
         for dhw_index, dhw in enumerate(system.domestic_hot_water):
-            sensors.append(DomesticHotWaterCalendar(index, dhw_index, coordinator))
+            sensors.append(
+                lambda: DomesticHotWaterCalendar(index, dhw_index, coordinator)
+            )
     async_add_entities(sensors)
 
 

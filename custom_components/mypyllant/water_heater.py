@@ -33,6 +33,7 @@ from .const import (
     SERVICE_SET_DHW_CIRCULATION_TIME_PROGRAM,
     SERVICE_SET_DHW_TIME_PROGRAM,
 )
+from .utils import EntityList
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,11 +49,11 @@ async def async_setup_entry(
         _LOGGER.warning("No system data, skipping water heater")
         return
 
-    dhws: list[WaterHeaterEntity] = []
+    dhws: EntityList[WaterHeaterEntity] = EntityList()
 
     for index, system in enumerate(coordinator.data):
         for dhw_index, dhw in enumerate(system.domestic_hot_water):
-            dhws.append(DomesticHotWaterEntity(index, dhw_index, coordinator))
+            dhws.append(lambda: DomesticHotWaterEntity(index, dhw_index, coordinator))
 
     async_add_entities(dhws)
     if len(dhws) > 0:
