@@ -4,4 +4,4 @@ set -e
 
 cd "$(dirname "$0")/.."
 VERSION=$(git --git-dir=../myPyllant/.git describe --abbrev=0 --tags)
-grep -rl "myPyllant==[0-9]" . --exclude-dir=.venv --exclude-dir=.git | xargs sed -i -E "s/myPyllant==[0-9]+.[0-9]+.[0-9]+b?[0-9]*/myPyllant==${VERSION/v/''}/g"
+grep -rl "myPyllant==[0-9]" . --exclude-dir=.venv --exclude-dir=.git | xargs sed -i -E "s/myPyllant==[0-9]+.[0-9]+.[0-9]+b?[0-9]*/myPyllant==${VERSION/v/}/g"
