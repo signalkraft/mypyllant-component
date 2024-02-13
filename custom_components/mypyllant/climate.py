@@ -100,6 +100,11 @@ _FAN_STAGE_TYPE_OPTIONS = [
     for v in VentilationFanStageType
 ]
 
+HVAC_ACTION_MAP = {
+    str(CircuitState.STANDBY): HVACAction.IDLE,
+    str(CircuitState.HEATING): HVACAction.HEATING,
+    str(CircuitState.COOLING): HVACAction.COOLING,
+}
 
 async def async_setup_entry(
     hass: HomeAssistant, config: ConfigEntry, async_add_entities: AddEntitiesCallback
@@ -436,6 +441,14 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             self.hvac_mode_map[hvac_mode],
         )
         await self.coordinator.async_request_refresh_delayed()
+
+    @property
+    def hvac_action(self) -> HVACAction | None:
+        states = list(set(map(lambda x: x["circuit_state"], self.system.state["circuits"])))
+
+        if len(states) == 1 and states[0] in HVAC_ACTION_MAP:
+            return HVAC_ACTION_MAP[states[0]]
+        return None
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """
