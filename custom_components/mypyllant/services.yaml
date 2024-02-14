@@ -169,6 +169,7 @@ set_zone_operating_mode:
   fields:
     mode:
       name: Operating Mode
+      description: The operating mode of the zone, for example OFF or TIME_CONTROLLED
       example: "OFF"
       selector:
         select:
