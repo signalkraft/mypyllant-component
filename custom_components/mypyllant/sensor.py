@@ -421,7 +421,10 @@ class ZoneHeatingStateSensor(ZoneCoordinatorEntity, SensorEntity):
 
     @property
     def native_value(self):
-        return self.zone.heating_state.display_value
+        if self.zone.heating_state is not None:
+            return self.zone.heating_state.display_value
+        else:
+            return None
 
     @property
     def unique_id(self) -> str:
