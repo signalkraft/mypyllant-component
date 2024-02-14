@@ -15,5 +15,5 @@ types-PyYAML~=6.0.12.12
 pytest==7.4.3
 pytest-cov==4.1.0
 pytest-homeassistant-custom-component==0.13.77
-myPyllant==0.7.13
+myPyllant==0.7.14
 dacite~=1.7.0
