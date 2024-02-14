@@ -10,6 +10,7 @@ from homeassistant.components.climate import (
     ClimateEntity,
     ClimateEntityFeature,
     HVACMode,
+    HVACAction,
 )
 from homeassistant.components.climate.const import (
     FAN_AUTO,
@@ -47,6 +48,7 @@ from myPyllant.enums import (
     ZoneCurrentSpecialFunction,
     VentilationOperationMode,
     VentilationFanStageType,
+    CircuitState,
 )
 
 from custom_components.mypyllant.utils import shorten_zone_name, EntityList
@@ -95,6 +97,12 @@ ZONE_PRESET_MAP = {
     PRESET_SLEEP: ZoneCurrentSpecialFunction.SYSTEM_OFF,
 }
 
+ZONE_HVAC_ACTION_MAP = {
+    CircuitState.STANDBY: HVACAction.IDLE,
+    CircuitState.HEATING: HVACAction.HEATING,
+    CircuitState.COOLING: HVACAction.COOLING,
+}
+
 VENTILATION_HVAC_MODE_MAP = {
     HVACMode.FAN_ONLY: VentilationOperationMode.NORMAL,
     HVACMode.AUTO: VentilationOperationMode.TIME_CONTROLLED,
@@ -112,11 +120,6 @@ _FAN_STAGE_TYPE_OPTIONS = [
     for v in VentilationFanStageType
 ]
 
-HVAC_ACTION_MAP = {
-    str(CircuitState.STANDBY): HVACAction.IDLE,
-    str(CircuitState.HEATING): HVACAction.HEATING,
-    str(CircuitState.COOLING): HVACAction.COOLING,
-}
 
 async def async_setup_entry(
     hass: HomeAssistant, config: ConfigEntry, async_add_entities: AddEntitiesCallback
@@ -504,11 +507,8 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def hvac_action(self) -> HVACAction | None:
-        states = list(set(map(lambda x: x["circuit_state"], self.system.state["circuits"])))
-
-        if len(states) == 1 and states[0] in HVAC_ACTION_MAP:
-            return HVAC_ACTION_MAP[states[0]]
-        return None
+        circuit_state = self.zone.get_associated_circuit(self.system).circuit_state
+        return ZONE_HVAC_ACTION_MAP.get(circuit_state)
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """

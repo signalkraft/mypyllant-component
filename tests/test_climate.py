@@ -15,6 +15,7 @@ from custom_components.mypyllant.climate import (
     VentilationClimate,
     ZoneClimate,
     async_setup_entry,
+    ZONE_HVAC_ACTION_MAP,
 )
 from tests.utils import get_config_entry
 from tests.conftest import MockConfigEntry, TEST_OPTIONS
@@ -96,6 +97,7 @@ async def test_zone_climate(
         assert isinstance(climate.preset_modes, list)
         assert climate.hvac_mode in climate.hvac_modes
         assert climate.preset_mode in climate.preset_modes
+        assert climate.hvac_action in ZONE_HVAC_ACTION_MAP.values()
         await mocked_api.aiohttp_session.close()
 
 
