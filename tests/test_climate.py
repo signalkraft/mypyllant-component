@@ -87,9 +87,8 @@ async def test_zone_climate(
         await climate.async_set_preset_mode(preset_mode=PRESET_AWAY)
         system_coordinator_mock._debounced_refresh.async_cancel()
 
-        zone_state = [
-            z for z in system_coordinator_mock.data[0].state["zones"] if z["index"] == 0
-        ][0]
+        print(system_coordinator_mock.data[0].state["zones"])
+        zone_state = system_coordinator_mock.data[0].state["zones"][0]
         if "currentRoomTemperature" in zone_state:
             assert isinstance(climate.current_temperature, float)
         if "humidity" in zone_state:

@@ -10,9 +10,11 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 from homeassistant.helpers.config_validation import positive_int
 from myPyllant.api import (
+    MyPyllantAPI,
+)
+from myPyllant.http_client import (
     AuthenticationFailed,
     LoginEndpointInvalid,
-    MyPyllantAPI,
     RealmInvalid,
 )
 from myPyllant.const import (

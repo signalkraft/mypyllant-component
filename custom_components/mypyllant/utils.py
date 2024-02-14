@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 _T = TypeVar("_T")
 
 
-class EntityList(MutableSequence[_T]):
+class EntityList(MutableSequence[_T | typing.Callable[[], _T]]):
     """
     A list that takes a callable for the item value, calls it, and logs exceptions without raising them
     When adding multiple entities in a setup function, an error on one entity

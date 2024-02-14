@@ -33,7 +33,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from myPyllant.const import (
     DEFAULT_MANUAL_SETPOINT_TYPE,
     DEFAULT_QUICK_VETO_DURATION,
-    MANUAL_SETPOINT_TYPES,
+    ZONE_MANUAL_SETPOINT_TYPES,
 )
 from myPyllant.models import (
     System,
@@ -66,13 +66,25 @@ from .const import (
     SERVICE_SET_ZONE_TIME_PROGRAM,
     OPTION_DEFAULT_HOLIDAY_SETPOINT,
     DEFAULT_HOLIDAY_SETPOINT,
+    SERVICE_SET_ZONE_OPERATING_MODE,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
-_MANUAL_SETPOINT_TYPES_OPTIONS = [
+_ZONE_MANUAL_SETPOINT_TYPES_OPTIONS = [
     selector.SelectOptionDict(value=k, label=v)
-    for k, v in MANUAL_SETPOINT_TYPES.items()
+    for k, v in ZONE_MANUAL_SETPOINT_TYPES.items()
+]
+
+_ZONE_OPERATING_MODE_OPTIONS = [
+    selector.SelectOptionDict(value=v, label=v.replace("_", " ").title())
+    for v in set(
+        [
+            e.value
+            for e in list(ZoneHeatingOperatingMode)
+            + list(ZoneHeatingOperatingModeVRC700)
+        ]
+    )
 ]
 
 ZONE_PRESET_MAP = {
@@ -169,7 +181,7 @@ async def async_setup_entry(
                 ),
                 vol.Required("setpoint_type"): selector.SelectSelector(
                     selector.SelectSelectorConfig(
-                        options=_MANUAL_SETPOINT_TYPES_OPTIONS,
+                        options=_ZONE_MANUAL_SETPOINT_TYPES_OPTIONS,
                         mode=selector.SelectSelectorMode.DROPDOWN,
                     ),
                 ),
@@ -182,6 +194,7 @@ async def async_setup_entry(
             "remove_quick_veto",
         )
         # noinspection PyTypeChecker
+        # Wrapping the schema in vol.Schema() breaks entity_id passing
         platform.async_register_entity_service(
             SERVICE_SET_HOLIDAY,
             {
@@ -216,6 +229,30 @@ async def async_setup_entry(
                 vol.Required("time_program"): vol.All(dict),
             },
             "set_zone_time_program",
+        )
+
+        # noinspection PyTypeChecker
+        # Wrapping the schema in vol.Schema() breaks entity_id passing
+        platform.async_register_entity_service(
+            SERVICE_SET_ZONE_OPERATING_MODE,
+            {
+                vol.Required("mode"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=_ZONE_OPERATING_MODE_OPTIONS,
+                        mode=selector.SelectSelectorMode.DROPDOWN,
+                    ),
+                ),
+                vol.Required("operating_type"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=[
+                            selector.SelectOptionDict(value="heating", label="Heating"),
+                            selector.SelectOptionDict(value="cooling", label="Cooling"),
+                        ],
+                        mode=selector.SelectSelectorMode.LIST,
+                    )
+                ),
+            },
+            "set_zone_operating_mode",
         )
 
     if len(ventilation_entities) > 0:
@@ -261,21 +298,22 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def hvac_modes(self) -> list[HVACMode]:
-        return [k for k in self.hvac_mode_map.keys()]
+        return list(set([v for v in self.hvac_mode_map.values()]))
 
     @property
     def hvac_mode_map(self):
         if self.zone.control_identifier.is_vrc700:
             return {
-                HVACMode.OFF: ZoneHeatingOperatingModeVRC700.OFF,
-                HVACMode.HEAT_COOL: ZoneHeatingOperatingModeVRC700.DAY,
-                HVACMode.AUTO: ZoneHeatingOperatingModeVRC700.AUTO,
+                ZoneHeatingOperatingModeVRC700.OFF: HVACMode.OFF,
+                ZoneHeatingOperatingModeVRC700.DAY: HVACMode.HEAT_COOL,
+                ZoneHeatingOperatingModeVRC700.AUTO: HVACMode.AUTO,
+                ZoneHeatingOperatingModeVRC700.SET_BACK: HVACMode.AUTO,
             }
         else:
             return {
-                HVACMode.OFF: ZoneHeatingOperatingMode.OFF,
-                HVACMode.HEAT_COOL: ZoneHeatingOperatingMode.MANUAL,
-                HVACMode.AUTO: ZoneHeatingOperatingMode.TIME_CONTROLLED,
+                ZoneHeatingOperatingMode.OFF: HVACMode.OFF,
+                ZoneHeatingOperatingMode.MANUAL: HVACMode.HEAT_COOL,
+                ZoneHeatingOperatingMode.TIME_CONTROLLED: HVACMode.AUTO,
             }
 
     @property
@@ -429,16 +467,38 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def hvac_mode(self) -> HVACMode:
-        return [
-            k
-            for k, v in self.hvac_mode_map.items()
-            if v == self.zone.heating.operation_mode_heating
-        ][0]
+        return self.hvac_mode_map.get(self.zone.heating.operation_mode_heating)
 
-    async def async_set_hvac_mode(self, hvac_mode):
-        await self.coordinator.api.set_zone_heating_operating_mode(
+    async def async_set_hvac_mode(self, hvac_mode: HVACMode):
+        mode = [k for k, v in self.hvac_mode_map.items() if v == hvac_mode][0]
+        await self.set_zone_operating_mode(mode)
+
+    async def set_zone_operating_mode(
+        self,
+        mode: ZoneHeatingOperatingMode | ZoneHeatingOperatingModeVRC700,
+        operating_type: str = "heating",
+    ):
+        """
+        Set operating mode for either cooling and heating HVAC mode
+        Used for service set_zone_operating_mode
+
+        Parameters:
+            mode: The new operating mode to set
+            operating_type: Whether to set the mode for cooling or heating
+        """
+        if self.zone.control_identifier.is_vrc700:
+            if mode not in ZoneHeatingOperatingModeVRC700:
+                raise ValueError(
+                    f"Invalid mode, use one of {', '.join(ZoneHeatingOperatingModeVRC700)}"
+                )
+        elif mode not in ZoneHeatingOperatingMode:
+            raise ValueError(
+                f"Invalid mode, use one of {', '.join(ZoneHeatingOperatingMode)}"
+            )
+        await self.coordinator.api.set_zone_operating_mode(
             self.zone,
-            self.hvac_mode_map[hvac_mode],
+            mode,
+            operating_type,
         )
         await self.coordinator.async_request_refresh_delayed()
 

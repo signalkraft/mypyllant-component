@@ -159,6 +159,37 @@ set_zone_time_program:
               end_time: 1290
               setpoint: 20
 
+set_zone_operating_mode:
+  name: Set Zone Operating mode
+  description: Same as setting HVAC mode, but allows setting heating or cooling
+  target:
+    entity:
+      integration: mypyllant
+      domain: climate
+  fields:
+    mode:
+      name: Operating Mode
+      description: The operating mode of the zone, for example OFF or TIME_CONTROLLED
+      example: "OFF"
+      selector:
+        select:
+          options:
+            - "OFF"
+            - "DAY"
+            - "MANUAL"
+            - "SET_BACK"
+            - "AUTO"
+            - "TIME_CONTROLLED"
+    operating_type:
+      name: Operating Type
+      description: Whether the set the mode for cooling or heating
+      example: heating
+      selector:
+        select:
+          options:
+            - "heating"
+            - "cooling"
+
 set_dhw_time_program:
   name: Set Water Heater Time Program
   description: Updates the time program for a water heater
