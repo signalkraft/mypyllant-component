@@ -161,7 +161,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     async def handle_report(call: ServiceCall) -> ServiceResponse:
         return {
             f.file_name: f.file_content
-            async for f in report.main(
+            for f in await report.main(
                 user=username,
                 password=password,
                 brand=brand,
