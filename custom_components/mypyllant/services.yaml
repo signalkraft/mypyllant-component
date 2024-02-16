@@ -49,12 +49,12 @@ set_manual_mode_setpoint:
     setpoint_type:
       name: Type
       description: Manual Mode Type
-      example: HEATING
+      example: heating
       selector:
         select:
           options:
-            - "HEATING"
-            - "COOLING"
+            - "heating"
+            - "cooling"
 
 cancel_quick_veto:
   name: Cancel quick veto
