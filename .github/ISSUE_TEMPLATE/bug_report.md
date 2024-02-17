@@ -9,7 +9,6 @@ assignees: ''
 
 ### Before submitting a new issue
 
-- [ ] I'm not using the older Vaillant sensoAPP (which is unsupported by this integration)
 - [ ] I [redownloaded the latest release](https://my.home-assistant.io/redirect/hacs_repository/?owner=signalkraft&repository=mypyllant-component) and restarted Home Assistant
 - [ ] I've [enabled debug logs](https://signalkraft.com/mypyllant-component/3-contributing/#debugging) and attached the relevant logs to this ticket
 
