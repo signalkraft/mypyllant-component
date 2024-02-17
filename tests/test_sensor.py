@@ -5,7 +5,8 @@ from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
 from myPyllant.api import MyPyllantAPI
 from myPyllant.models import DeviceData
 from myPyllant.enums import CircuitState
-from myPyllant.tests.utils import list_test_data
+from myPyllant.tests.generate_test_data import DATA_DIR
+from myPyllant.tests.utils import list_test_data, load_test_data
 
 from custom_components.mypyllant.sensor import (
     CircuitFlowTemperatureSensor,
@@ -28,6 +29,9 @@ from custom_components.mypyllant.sensor import (
     SystemDeviceOnOffCyclesSensor,
     SystemDeviceOperationTimeSensor,
     create_system_sensors,
+    SystemTopDHWTemperatureSensor,
+    SystemBottomDHWTemperatureSensor,
+    SystemTopCHTemperatureSensor,
 )
 from custom_components.mypyllant.const import DOMAIN
 from tests.conftest import MockConfigEntry, TEST_OPTIONS
@@ -268,4 +272,29 @@ async def test_device_sensor(
                 ).native_value,
                 float,
             )
+        await mocked_api.aiohttp_session.close()
+
+
+async def test_additional_system_sensors(
+    mypyllant_aioresponses,
+    mocked_api: MyPyllantAPI,
+    system_coordinator_mock,
+):
+    test_data = load_test_data(DATA_DIR / "two_systems")
+    with mypyllant_aioresponses(test_data) as _:
+        system_coordinator_mock.data = (
+            await system_coordinator_mock._async_update_data()
+        )
+        assert isinstance(
+            SystemTopDHWTemperatureSensor(0, system_coordinator_mock).native_value,
+            float,
+        )
+        assert isinstance(
+            SystemBottomDHWTemperatureSensor(0, system_coordinator_mock).native_value,
+            float,
+        )
+        assert isinstance(
+            SystemTopCHTemperatureSensor(0, system_coordinator_mock).native_value,
+            float,
+        )
         await mocked_api.aiohttp_session.close()

@@ -70,6 +70,22 @@ async def create_system_sensors(
             )
         if system.water_pressure is not None:
             sensors.append(lambda: SystemWaterPressureSensor(index, system_coordinator))
+        if system.cylinder_temperature_sensor_top_dhw is not None:
+            sensors.append(
+                lambda: SystemTopDHWTemperatureSensor(index, system_coordinator)
+            )
+        if system.cylinder_temperature_sensor_bottom_dhw is not None:
+            sensors.append(
+                lambda: SystemBottomDHWTemperatureSensor(index, system_coordinator)
+            )
+        if system.cylinder_temperature_sensor_top_ch is not None:
+            sensors.append(
+                lambda: SystemTopCHTemperatureSensor(index, system_coordinator)
+            )
+        if system.cylinder_temperature_sensor_bottom_ch is not None:
+            sensors.append(
+                lambda: SystemBottomCHTemperatureSensor(index, system_coordinator)
+            )
         sensors.append(lambda: HomeEntity(index, system_coordinator))
 
         for device_index, device in enumerate(system.devices):
@@ -252,10 +268,99 @@ class SystemOutdoorTemperatureSensor(SystemSensor):
         return f"{self.name_prefix} Outdoor Temperature"
 
 
+class SystemTopDHWTemperatureSensor(SystemSensor):
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    @property
+    def native_value(self):
+        if self.system.cylinder_temperature_sensor_top_dhw is not None:
+            return round(self.system.cylinder_temperature_sensor_top_dhw, 1)
+        else:
+            return None
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_top_dhw_temperature"
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} Top DHW Cylinder Temperature"
+
+
+class SystemBottomDHWTemperatureSensor(SystemSensor):
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    @property
+    def native_value(self):
+        if self.system.cylinder_temperature_sensor_bottom_dhw is not None:
+            return round(self.system.cylinder_temperature_sensor_bottom_dhw, 1)
+        else:
+            return None
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_bottom_dhw_temperature"
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} Bottom DHW Cylinder Temperature"
+
+
+class SystemTopCHTemperatureSensor(SystemSensor):
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    @property
+    def native_value(self):
+        if self.system.cylinder_temperature_sensor_top_ch is not None:
+            return round(self.system.cylinder_temperature_sensor_top_ch, 1)
+        else:
+            return None
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_top_ch_temperature"
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} Top Central Heating Cylinder Temperature"
+
+
+class SystemBottomCHTemperatureSensor(SystemSensor):
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    @property
+    def native_value(self):
+        if self.system.cylinder_temperature_sensor_bottom_ch is not None:
+            return round(self.system.cylinder_temperature_sensor_bottom_ch, 1)
+        else:
+            return None
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_bottom_ch_temperature"
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} Bottom Central Heating Cylinder Temperature"
+
+
 class SystemWaterPressureSensor(SystemSensor):
     _attr_native_unit_of_measurement = UnitOfPressure.BAR
     _attr_device_class = SensorDeviceClass.PRESSURE
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
     def native_value(self):
@@ -269,15 +374,13 @@ class SystemWaterPressureSensor(SystemSensor):
         return f"{DOMAIN}_{self.id_infix}_water_pressure"
 
     @property
-    def entity_category(self) -> EntityCategory | None:
-        return EntityCategory.DIAGNOSTIC
-
-    @property
     def name(self):
         return f"{self.name_prefix} System Water Pressure"
 
 
 class HomeEntity(CoordinatorEntity, SensorEntity):
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
     def __init__(
         self,
         system_index: int,
@@ -289,10 +392,6 @@ class HomeEntity(CoordinatorEntity, SensorEntity):
     @property
     def system(self) -> System:
         return self.coordinator.data[self.system_index]
-
-    @property
-    def entity_category(self) -> EntityCategory | None:
-        return EntityCategory.DIAGNOSTIC
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
@@ -397,6 +496,8 @@ class ZoneHumiditySensor(ZoneCoordinatorEntity, SensorEntity):
 
 
 class ZoneHeatingOperatingModeSensor(ZoneCoordinatorEntity, SensorEntity):
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
     @property
     def name(self):
         return f"{self.name_prefix} Heating Operating Mode"
@@ -409,12 +510,10 @@ class ZoneHeatingOperatingModeSensor(ZoneCoordinatorEntity, SensorEntity):
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_heating_operating_mode"
 
-    @property
-    def entity_category(self) -> EntityCategory | None:
-        return EntityCategory.DIAGNOSTIC
-
 
 class ZoneHeatingStateSensor(ZoneCoordinatorEntity, SensorEntity):
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
     @property
     def name(self):
         return f"{self.name_prefix} Heating State"
@@ -430,12 +529,10 @@ class ZoneHeatingStateSensor(ZoneCoordinatorEntity, SensorEntity):
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_heating_state"
 
-    @property
-    def entity_category(self) -> EntityCategory | None:
-        return EntityCategory.DIAGNOSTIC
-
 
 class ZoneCurrentSpecialFunctionSensor(ZoneCoordinatorEntity, SensorEntity):
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
     @property
     def name(self):
         return f"{self.name_prefix} Current Special Function"
@@ -447,10 +544,6 @@ class ZoneCurrentSpecialFunctionSensor(ZoneCoordinatorEntity, SensorEntity):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_current_special_function"
-
-    @property
-    def entity_category(self) -> EntityCategory | None:
-        return EntityCategory.DIAGNOSTIC
 
 
 class CircuitSensor(CoordinatorEntity, SensorEntity):
@@ -488,6 +581,7 @@ class CircuitFlowTemperatureSensor(CircuitSensor):
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
     def name(self):
@@ -498,15 +592,13 @@ class CircuitFlowTemperatureSensor(CircuitSensor):
         return self.circuit.current_circuit_flow_temperature
 
     @property
-    def entity_category(self) -> EntityCategory | None:
-        return EntityCategory.DIAGNOSTIC
-
-    @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_flow_temperature"
 
 
 class CircuitStateSensor(CircuitSensor):
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
     @property
     def name(self):
         return f"{self.name_prefix} State"
@@ -514,10 +606,6 @@ class CircuitStateSensor(CircuitSensor):
     @property
     def native_value(self):
         return self.circuit.circuit_state
-
-    @property
-    def entity_category(self) -> EntityCategory | None:
-        return EntityCategory.DIAGNOSTIC
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
@@ -532,6 +620,7 @@ class CircuitMinFlowTemperatureSetpointSensor(CircuitSensor):
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
     def name(self):
@@ -542,16 +631,13 @@ class CircuitMinFlowTemperatureSetpointSensor(CircuitSensor):
         return self.circuit.min_flow_temperature_setpoint
 
     @property
-    def entity_category(self) -> EntityCategory | None:
-        return EntityCategory.DIAGNOSTIC
-
-    @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_min_flow_temperature_setpoint"
 
 
 class CircuitHeatingCurveSensor(CircuitSensor):
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
     def name(self):
@@ -563,10 +649,6 @@ class CircuitHeatingCurveSensor(CircuitSensor):
             return round(self.circuit.heating_curve, 2)
         else:
             return None
-
-    @property
-    def entity_category(self) -> EntityCategory | None:
-        return EntityCategory.DIAGNOSTIC
 
     @property
     def unique_id(self) -> str:
@@ -614,6 +696,8 @@ class DomesticHotWaterSetPointSensor(DomesticHotWaterCoordinatorEntity, SensorEn
 class DomesticHotWaterOperationModeSensor(
     DomesticHotWaterCoordinatorEntity, SensorEntity
 ):
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
     @property
     def name(self):
         return f"{self.name_prefix} Operation Mode"
@@ -623,10 +707,6 @@ class DomesticHotWaterOperationModeSensor(
         return self.domestic_hot_water.operation_mode_dhw.display_value
 
     @property
-    def entity_category(self) -> EntityCategory:
-        return EntityCategory.DIAGNOSTIC
-
-    @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_operation_mode"
 
@@ -634,6 +714,8 @@ class DomesticHotWaterOperationModeSensor(
 class DomesticHotWaterCurrentSpecialFunctionSensor(
     DomesticHotWaterCoordinatorEntity, SensorEntity
 ):
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
     @property
     def name(self):
         return f"{self.name_prefix} Current Special Function"
@@ -641,10 +723,6 @@ class DomesticHotWaterCurrentSpecialFunctionSensor(
     @property
     def native_value(self):
         return self.domestic_hot_water.current_special_function.display_value
-
-    @property
-    def entity_category(self) -> EntityCategory:
-        return EntityCategory.DIAGNOSTIC
 
     @property
     def unique_id(self) -> str:
@@ -908,6 +986,7 @@ class SystemDeviceWaterPressureSensor(SystemDeviceSensor):
     _attr_native_unit_of_measurement = UnitOfPressure.BAR
     _attr_device_class = SensorDeviceClass.PRESSURE
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
     def name(self):
@@ -921,15 +1000,12 @@ class SystemDeviceWaterPressureSensor(SystemDeviceSensor):
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_water_pressure"
 
-    @property
-    def entity_category(self) -> EntityCategory | None:
-        return EntityCategory.DIAGNOSTIC
-
 
 class SystemDeviceOperationTimeSensor(SystemDeviceSensor):
     _attr_native_unit_of_measurement = UnitOfTime.HOURS
     _attr_device_class = SensorDeviceClass.DURATION
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
     def native_value(self):
@@ -943,16 +1019,13 @@ class SystemDeviceOperationTimeSensor(SystemDeviceSensor):
         return f"{DOMAIN}_{self.id_infix}_operation_time"
 
     @property
-    def entity_category(self) -> EntityCategory | None:
-        return EntityCategory.DIAGNOSTIC
-
-    @property
     def name(self):
         return f"{self.name_prefix} Operation Time"
 
 
 class SystemDeviceOnOffCyclesSensor(SystemDeviceSensor):
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_icon = "mdi:counter"
 
     @property
@@ -965,10 +1038,6 @@ class SystemDeviceOnOffCyclesSensor(SystemDeviceSensor):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_on_off_cycles"
-
-    @property
-    def entity_category(self) -> EntityCategory | None:
-        return EntityCategory.DIAGNOSTIC
 
     @property
     def name(self):
