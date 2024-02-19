@@ -26,6 +26,7 @@ from Saunier Duval & Bulex).
 * Vaillant aroTHERM plus heatpump + sensoCOMFORT VRC 720 + sensoNET VR 921
 * Vaillant ECOTEC PLUS boiler + VR940F + sensoCOMFORT
 * Vaillant ECOTEC PLUS boiler + VRT380f + sensoNET
+* Vaillant EcoCompact VSC206 4-5 boiler + Multimatic VRC700/6 + gateway VR920
 * Saunier Duval DUOMAX F30 90 + MISET Radio + MiLink V3
 * [More are documented here](https://signalkraft.com/mypyllant-component/#tested-setups)
 
