@@ -186,12 +186,10 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
         enum_value = operation_mode.upper().replace(" ", "_")
         if self.domestic_hot_water.control_identifier.is_vrc700:
             enum_class = DHWOperationModeVRC700  # type: ignore
-            cylinder_boost = str(DHWCurrentSpecialFunctionVRC700.CYLINDER_BOOST)
         else:
             enum_class = DHWOperationMode  # type: ignore
-            cylinder_boost = str(DHWCurrentSpecialFunction.CYLINDER_BOOST)
 
-        if enum_value == cylinder_boost:
+        if enum_value == DHWCurrentSpecialFunction.CYLINDER_BOOST:
             # Boost was requested
             await self.coordinator.api.boost_domestic_hot_water(
                 self.domestic_hot_water,
