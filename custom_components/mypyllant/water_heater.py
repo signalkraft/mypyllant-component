@@ -184,10 +184,14 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
         self, operation_mode: str, **kwargs: Any
     ) -> None:
         enum_value = operation_mode.upper().replace(" ", "_")
-        if enum_value in [
-            str(DHWCurrentSpecialFunction.CYLINDER_BOOST),
-            str(DHWCurrentSpecialFunctionVRC700.CYLINDER_BOOST),
-        ]:
+        if self.domestic_hot_water.control_identifier.is_vrc700:
+            enum_class = DHWOperationModeVRC700  # type: ignore
+            cylinder_boost = str(DHWCurrentSpecialFunctionVRC700.CYLINDER_BOOST)
+        else:
+            enum_class = DHWOperationMode  # type: ignore
+            cylinder_boost = str(DHWCurrentSpecialFunction.CYLINDER_BOOST)
+
+        if enum_value == cylinder_boost:
             # Boost was requested
             await self.coordinator.api.boost_domestic_hot_water(
                 self.domestic_hot_water,
@@ -198,27 +202,15 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
                 self.domestic_hot_water,
             )
             if enum_value != self.domestic_hot_water.operation_mode_dhw:
-                if self.domestic_hot_water.control_identifier.is_vrc700:
-                    await self.coordinator.api.set_domestic_hot_water_operation_mode(
-                        self.domestic_hot_water,
-                        DHWOperationModeVRC700(enum_value),
-                    )
-                else:
-                    await self.coordinator.api.set_domestic_hot_water_operation_mode(
-                        self.domestic_hot_water,
-                        DHWOperationMode(enum_value),
-                    )
+                await self.coordinator.api.set_domestic_hot_water_operation_mode(
+                    self.domestic_hot_water,
+                    enum_class(enum_value),
+                )
         else:
-            if self.domestic_hot_water.control_identifier.is_vrc700:
-                await self.coordinator.api.set_domestic_hot_water_operation_mode(
-                    self.domestic_hot_water,
-                    DHWOperationModeVRC700(enum_value),
-                )
-            else:
-                await self.coordinator.api.set_domestic_hot_water_operation_mode(
-                    self.domestic_hot_water,
-                    DHWOperationMode(enum_value),
-                )
+            await self.coordinator.api.set_domestic_hot_water_operation_mode(
+                self.domestic_hot_water,
+                enum_class(enum_value),
+            )
         await self.coordinator.async_request_refresh_delayed()
 
     async def set_dhw_time_program(self, **kwargs):
