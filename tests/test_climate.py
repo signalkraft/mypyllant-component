@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest as pytest
 from homeassistant.components.climate import HVACMode
-from homeassistant.components.climate.const import FAN_OFF, PRESET_AWAY
+from homeassistant.components.climate.const import FAN_OFF, PRESET_ECO
 from homeassistant.const import ATTR_TEMPERATURE
 from homeassistant.helpers.entity_registry import DATA_REGISTRY, EntityRegistry
 from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
@@ -85,7 +85,7 @@ async def test_zone_climate(
         await climate.async_set_hvac_mode(HVACMode.AUTO)
         await climate.async_set_temperature(**{ATTR_TEMPERATURE: 20})
         # TODO: Test logic of different calls depending on current new preset mode
-        await climate.async_set_preset_mode(preset_mode=PRESET_AWAY)
+        await climate.async_set_preset_mode(preset_mode=PRESET_ECO)
         system_coordinator_mock._debounced_refresh.async_cancel()
 
         print(system_coordinator_mock.data[0].state["zones"])

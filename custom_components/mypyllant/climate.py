@@ -11,6 +11,7 @@ from homeassistant.components.climate import (
     ClimateEntityFeature,
     HVACMode,
     HVACAction,
+    PRESET_COMFORT,
 )
 from homeassistant.components.climate.const import (
     FAN_AUTO,
@@ -95,6 +96,13 @@ ZONE_PRESET_MAP = {
     PRESET_NONE: ZoneCurrentSpecialFunction.NONE,
     PRESET_AWAY: ZoneCurrentSpecialFunction.HOLIDAY,
     PRESET_SLEEP: ZoneCurrentSpecialFunction.SYSTEM_OFF,
+}
+
+ZONE_PRESET_MAP_VRC700 = {
+    ZoneHeatingOperatingModeVRC700.OFF: PRESET_NONE,
+    ZoneHeatingOperatingModeVRC700.DAY: PRESET_COMFORT,
+    ZoneHeatingOperatingModeVRC700.AUTO: PRESET_NONE,
+    ZoneHeatingOperatingModeVRC700.SET_BACK: PRESET_ECO,
 }
 
 ZONE_HVAC_ACTION_MAP = {
@@ -285,7 +293,6 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     coordinator: SystemCoordinator
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
-    _attr_preset_modes = [str(k) for k in ZONE_PRESET_MAP.keys()]
 
     def __init__(
         self,
@@ -308,8 +315,8 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         if self.zone.control_identifier.is_vrc700:
             return {
                 ZoneHeatingOperatingModeVRC700.OFF: HVACMode.OFF,
-                ZoneHeatingOperatingModeVRC700.DAY: HVACMode.HEAT_COOL,
                 ZoneHeatingOperatingModeVRC700.AUTO: HVACMode.AUTO,
+                ZoneHeatingOperatingModeVRC700.DAY: HVACMode.AUTO,
                 ZoneHeatingOperatingModeVRC700.SET_BACK: HVACMode.AUTO,
             }
         else:
@@ -548,14 +555,24 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             await self.coordinator.async_request_refresh_delayed()
 
     @property
+    def preset_modes(self) -> list[str]:
+        if self.zone.control_identifier.is_vrc700:
+            return [k for k in ZONE_PRESET_MAP_VRC700.values()]
+        else:
+            return [k for k in ZONE_PRESET_MAP.keys()]
+
+    @property
     def preset_mode(self) -> str:
-        if self.zone.is_eco_mode:
-            return PRESET_ECO
-        return [
-            k
-            for k, v in ZONE_PRESET_MAP.items()
-            if v == self.zone.current_special_function
-        ][0]
+        if self.zone.control_identifier.is_vrc700:
+            return ZONE_PRESET_MAP_VRC700[self.zone.heating.operation_mode_heating]  # type: ignore
+        else:
+            if self.zone.is_eco_mode:
+                return PRESET_ECO
+            return [
+                k
+                for k, v in ZONE_PRESET_MAP.items()
+                if v == self.zone.current_special_function
+            ][0]
 
     async def async_set_preset_mode(self, preset_mode):
         """
@@ -564,43 +581,54 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         Parameters:
             preset_mode (str): The new preset mode to set
         """
-        if preset_mode not in ZONE_PRESET_MAP:
-            raise ValueError(
-                f'Invalid preset mode, use one of {", ".join(ZONE_PRESET_MAP.keys())}'
-            )
-        requested_mode = ZONE_PRESET_MAP[preset_mode]
-        if requested_mode != self.zone.current_special_function:
-            if requested_mode == ZoneCurrentSpecialFunction.NONE:
-                if (
-                    self.zone.current_special_function
-                    == ZoneCurrentSpecialFunction.QUICK_VETO
-                ):
-                    # If quick veto is set, we cancel that
-                    await self.coordinator.api.cancel_quick_veto_zone_temperature(
-                        self.zone
-                    )
-                elif (
-                    self.zone.current_special_function
-                    == ZoneCurrentSpecialFunction.HOLIDAY
-                ):
-                    # If holiday mode is set, we cancel that instead
-                    await self.cancel_holiday()
-            if requested_mode == ZoneCurrentSpecialFunction.QUICK_VETO:
-                await self.coordinator.api.quick_veto_zone_temperature(
-                    self.zone,
-                    self.zone.heating.manual_mode_setpoint_heating,
-                    default_duration=self.default_quick_veto_duration,
+        if self.zone.control_identifier.is_vrc700:
+            try:
+                requested_mode = [
+                    k for k, v in ZONE_PRESET_MAP_VRC700.items() if v == preset_mode
+                ][0]
+                await self.set_zone_operating_mode(requested_mode)
+            except IndexError:
+                raise ValueError(
+                    f'Invalid preset mode, use one of {", ".join(set(ZONE_PRESET_MAP_VRC700.values()))}'
                 )
-            if requested_mode == ZoneCurrentSpecialFunction.HOLIDAY:
-                await self.set_holiday()
+        else:
+            if preset_mode not in ZONE_PRESET_MAP:
+                raise ValueError(
+                    f'Invalid preset mode, use one of {", ".join(ZONE_PRESET_MAP.keys())}'
+                )
+            requested_mode = ZONE_PRESET_MAP[preset_mode]
+            if requested_mode != self.zone.current_special_function:
+                if requested_mode == ZoneCurrentSpecialFunction.NONE:
+                    if (
+                        self.zone.current_special_function
+                        == ZoneCurrentSpecialFunction.QUICK_VETO
+                    ):
+                        # If quick veto is set, we cancel that
+                        await self.coordinator.api.cancel_quick_veto_zone_temperature(
+                            self.zone
+                        )
+                    elif (
+                        self.zone.current_special_function
+                        == ZoneCurrentSpecialFunction.HOLIDAY
+                    ):
+                        # If holiday mode is set, we cancel that instead
+                        await self.cancel_holiday()
+                if requested_mode == ZoneCurrentSpecialFunction.QUICK_VETO:
+                    await self.coordinator.api.quick_veto_zone_temperature(
+                        self.zone,
+                        self.zone.heating.manual_mode_setpoint_heating,
+                        default_duration=self.default_quick_veto_duration,
+                    )
+                if requested_mode == ZoneCurrentSpecialFunction.HOLIDAY:
+                    await self.set_holiday()
 
-            if requested_mode == ZoneCurrentSpecialFunction.SYSTEM_OFF:
-                # SYSTEM_OFF is a valid special function, but since there's no API endpoint we
-                # just turn off the system though the zone heating mode API.
-                # See https://github.com/signalkraft/mypyllant-component/issues/27#issuecomment-1746568372
-                await self.async_set_hvac_mode(HVACMode.OFF)
+                if requested_mode == ZoneCurrentSpecialFunction.SYSTEM_OFF:
+                    # SYSTEM_OFF is a valid special function, but since there's no API endpoint we
+                    # just turn off the system though the zone heating mode API.
+                    # See https://github.com/signalkraft/mypyllant-component/issues/27#issuecomment-1746568372
+                    await self.async_set_hvac_mode(HVACMode.OFF)
 
-            await self.coordinator.async_request_refresh_delayed()
+                await self.coordinator.async_request_refresh_delayed()
 
 
 class VentilationClimate(CoordinatorEntity, ClimateEntity):
