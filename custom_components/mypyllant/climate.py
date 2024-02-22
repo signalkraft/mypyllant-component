@@ -557,7 +557,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     @property
     def preset_modes(self) -> list[str]:
         if self.zone.control_identifier.is_vrc700:
-            return [k for k in ZONE_PRESET_MAP_VRC700.values()]
+            return list({v for v in ZONE_PRESET_MAP_VRC700.values()})
         else:
             return [k for k in ZONE_PRESET_MAP.keys()]
 
