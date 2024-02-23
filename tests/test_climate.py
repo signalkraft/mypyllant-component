@@ -12,11 +12,11 @@ from myPyllant.tests.utils import list_test_data
 
 from custom_components.mypyllant import SystemCoordinator, DOMAIN
 from custom_components.mypyllant.climate import (
-    VentilationClimate,
     ZoneClimate,
     async_setup_entry,
     ZONE_HVAC_ACTION_MAP,
 )
+from custom_components.mypyllant.ventilation_climate import VentilationClimate
 from tests.utils import get_config_entry
 from tests.conftest import MockConfigEntry, TEST_OPTIONS
 from tests.test_init import test_user_input

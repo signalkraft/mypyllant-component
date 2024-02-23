@@ -85,7 +85,7 @@ async def test_water_heater(
 
         await dhw.async_set_temperature(**{ATTR_TEMPERATURE: 50})
         await dhw.async_set_operation_mode(
-            operation_mode=DHWOperationMode("MANUAL").display_value
+            operation_mode=DHWOperationMode("OFF").display_value
         )
         system_coordinator_mock._debounced_refresh.async_cancel()
 

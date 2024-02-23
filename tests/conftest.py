@@ -4,21 +4,24 @@ from unittest import mock
 
 import pytest
 from homeassistant import config_entries
+
+from custom_components.mypyllant.coordinator import (
+    SystemCoordinator,
+    DailyDataCoordinator,
+)
 from myPyllant.api import MyPyllantAPI
 from myPyllant.const import DEFAULT_BRAND
 from myPyllant.models import Circuit, DomesticHotWater, System, Zone
 from myPyllant.tests.utils import _mocked_api, _mypyllant_aioresponses
 from polyfactory.factories import DataclassFactory
 
-from custom_components.mypyllant import (
+from custom_components.mypyllant.const import (
     DEFAULT_COUNTRY,
     DOMAIN,
     OPTION_BRAND,
     OPTION_COUNTRY,
     OPTION_REFRESH_DELAY,
     OPTION_UPDATE_INTERVAL,
-    DailyDataCoordinator,
-    SystemCoordinator,
 )
 
 TEST_OPTIONS = {
