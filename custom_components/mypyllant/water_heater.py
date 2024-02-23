@@ -190,8 +190,8 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
             enum_class = DHWOperationMode  # type: ignore
 
         if enum_value in [
-            DHWCurrentSpecialFunction.CYLINDER_BOOST,
-            DHWCurrentSpecialFunctionVRC700.CYLINDER_BOOST,
+            DHWCurrentSpecialFunction.CYLINDER_BOOST.name,
+            DHWCurrentSpecialFunctionVRC700.CYLINDER_BOOST.name,
         ]:
             # Boost was requested
             await self.coordinator.api.boost_domestic_hot_water(
