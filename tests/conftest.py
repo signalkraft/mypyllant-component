@@ -122,6 +122,7 @@ class MockConfigEntry(config_entries.ConfigEntry):
         unique_id=None,
         disabled_by=None,
         reason=None,
+        minor_version=None,
     ):
         """Initialize a mock config entry."""
         kwargs = {
@@ -135,6 +136,7 @@ class MockConfigEntry(config_entries.ConfigEntry):
             "title": title,
             "unique_id": unique_id,
             "disabled_by": disabled_by,
+            "minor_version": minor_version,
         }
         if source is not None:
             kwargs["source"] = source
@@ -147,11 +149,7 @@ class MockConfigEntry(config_entries.ConfigEntry):
     def add_to_hass(self, hass):
         """Test helper to add entry to hass."""
         hass.config_entries._entries[self.entry_id] = self
-        hass.config_entries._domain_index.setdefault(self.domain, []).append(
-            self.entry_id
-        )
 
     def add_to_manager(self, manager):
         """Test helper to add entry to entry manager."""
         manager._entries[self.entry_id] = self
-        manager._domain_index.setdefault(self.domain, []).append(self.entry_id)

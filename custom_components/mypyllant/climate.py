@@ -145,12 +145,16 @@ async def async_setup_entry(
 
     for index, system in enumerate(coordinator.data):
         for zone_index, _ in enumerate(system.zones):
+            data_key = f"zone_{index}_{zone_index}"
+            if data_key not in hass.data[DOMAIN][config.entry_id]:
+                hass.data[DOMAIN][config.entry_id][data_key] = {}
             zone_entities.append(
                 lambda: ZoneClimate(
                     index,
                     zone_index,
                     coordinator,
                     config,
+                    hass.data[DOMAIN][config.entry_id][data_key],
                 )
             )
         for ventilation_index, _ in enumerate(system.ventilation):
@@ -293,6 +297,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     coordinator: SystemCoordinator
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
+    _enable_turn_on_off_backwards_compatibility = False
 
     def __init__(
         self,
@@ -300,11 +305,29 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         zone_index: int,
         coordinator: SystemCoordinator,
         config: ConfigEntry,
+        data: dict,
     ) -> None:
         super().__init__(coordinator)
         self.system_index = system_index
         self.zone_index = zone_index
         self.config = config
+        self.data = data
+        self.data["last_active_hvac_mode"] = (
+            self.hvac_mode if self.hvac_mode != HVACMode.OFF else HVACMode.AUTO
+        )
+        _LOGGER.debug(
+            "Saving last active HVAC mode %s", self.data["last_active_hvac_mode"]
+        )
+
+    async def async_update(self) -> None:
+        """
+        Save last active HVAC mode after update, so it can be restored in turn_on
+        """
+        await super().async_update()
+
+        if self.enabled and self.hvac_mode != HVACMode.OFF:
+            _LOGGER.debug("Saving last active HVAC mode %s", self.hvac_mode)
+            self.data["last_active_hvac_mode"] = self.hvac_mode
 
     @property
     def hvac_modes(self) -> list[HVACMode]:
@@ -458,7 +481,10 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     def supported_features(self) -> ClimateEntityFeature:
         """Return the list of supported features."""
         return (
-            ClimateEntityFeature.TARGET_TEMPERATURE | ClimateEntityFeature.PRESET_MODE
+            ClimateEntityFeature.TARGET_TEMPERATURE
+            | ClimateEntityFeature.PRESET_MODE
+            | ClimateEntityFeature.TURN_OFF
+            | ClimateEntityFeature.TURN_ON
         )
 
     @property
@@ -516,6 +542,12 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     def hvac_action(self) -> HVACAction | None:
         circuit_state = self.zone.get_associated_circuit(self.system).circuit_state
         return ZONE_HVAC_ACTION_MAP.get(circuit_state)
+
+    async def turn_on(self) -> None:
+        await self.async_set_hvac_mode(self.data["last_active_hvac_mode"])
+
+    async def turn_off(self) -> None:
+        await self.async_set_hvac_mode(HVACMode.OFF)
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """

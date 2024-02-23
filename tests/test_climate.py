@@ -73,6 +73,7 @@ async def test_zone_climate(
             0,
             system_coordinator_mock,
             get_config_entry(),
+            {},
         )
         assert isinstance(climate.device_info, dict)
         assert isinstance(climate.extra_state_attributes, dict)
