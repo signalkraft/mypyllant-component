@@ -11,12 +11,12 @@ from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
 from myPyllant.api import MyPyllantAPI
 from myPyllant.tests.utils import list_test_data
 
-from custom_components.mypyllant import DOMAIN, async_setup_entry, async_unload_entry
+from custom_components.mypyllant.const import DOMAIN
+from custom_components.mypyllant import async_setup_entry, async_unload_entry
 from custom_components.mypyllant.config_flow import DATA_SCHEMA
 from tests.conftest import TEST_OPTIONS, MockConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
-
 
 test_user_input = {
     "username": "username",

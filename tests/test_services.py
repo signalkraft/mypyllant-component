@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from custom_components.mypyllant import (
+from custom_components.mypyllant.const import (
     SERVICE_GENERATE_TEST_DATA,
     SERVICE_EXPORT,
 )

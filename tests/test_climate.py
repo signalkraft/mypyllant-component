@@ -10,7 +10,8 @@ from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
 from myPyllant.api import MyPyllantAPI
 from myPyllant.tests.utils import list_test_data
 
-from custom_components.mypyllant import SystemCoordinator, DOMAIN
+from custom_components.mypyllant.const import DOMAIN
+from custom_components.mypyllant.coordinator import SystemCoordinator
 from custom_components.mypyllant.climate import (
     ZoneClimate,
     async_setup_entry,

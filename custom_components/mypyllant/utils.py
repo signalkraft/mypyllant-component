@@ -15,7 +15,7 @@ from custom_components.mypyllant.const import DOMAIN, OPTION_DEFAULT_HOLIDAY_DUR
 from myPyllant.const import DEFAULT_HOLIDAY_DURATION
 
 if typing.TYPE_CHECKING:
-    from custom_components.mypyllant import SystemCoordinator
+    from custom_components.mypyllant.coordinator import SystemCoordinator
     from myPyllant.models import System, DomesticHotWater, Zone
 
 logger = logging.getLogger(__name__)

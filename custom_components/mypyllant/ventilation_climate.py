@@ -16,7 +16,8 @@ from homeassistant.helpers import selector
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from custom_components.mypyllant import SystemCoordinator, DOMAIN
+from custom_components.mypyllant.const import DOMAIN
+from custom_components.mypyllant.coordinator import SystemCoordinator
 from myPyllant.enums import VentilationOperationMode, VentilationFanStageType
 from myPyllant.models import System, Ventilation
 

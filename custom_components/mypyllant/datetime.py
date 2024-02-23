@@ -8,7 +8,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from custom_components.mypyllant import DOMAIN, SystemCoordinator
+from custom_components.mypyllant.const import DOMAIN
+from custom_components.mypyllant.coordinator import SystemCoordinator
 from custom_components.mypyllant.utils import HolidayEntity, EntityList
 from myPyllant.utils import get_default_holiday_dates
 

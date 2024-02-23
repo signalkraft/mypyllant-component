@@ -6,7 +6,7 @@ import pytest
 from homeassistant.helpers.entity_registry import DATA_REGISTRY, EntityRegistry
 from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
 
-from custom_components.mypyllant import DOMAIN
+from custom_components.mypyllant.const import DOMAIN
 from myPyllant.api import MyPyllantAPI
 from myPyllant.tests.utils import list_test_data
 

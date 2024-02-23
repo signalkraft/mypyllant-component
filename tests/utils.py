@@ -1,10 +1,7 @@
 from unittest import mock
 
-
-from custom_components.mypyllant import (
-    DOMAIN,
-    async_setup_entry,
-)
+from custom_components.mypyllant.const import DOMAIN
+from custom_components.mypyllant import async_setup_entry
 from tests.conftest import MockConfigEntry, TEST_OPTIONS
 from tests.test_init import test_user_input
 
