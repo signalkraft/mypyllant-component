@@ -1,5 +1,6 @@
 ---
 title: Getting Started
+description: Home Assistant component that interfaces with the myVAILLANT API (and branded versions of it, such as the MiGo Link app from Saunier Duval & Bulex).
 hide:
   - navigation
 ---
@@ -7,10 +8,10 @@ hide:
 # Getting Started
 
 [![GitHub Release](https://img.shields.io/github/release/signalkraft/mypyllant-component.svg)](https://github.com/signalkraft/mypyllant-component/releases)
-[![License](https://img.shields.io/github/license/signalkraft/mypyllant-component.svg)](LICENSE)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/signalkraft/mypyllant-component/build-test.yaml)
+[![License](https://img.shields.io/github/license/signalkraft/mypyllant-component.svg)](https://github.com/signalkraft/mypyllant-component/blob/main/LICENSE)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/signalkraft/mypyllant-component/build-test.yaml)](https://github.com/signalkraft/mypyllant-component/actions)
 
-![myPyllant](https://raw.githubusercontent.com/signalkraft/myPyllant/main/logo.png){ align=right }
+![myPyllant](assets/logo.png){ align=right width="25%" }
 
 Home Assistant component that interfaces with the myVAILLANT API
 (and branded versions of it, such as the MiGo Link app from Saunier Duval & Bulex).
@@ -31,6 +32,8 @@ Uses the [myPyllant library](https://github.com/signalkraft/mypyllant).
 4. [Add myVaillant integration](https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant)
 5. Sign in with the email & password you used in the myVAILLANT app (or MiGo app for Saunier Duval)
 
+Having problems? [Open an issue](https://github.com/signalkraft/mypyllant-component/issues/new/choose).
+
 ### Manual
 
 1. Download [the latest release](https://github.com/signalkraft/mypyllant-component/releases)
@@ -48,6 +51,7 @@ Uses the [myPyllant library](https://github.com/signalkraft/mypyllant).
 * Vaillant ECOTEC PLUS boiler + VRT380f + sensoNET
 * Vaillant ECOTEC PLUS VCW20/1 boiler + sensoCOMFORT VRC 720 + sensoNET VR 921
 * Vaillant ECOTEC PLUS 296/5-5 (R6) + sensoCOMFORT VRC 720/2 + VR 70 (2 circuits) + sensoNET VR 921
+* VAILLANT ecoVIT + VIH R/6 uniSTORE + VR920
 * Saunier Duval DUOMAX F30 90 + MISET Radio + MiLink V3
 * Bulex Thema Condens F30/35 + Red 5 + MiPro Sense + MiLink v3
 

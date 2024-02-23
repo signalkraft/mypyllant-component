@@ -4,8 +4,7 @@ site_url: https://signalkraft.com/mypyllant-component/
 theme:
   name: material
   language: en
-  icon:
-    logo: material/rabbit-variant-outline
+  logo: assets/logo-white.png
   palette:
     scheme: slate
   features:
@@ -36,3 +35,5 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
+extra_css:
+  - stylesheets/extra.css
