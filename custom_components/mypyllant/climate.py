@@ -582,15 +582,19 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             preset_mode (str): The new preset mode to set
         """
         if self.zone.control_identifier.is_vrc700:
-            try:
+            # VRC700 presets map to operating modes instead of special functions
+            if preset_mode == PRESET_NONE:
+                # None can map to off or auto mode, if it's selected by the user we want auto
+                requested_mode = ZoneHeatingOperatingModeVRC700.AUTO
+            elif preset_mode in ZONE_PRESET_MAP_VRC700.values():
                 requested_mode = [
                     k for k, v in ZONE_PRESET_MAP_VRC700.items() if v == preset_mode
                 ][0]
-                await self.set_zone_operating_mode(requested_mode)
-            except IndexError:
+            else:
                 raise ValueError(
                     f'Invalid preset mode, use one of {", ".join(set(ZONE_PRESET_MAP_VRC700.values()))}'
                 )
+            await self.set_zone_operating_mode(requested_mode)
         else:
             if preset_mode not in ZONE_PRESET_MAP:
                 raise ValueError(
