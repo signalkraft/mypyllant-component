@@ -19,6 +19,7 @@ plugins:
   - mkdocstrings
   - social
   - search
+  - glightbox
 repo_url: https://github.com/signalkraft/mypyllant-component/
 markdown_extensions:
   - admonition

@@ -5,7 +5,7 @@ hide:
   - navigation
 ---
 
-![myPyllant](assets/logo.png){ align=right width="25%" }
+[![myPyllant](assets/logo.png){ align=right width="25%" }]()
 
 # Getting Started
 
@@ -26,6 +26,8 @@ Uses the [myPyllant Python library](https://github.com/signalkraft/mypyllant).
 
 ### HACS
 
+![Default Dashboard Screenshot](assets/default-dashboard.png){ width="50%" align="right" }
+
 1. [Install HACS](https://hacs.xyz/docs/setup/download)
 2. Search for the myVAILLANT integration in HACS and install it
 3. Restart Home Assistant
@@ -44,6 +46,62 @@ Having problems? [Open an issue](https://github.com/signalkraft/mypyllant-compon
    Settings :material-arrow-right: Integrations and add myVAILLANT
 5. Sign in with the email & password you used in the myVAILLANT app (or MiGo app for Saunier Duval)
 
+## Features
+
+<div class="grid cards" markdown>
+
+*    :material-sun-snowflake-variant:{ .lg .middle } Climate Controls
+
+     ---
+
+     Supports climate & hot water controls, as well as ventilation and circulation pumps
+
+     [:material-arrow-right: Read more](2-entities.md#sample-entities)
+
+*    :material-thermostat-auto:{ .lg .middle } Set Modes & Temperatures
+
+     ---
+
+     Control operating modes, target temperature, and presets such as holiday more or quick veto
+
+     [:material-arrow-right: Read more](2-entities.md#climate-entities)
+
+*    :material-calendar-sync:{ .lg .middle } Change Schedules
+
+     ---
+
+     Set the schedule for climate zones, water heaters, and circulation pumps
+     with [a custom service](https://signalkraft.com/mypyllant-component/2-services/#setting-a-time-program) or [in the Home Assistant calendar](2-entities.md#calendar-entities)
+
+     [:material-arrow-right: Read more](2-entities.md#calendar-entities)
+
+*    :material-chart-line:{ .lg .middle } Track Data over Time
+
+     ---
+
+     Track sensor information of devices, such as temperature, humidity, operating mode, energy usage, or energy efficiency
+
+    [:material-arrow-right: Read more](2-entities.md#sample-entities)
+
+*    :material-hammer-screwdriver:{ .lg .middle } Diagnostic Data
+
+     ---
+
+     See diagnostic information, such as the current heating curve, flow temperature, firmware versions, or water pressure.
+     Even values that are not available in the app, such as the current heating curve.
+
+     [:material-arrow-right: Read more](2-entities.md#extra-state-attributes)
+
+*    :material-home-automation:{ .lg .middle } Services & Automations
+
+     ---
+
+     Custom services to set holiday mode or quick veto temperature overrides, and their duration
+
+     [:material-arrow-right: Read more](2-services.md)
+
+</div>
+
 ## Tested Setups
 
 * Vaillant aroTHERM plus heatpump + sensoCOMFORT VRC 720 + sensoNET VR 921
@@ -55,18 +113,6 @@ Having problems? [Open an issue](https://github.com/signalkraft/mypyllant-compon
 * Saunier Duval DUOMAX F30 90 + MISET Radio + MiLink V3
 * Bulex Thema Condens F30/35 + Red 5 + MiPro Sense + MiLink v3
 
-## Features
-
-![Default Dashboard Screenshot](assets/default-dashboard.png)
-
-* Supports climate & hot water controls, as well as sensor information
-* Control operating modes, target temperature, and presets such as holiday more or quick veto
-* Set the schedule for climate zones, water heaters, and circulation pumps
-  with [a custom service](https://signalkraft.com/mypyllant-component/2-services/#setting-a-time-program) or [in the Home Assistant calendar](2-entities.md#calendar-entities)
-* Track sensor information of devices, such as temperature, humidity, operating mode, energy usage, or energy efficiency
-* See diagnostic information, such as the current heating curve, flow temperature, firmware versions, or water pressure
-* Custom services to set holiday mode or quick veto temperature overrides, and their duration
-* [...and more](2-entities.md)
 
 ## Options
 
