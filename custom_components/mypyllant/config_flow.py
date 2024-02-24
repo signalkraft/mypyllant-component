@@ -139,17 +139,17 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         ),
                     ): positive_int,
                     vol.Required(
-                        OPTION_TIME_PROGRAM_OVERWRITE,
-                        default=self.config_entry.options.get(
-                            OPTION_TIME_PROGRAM_OVERWRITE,
-                            DEFAULT_TIME_PROGRAM_OVERWRITE,
-                        ),
-                    ): bool,
-                    vol.Required(
                         OPTION_DEFAULT_HOLIDAY_SETPOINT,
                         default=self.config_entry.options.get(
                             OPTION_DEFAULT_HOLIDAY_SETPOINT,
                             DEFAULT_HOLIDAY_SETPOINT,
+                        ),
+                    ): vol.All(vol.Coerce(float), vol.Clamp(min=0, max=30)),
+                    vol.Required(
+                        OPTION_TIME_PROGRAM_OVERWRITE,
+                        default=self.config_entry.options.get(
+                            OPTION_TIME_PROGRAM_OVERWRITE,
+                            DEFAULT_TIME_PROGRAM_OVERWRITE,
                         ),
                     ): bool,
                     vol.Required(

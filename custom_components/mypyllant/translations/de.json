@@ -28,6 +28,7 @@
           "quick_veto_duration": "Standard Dauer in Stunden für Quick Veto",
           "holiday_duration": "Standard Dauer in Tagen für Abwesenheitsmodus",
           "time_program_overwrite": "Temperaturänderungen in der Zeitsteuerung speichern, statt Quick Veto",
+          "default_holiday_setpoint": "Standardtemperatur während Abwesenheitsmodus",
           "country": "Land",
           "brand": "Hersteller"
         }

@@ -83,11 +83,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         from importlib.metadata import version
 
         _LOGGER.debug(
-            "Starting mypyllant component %s (library %s) with homeassistant %s, dacite %s, and aiohttp %s",
+            "Starting mypyllant component %s (library %s) with homeassistant %s, pydantic %s, and aiohttp %s",
             hass.data["integrations"][DOMAIN].version,
             version("myPyllant"),
             version("homeassistant"),
-            version("dacite"),
+            version("pydantic"),
             version("aiohttp"),
         )
     username: str = entry.data.get("username")  # type: ignore

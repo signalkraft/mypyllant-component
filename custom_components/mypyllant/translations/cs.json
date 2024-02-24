@@ -28,6 +28,7 @@
           "quick_veto_duration": "Nastavené trvání v hodinách pro rychlé veto",
           "holiday_duration": "Nastavená doba trvání dovolené ve dnech",
           "time_program_overwrite": "Regulátory teploty přepisují časový program namísto nastavení rychlého veta",
+          "default_holiday_setpoint": "Výchozí teplota pro dovolenou",
           "country": "Země",
           "brand": "Značka"
         }
