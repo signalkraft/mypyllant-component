@@ -206,3 +206,7 @@ If it doesn't, there's nothing we can do about it.
 If you would like to request a new feature, please check that it's available in the myVAILLANT app first.
 Some data (for example quiet mode or legionella protection) are not available in the app, and therefore
 can't be supported by this integration.
+
+### The modes in Home Assistant and the myVAILLANT app don't match
+
+[Check the mapping of modes](2-entities.md#climate-entities) between Home Assistant and myVAILLANT.

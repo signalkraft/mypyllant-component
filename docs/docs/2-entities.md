@@ -57,6 +57,32 @@ or the naming of your heating zones (in this case "Zone 1"):
 | Home Away Mode                                                                |      |              | off             |
 | Home Domestic Hot Water 0 Boost                                               |      |              | off             |
 
+## Climate Entities
+
+Home Assistant's built-in climate modes differ from Vaillant's.
+The following table shows the mapping:
+
+=== "VRC720 Controller"
+        
+    | Home Assistant Mode                                                              | Home Assistant Preset                      | Vaillant Mode        |
+    |----------------------------------------------------------------------------------|--------------------------------------------|----------------------|
+    | :material-power: Off                                                             | :material-circle-small: No Preset          | Off                  |
+    | :material-thermostat-auto: Auto                                                  | :material-circle-small: No Preset          | Time Controlled Mode |
+    | :material-thermostat-auto: Auto                                                  | :material-leaf: Eco Preset                 | Eco mode             |
+    | :material-sun-snowflake-variant: Heat / Cool                                     | :material-circle-small: No Preset          | Manual Mode          |
+    | :material-thermostat-auto: Auto<br/>:material-sun-snowflake-variant: Heat / Cool | :material-account-arrow-right: Away Preset | Away Mode            |
+    | :material-thermostat-auto: Auto<br/>:material-sun-snowflake-variant: Heat / Cool | :material-rocket-launch: Boost Preset      | Quick Veto Mode      |
+    | :material-thermostat-auto: Auto<br/>:material-sun-snowflake-variant: Heat / Cool | :material-bed: Sleep Preset                | Off                  |
+
+=== "VRC700 Controller"
+        
+    | Home Assistant Mode             | Home Assistant Preset             | Vaillant Mode |
+    |---------------------------------|-----------------------------------|---------------|
+    | :material-power: Off            | :material-circle-small: No Preset | Off           |
+    | :material-thermostat-auto: Auto | :material-circle-small: No Preset | Auto Mode     |
+    | :material-thermostat-auto: Auto | :material-home: Home Preset       | Day Mode      |
+    | :material-thermostat-auto: Auto | :material-leaf: Eco Preset        | Night Mode    |
+
 ## Calendar Entities
 
 <video style="float: right; width: 40%; margin: 0 0 15px 15px; min-width: 200px;" autoplay muted loop playsinline style="max-width: 600px; width: 100%; margin: 0 auto;">
