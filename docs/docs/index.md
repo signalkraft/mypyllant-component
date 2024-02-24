@@ -5,13 +5,13 @@ hide:
   - navigation
 ---
 
+![myPyllant](assets/logo.png){ align=right width="25%" }
+
 # Getting Started
 
 [![GitHub Release](https://img.shields.io/github/release/signalkraft/mypyllant-component.svg)](https://github.com/signalkraft/mypyllant-component/releases)
 [![License](https://img.shields.io/github/license/signalkraft/mypyllant-component.svg)](https://github.com/signalkraft/mypyllant-component/blob/main/LICENSE)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/signalkraft/mypyllant-component/build-test.yaml)](https://github.com/signalkraft/mypyllant-component/actions)
-
-![myPyllant](assets/logo.png){ align=right width="25%" }
 
 Home Assistant component that interfaces with the myVAILLANT API
 (and branded versions of it, such as the MiGo Link app from Saunier Duval & Bulex).
@@ -62,12 +62,15 @@ Having problems? [Open an issue](https://github.com/signalkraft/mypyllant-compon
 * Supports climate & hot water controls, as well as sensor information
 * Control operating modes, target temperature, and presets such as holiday more or quick veto
 * Set the schedule for climate zones, water heaters, and circulation pumps
-  with [a custom service](https://signalkraft.com/mypyllant-component/2-services/#setting-a-time-program)
+  with [a custom service](https://signalkraft.com/mypyllant-component/2-services/#setting-a-time-program) or [in the Home Assistant calendar](2-entities.md#calendar-entities)
 * Track sensor information of devices, such as temperature, humidity, operating mode, energy usage, or energy efficiency
 * See diagnostic information, such as the current heating curve, flow temperature, firmware versions, or water pressure
 * Custom services to set holiday mode or quick veto temperature overrides, and their duration
+* [...and more](2-entities.md)
 
 ## Options
+
+After setting up the integration, you can configure it further in Settings :material-arrow-right: Devices & Services :material-arrow-right: myVAILLANT :material-arrow-right: Configure.
 
 ### Seconds between scans
 
@@ -121,11 +124,11 @@ Having problems? [Open an issue](https://github.com/signalkraft/mypyllant-compon
 
 ### Country
 
-The country you registered your myVAILLANT account in. The list of options is limited to known supported countries.
+:   The country you registered your myVAILLANT account in. The list of options is limited to known supported countries.
 
 ### Brand
 
-Brand of your HVAC equipment and app, pick Saunier Duval if you use the MiGo Link app.
+:   Brand of your HVAC equipment and app, pick Saunier Duval if you use the MiGo Link app.
 
 ## Supported Brands & Countries
 

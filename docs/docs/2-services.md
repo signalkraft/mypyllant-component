@@ -59,6 +59,8 @@ under attributes for your zones and water heater.
 
 Times in the time program are given in minutes since midnight in UTC.
 
+You can also [use the calendar UI](2-entities.md#calendar-entities) to change time programs.
+
 !!! note "Disabling a time window"
 
     You can delete all time windows on a day by sending an empty list, for example `monday: []`.
