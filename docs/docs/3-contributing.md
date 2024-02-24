@@ -155,3 +155,9 @@ docker compose exec homeassistant python3 -m myPyllant.tests.generate_test_data 
 docker compose cp homeassistant:<testdata folder> .
 # Test data will be copied to your current directory
 ```
+
+## Acknowledgements
+
+* Auth is loosely based on [ioBroker.vaillant](https://github.com/TA2k/ioBroker.vaillant)
+* Most API endpoints are reverse-engineered from the myVaillant app, using [mitmproxy](https://github.com/mitmproxy/mitmproxy)
+* Logo based on [Hase Icons erstellt von Freepik - Flaticon](https://www.flaticon.com/de/kostenlose-icons/hase) & [Ouroboros Icons erstellt von Freepik - Flaticon](https://www.flaticon.com/de/kostenlose-icons/ouroboros).

@@ -26,7 +26,7 @@ Uses the [myPyllant Python library](https://github.com/signalkraft/mypyllant).
 
 ### HACS
 
-![Default Dashboard Screenshot](assets/default-dashboard.png){ width="50%" align="right" }
+![Default Dashboard Screenshot](assets/default-dashboard.png){ width="45%" align="right" }
 
 1. [Install HACS](https://hacs.xyz/docs/setup/download)
 2. Search for the myVAILLANT integration in HACS and install it
@@ -87,7 +87,7 @@ Having problems? [Open an issue](https://github.com/signalkraft/mypyllant-compon
 
      ---
 
-     See diagnostic information, such as the current heating curve, flow temperature, firmware versions, or water pressure.
+     See diagnostic information, such as flow temperature, firmware versions, or water pressure.
      Even values that are not available in the app, such as the current heating curve.
 
      [:material-arrow-right: Read more](2-entities.md#extra-state-attributes)
