@@ -7,54 +7,78 @@ hide:
 # Entities
 
 You can expect these entities, although names will vary based on your home name (here "Home"),
-installed devices (in this example "aroTHERM plus" and "hydraulic station"),
+installed devices (in this example "aroTHERM plus" and "Hydraulic Station"),
 or the naming of your heating zones (in this case "Zone 1"):
 
-| Entity                                                                        | Unit   | Class        | Sample                    |
-|-------------------------------------------------------------------------------|--------|--------------|---------------------------|
-| Home Outdoor Temperature                                                      | °C     | temperature  | 11.2                      |
-| Home System Water Pressure                                                    | bar    | pressure     | 1.4                       |
-| Home Firmware Version                                                         |        |              | 0357.40.32                |
-| Home Zone 1 (Circuit 0) Desired Temperature                                   | °C     | temperature  | 22.0                      |
-| Home Zone 1 (Circuit 0) Current Temperature                                   | °C     | temperature  | 22.4                      |
-| Home Zone 1 (Circuit 0) Humidity                                              | %      | humidity     | 46.0                      |
-| Home Zone 1 (Circuit 0) Heating Operating Mode                                |        |              | Time Controlled           |
-| Home Zone 1 (Circuit 0) Heating State                                         |        |              | Idle                      |
-| Home Zone 1 (Circuit 0) Current Special Function                              |        |              | None                      |
-| Home Circuit 0 State                                                          |        |              | STANDBY                   |
-| Home Circuit 0 Current Flow Temperature                                       | °C     | temperature  | 26.0                      |
-| Home Circuit 0 Heating Curve                                                  |        |              | 1.19                      |
-| Home Domestic Hot Water 0 Tank Temperature                                    | °C     | temperature  | 49.0                      |
-| Home Domestic Hot Water 0 Setpoint                                            | °C     | temperature  | 52.0                      |
-| Home Domestic Hot Water 0 Operation Mode                                      |        |              | Time Controlled           |
-| Home Domestic Hot Water 0 Current Special Function                            |        |              | Regular                   |
-| Home Heating Energy Efficiency                                                |        |              | 3.6                       |
-| Home Device 0 aroTHERM plus Heating Energy Efficiency                         |        |              | 3.6                       |
-| Home Device 0 aroTHERM plus Consumed Electrical Energy Domestic Hot Water     | Wh     | energy       | 3000.0                    |
-| Home Device 0 aroTHERM plus Consumed Electrical Energy Heating                | Wh     | energy       | 14000.0                   |
-| Home Device 0 aroTHERM plus Earned Environment Energy Domestic Hot Water      | Wh     | energy       | 8000.0                    |
-| Home Device 0 aroTHERM plus Earned Environment Energy Heating                 | Wh     | energy       | 36000.0                   |
-| Home Device 0 aroTHERM plus Heat Generated Heating                            | Wh     | energy       | 50000.0                   |
-| Home Device 0 aroTHERM plus Heat Generated Domestic Hot Water                 | Wh     | energy       | 11000.0                   |
-| Home Device 1 Hydraulic Station Heating Energy Efficiency                     |        |              | unknown                   |
-| Home Device 1 Hydraulic Station Consumed Electrical Energy Domestic Hot Water | Wh     | energy       | 0.0                       |
-| Home Device 1 Hydraulic Station Consumed Electrical Energy Heating            | Wh     | energy       | 0.0                       |
-| Home Zone 1 (Circuit 0) Climate                                               |        |              | auto                      |
-| Home Away Mode Start Date                                                     |        |              | unknown                   |
-| Home Away Mode End Date                                                       |        |              | unknown                   |
-| Home Trouble Codes                                                            |        | problem      | off                       |
-| Home Online Status                                                            |        | connectivity | on                        |
-| Home Firmware Update Required                                                 |        | update       | off                       |
-| Home Firmware Update Enabled                                                  |        |              | on                        |
-| Home Circuit 0 Cooling Allowed                                                |        |              | off                       |
-| Home Holiday Duration Remaining                                               | d      |              | 0                         |
-| Home Domestic Hot Water 0                                                     |        |              | Time Controlled           |
-| Home Away Mode                                                                |        |              | off                       |
-| Home Domestic Hot Water 0 Boost                                               |        |              | off                       |
+## Sample Entities
+
+| Entity                                                                        | Unit | Class        | Sample          |
+|-------------------------------------------------------------------------------|------|--------------|-----------------|
+| Home Outdoor Temperature                                                      | °C   | temperature  | 10.3            |
+| Home System Water Pressure                                                    | bar  | pressure     | 1.8             |
+| Home Firmware Version                                                         |      |              | 0357.40.33      |
+| Home Zone 1 (Circuit 0) Desired Temperature                                   | °C   | temperature  | 22.0            |
+| Home Zone 1 (Circuit 0) Current Temperature                                   | °C   | temperature  | 22.4            |
+| Home Zone 1 (Circuit 0) Humidity                                              | %    | humidity     | 41.0            |
+| Home Zone 1 (Circuit 0) Heating Operating Mode                                |      |              | Time Controlled |
+| Home Zone 1 (Circuit 0) Heating State                                         |      |              | Idle            |
+| Home Zone 1 (Circuit 0) Current Special Function                              |      |              | None            |
+| Home Circuit 0 State                                                          |      |              | STANDBY         |
+| Home Circuit 0 Current Flow Temperature                                       | °C   | temperature  | 21.0            |
+| Home Circuit 0 Heating Curve                                                  |      |              | 1.19            |
+| Home Domestic Hot Water 0 Tank Temperature                                    | °C   | temperature  | 48.0            |
+| Home Domestic Hot Water 0 Setpoint                                            | °C   | temperature  | 52.0            |
+| Home Domestic Hot Water 0 Operation Mode                                      |      |              | Time Controlled |
+| Home Domestic Hot Water 0 Current Special Function                            |      |              | Regular         |
+| Home Heating Energy Efficiency                                                |      |              | 3.6             |
+| Home Device 0 aroTHERM plus Heating Energy Efficiency                         |      |              | 3.6             |
+| Home Device 0 aroTHERM plus Consumed Electrical Energy Domestic Hot Water     | Wh   | energy       | 2000.0          |
+| Home Device 0 aroTHERM plus Consumed Electrical Energy Heating                | Wh   | energy       | 12000.0         |
+| Home Device 0 aroTHERM plus Earned Environment Energy Domestic Hot Water      | Wh   | energy       | 4000.0          |
+| Home Device 0 aroTHERM plus Earned Environment Energy Heating                 | Wh   | energy       | 33000.0         |
+| Home Device 0 aroTHERM plus Heat Generated Heating                            | Wh   | energy       | 45000.0         |
+| Home Device 0 aroTHERM plus Heat Generated Domestic Hot Water                 | Wh   | energy       | 6000.0          |
+| Home Device 1 Hydraulic Station Heating Energy Efficiency                     |      |              | unknown         |
+| Home Device 1 Hydraulic Station Consumed Electrical Energy Domestic Hot Water | Wh   | energy       | 0.0             |
+| Home Device 1 Hydraulic Station Consumed Electrical Energy Heating            | Wh   | energy       | 0.0             |
+| Home Trouble Codes                                                            |      | problem      | off             |
+| Home Online Status                                                            |      | connectivity | on              |
+| Home Firmware Update Required                                                 |      | update       | off             |
+| Home Firmware Update Enabled                                                  |      |              | on              |
+| Home Circuit 0 Cooling Allowed                                                |      |              | off             |
+| Home Zone 1 (Circuit 0) Climate                                               |      |              | auto            |
+| Home Away Mode Start Date                                                     |      |              | unknown         |
+| Home Away Mode End Date                                                       |      |              | unknown         |
+| Home Holiday Duration Remaining                                               | d    |              | 0               |
+| Home Zone 1 (Circuit 0) Quick Veto Duration                                   | h    |              | unavailable     |
+| Home Domestic Hot Water 0                                                     |      |              | Time Controlled |
+| Home Zone 1 (Circuit 0) Heating Schedule                                      |      |              | on              |
+| Home Domestic Hot Water 0 Schedule                                            |      |              | on              |
+| Home Away Mode                                                                |      |              | off             |
+| Home Domestic Hot Water 0 Boost                                               |      |              | off             |
+
+## Calendar Entities
+
+<video style="float: right; width: 40%; margin: 0 0 15px 15px; min-width: 200px;" autoplay muted loop playsinline style="max-width: 600px; width: 100%; margin: 0 auto;">
+    <source src="/mypyllant-component/assets/calendar.mp4" type="video/mp4">
+</video>
+
+Each zone and water heater has a calendar for changing the heating schedule. In the calendar, you can:
+
+* Create new time slots (set a target temperature as the event summary)
+* Update existing time slots by changing start time, end time, weekdays, or the target temperature in the event summary
+* Delete time slots on a specific weekday
+
+!!! note
+
+    Make sure to select weekly repetition whenever you create, update, or delete events.
+
+    Individual events can't be edited, only the whole weekly schedule.
 
 ## Extra State Attributes
 
-Some entities come with extra state attributes for debugging and advanced usage. Your attributes may be different, depending on your devices.
+Some entities come with extra state attributes for debugging and advanced usage. Your attributes may be different,
+depending on your devices.
 
 ### Home Sensor
 
@@ -88,19 +112,19 @@ energy_provide_power_cut_behavior: DISABLE_HEATPUMP_AND_BACKUP_HEATER
 ### Control Error Binary Sensor
 
 ```yaml
-diagnostic_trouble_codes: 
-- serial_number: 
-  article_number: '0020260962'
-  codes: []
-- serial_number: 
-  article_number: '0010021118'
-  codes: []
-- serial_number: 
-  article_number: '0010023609'
-  codes: []
-- serial_number: 
-  article_number: '0020260914'
-  codes: []
+diagnostic_trouble_codes:
+  - serial_number:
+    article_number: '0020260962'
+    codes: [ ]
+  - serial_number:
+    article_number: '0010021118'
+    codes: [ ]
+  - serial_number:
+    article_number: '0010023609'
+    codes: [ ]
+  - serial_number:
+    article_number: '0020260914'
+    codes: [ ]
 ```
 
 ### Climate Entity
@@ -114,40 +138,40 @@ current_temperature: 21.5
 temperature: 0
 current_humidity: 53
 preset_mode: none
-time_program_heating: 
-  extra_fields: {}
+time_program_heating:
+  extra_fields: { }
   monday:
-    - extra_fields: {}
+    - extra_fields: { }
       start_time: 420
       end_time: 1290
       setpoint: 21
   tuesday:
-    - extra_fields: {}
+    - extra_fields: { }
       start_time: 420
       end_time: 1290
       setpoint: 21
   wednesday:
-    - extra_fields: {}
+    - extra_fields: { }
       start_time: 420
       end_time: 1290
       setpoint: 21
   thursday:
-    - extra_fields: {}
+    - extra_fields: { }
       start_time: 420
       end_time: 1290
       setpoint: 21
   friday:
-    - extra_fields: {}
+    - extra_fields: { }
       start_time: 420
       end_time: 1290
       setpoint: 21
   saturday:
-    - extra_fields: {}
+    - extra_fields: { }
       start_time: 420
       end_time: 1290
       setpoint: 21
   sunday:
-    - extra_fields: {}
+    - extra_fields: { }
       start_time: 420
       end_time: 1290
       setpoint: 21
@@ -182,34 +206,34 @@ temperature: 50
 target_temp_high: null
 target_temp_low: null
 operation_mode: Time Controlled
-time_program_dhw: 
-  extra_fields: {}
+time_program_dhw:
+  extra_fields: { }
   monday:
-    - extra_fields: {}
+    - extra_fields: { }
       start_time: 330
       end_time: 1260
   tuesday:
-    - extra_fields: {}
+    - extra_fields: { }
       start_time: 330
       end_time: 1260
   wednesday:
-    - extra_fields: {}
+    - extra_fields: { }
       start_time: 330
       end_time: 1260
   thursday:
-    - extra_fields: {}
+    - extra_fields: { }
       start_time: 330
       end_time: 1260
   friday:
-    - extra_fields: {}
+    - extra_fields: { }
       start_time: 330
       end_time: 1260
   saturday:
-    - extra_fields: {}
+    - extra_fields: { }
       start_time: 450
       end_time: 1260
   sunday:
-    - extra_fields: {}
+    - extra_fields: { }
       start_time: 450
       end_time: 1260
   meta_info:
@@ -217,15 +241,15 @@ time_program_dhw:
     max_slots_per_day: 3
     setpoint_required_per_slot: false
 
-time_program_circulation_pump: 
-  extra_fields: {}
-  monday: []
-  tuesday: []
-  wednesday: []
-  thursday: []
-  friday: []
-  saturday: []
-  sunday: []
+time_program_circulation_pump:
+  extra_fields: { }
+  monday: [ ]
+  tuesday: [ ]
+  wednesday: [ ]
+  thursday: [ ]
+  friday: [ ]
+  saturday: [ ]
+  sunday: [ ]
   meta_info:
     min_slots_per_day: 0
     max_slots_per_day: 3

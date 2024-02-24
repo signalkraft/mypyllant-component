@@ -15,7 +15,7 @@ hide:
 
 Home Assistant component that interfaces with the myVAILLANT API
 (and branded versions of it, such as the MiGo Link app from Saunier Duval & Bulex).
-Uses the [myPyllant library](https://github.com/signalkraft/mypyllant).
+Uses the [myPyllant Python library](https://github.com/signalkraft/mypyllant).
 
 ## Installation
 
@@ -41,7 +41,7 @@ Having problems? [Open an issue](https://github.com/signalkraft/mypyllant-compon
    be `config/custom_components/mypyllant`
 3. Restart Home Assistant
 4. [Add myVaillant integration](https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant), or go to
-   Settings > Integrations and add myVAILLANT
+   Settings :material-arrow-right: Integrations and add myVAILLANT
 5. Sign in with the email & password you used in the myVAILLANT app (or MiGo app for Saunier Duval)
 
 ## Tested Setups
@@ -51,7 +51,7 @@ Having problems? [Open an issue](https://github.com/signalkraft/mypyllant-compon
 * Vaillant ECOTEC PLUS boiler + VRT380f + sensoNET
 * Vaillant ECOTEC PLUS VCW20/1 boiler + sensoCOMFORT VRC 720 + sensoNET VR 921
 * Vaillant ECOTEC PLUS 296/5-5 (R6) + sensoCOMFORT VRC 720/2 + VR 70 (2 circuits) + sensoNET VR 921
-* VAILLANT ecoVIT + VIH R/6 uniSTORE + VR920
+* Vaillant ecoVIT + VIH R/6 uniSTORE + VR920
 * Saunier Duval DUOMAX F30 90 + MISET Radio + MiLink V3
 * Bulex Thema Condens F30/35 + Red 5 + MiPro Sense + MiLink v3
 
@@ -71,32 +71,53 @@ Having problems? [Open an issue](https://github.com/signalkraft/mypyllant-compon
 
 ### Seconds between scans
 
-Wait interval between updating (most) sensors. The energy data and efficiency sensors have a fixed hourly interval.
+:   Wait interval between updating (most) sensors. The energy data and efficiency sensors have a fixed hourly interval.
+    Setting this too low can cause "quota exceeded" errors.
+    
+    :material-cog: Default is 60 seconds.
 
 ### Delay before refreshing data after updates
 
-How long to wait between making a request (i.e. setting target temperature) and refreshing data.
-The Vaillant takes some time to return the updated values.
+:   How long to wait between making a request (i.e. setting target temperature) and refreshing data.
+    The Vaillant API takes some time to return the updated values. Setting this too low will return the old values.
+    
+    :material-cog: Default is 5 seconds.
 
 ### Default duration in hours for quick veto
 
-When setting the temperature with the climate controls, the integration uses the "quick veto" feature of the myVAILLANT
-app.
+:   When setting the temperature with the climate controls, the integration uses the "quick veto" feature of the myVAILLANT
+    app by default.
+    
+    With this option you can set for how long the temperature should stay set, before returning to the default value.
 
-With this option you can set for how long the temperature should stay set, before returning to the default value.
+    :material-cog: Default is 3 hours.
 
 ### Default duration in days for away mode
 
-When the away mode preset is activated, this duration is used to for the end date (default is 365 days).
+:   When the away mode preset is activated, this duration is used to for the end date.
+
+    :material-cog: Default is 365 days.
+
+### Default temperature setpoint for away mode
+
+:   When away mode is activated without a temperature (for example with the away mode switch), this value is set for all zones.
+
+    :material-cog: Default is 10.0°C.
 
 ### Temperature controls overwrite time program instead of setting quick veto
 
-When raising or lowering the desired temperature in the myVAILLANT app, it sets a quick veto mode for a limited time
-with that new temperature, if the zone is in time controlled mode. If you want to permanently change the desired
-temperature, you need to update the time schedule.
+:   When raising or lowering the desired temperature in the myVAILLANT app, it sets a quick veto mode for a limited time
+    with that new temperature, if the zone is in time controlled mode. If you want to permanently change the desired
+    temperature, you need to update the time schedule.
 
-By default, this integration has the same behavior. But when enabling this option, the Home Assistant climate controls
-instead overwrite the temperatures set in the time schedule with the new value (unless quick veto is already active).
+    By default, this integration has the same behavior. But when enabling this option, the Home Assistant climate controls
+    instead overwrite the temperatures set in the time schedule with the new value.
+
+    :material-cog: Default is off.
+
+    !!! note
+    
+        If quick veto is active, the climate controls will always set the quick veto temperature.
 
 ### Country
 
@@ -171,3 +192,14 @@ Your HVAC system might differ from the ones in [Tested Setups](#tested-setups) a
 If you don't see any entities, or get an error during setup, please check [Debugging](3-contributing.md#debugging) and
 create an issue.
 With debugging enabled, there's a chance to find the culprit in the data returned by the myVAILLANT API and fix it.
+
+### Vaillant API is occasionally unavailable
+
+The API this integration uses sometimes goes down. Before reporting an issue, check if the myVAILLANT app works normally.
+If it doesn't, there's nothing we can do about it.
+
+### Some features that are available on the controller or in the maintenance settings are not available
+
+If you would like to request a new feature, please check that it's available in the myVAILLANT app first.
+Some data (for example quiet mode or legionella protection) are not available in the app, and therefore
+can't be supported by this integration.
