@@ -413,12 +413,12 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         await self.coordinator.api.set_holiday(
             self.system, start, end, setpoint=setpoint
         )
-        await self.coordinator.async_request_refresh_delayed()
+        await self.coordinator.async_request_refresh_delayed(20)
 
     async def cancel_holiday(self):
         _LOGGER.debug("Canceling holiday on System %s", self.system.id)
         await self.coordinator.api.cancel_holiday(self.system)
-        await self.coordinator.async_request_refresh_delayed()
+        await self.coordinator.async_request_refresh_delayed(20)
 
     async def set_zone_time_program(self, **kwargs):
         _LOGGER.debug("Canceling holiday on System %s", self.system.id)

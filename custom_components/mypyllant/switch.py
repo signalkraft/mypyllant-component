@@ -61,12 +61,12 @@ class SystemHolidaySwitch(HolidayEntity, SwitchEntity):
         )
         await self.coordinator.api.set_holiday(self.system, end=end)
         # Holiday values need a long time to show up in the API
-        await self.coordinator.async_request_refresh_delayed(10)
+        await self.coordinator.async_request_refresh_delayed(20)
 
     async def async_turn_off(self, **kwargs):
         await self.coordinator.api.cancel_holiday(self.system)
         # Holiday values need a long time to show up in the API
-        await self.coordinator.async_request_refresh_delayed(10)
+        await self.coordinator.async_request_refresh_delayed(20)
 
     @property
     def unique_id(self) -> str:

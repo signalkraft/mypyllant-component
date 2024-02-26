@@ -37,6 +37,18 @@ class AsyncMock(mock.MagicMock):
         return super().__call__(*args, **kwargs)
 
 
+@pytest.fixture(scope="session", autouse=True)
+def asyncio_sleep_mock():
+    """
+    Disable sleep in asyncio to avoid delays in test execution
+    """
+    with mock.patch(
+        "asyncio.sleep",
+        new_callable=AsyncMock,
+    ) as _fixture:
+        yield _fixture
+
+
 @pytest.fixture(autouse=True)
 def auto_enable_custom_integrations(enable_custom_integrations):
     """Enable custom integrations in all tests."""

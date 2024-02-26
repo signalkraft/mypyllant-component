@@ -87,7 +87,7 @@ class SystemHolidayDurationNumber(HolidayEntity, NumberEntity):
     def native_value(self):
         if self.holiday_remaining:
             if self.native_unit_of_measurement == UnitOfTime.DAYS:
-                return round(self.holiday_remaining.total_seconds() / 3600 / 24)
+                return round(self.holiday_remaining.days)
             else:
                 return round(self.holiday_remaining.total_seconds() / 3600)
         else:
@@ -97,14 +97,14 @@ class SystemHolidayDurationNumber(HolidayEntity, NumberEntity):
         if value == 0:
             await self.coordinator.api.cancel_holiday(self.system)
             # Holiday values need a long time to show up in the API
-            await self.coordinator.async_request_refresh_delayed(10)
+            await self.coordinator.async_request_refresh_delayed(20)
         else:
             if self.native_unit_of_measurement == UnitOfTime.DAYS:
                 value = value * 24
             end = datetime.now(self.system.timezone) + timedelta(hours=value)
             await self.coordinator.api.set_holiday(self.system, end=end)
             # Holiday values need a long time to show up in the API
-            await self.coordinator.async_request_refresh_delayed(10)
+            await self.coordinator.async_request_refresh_delayed(20)
 
     @property
     def unique_id(self) -> str:

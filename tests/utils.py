@@ -32,6 +32,7 @@ async def call_service(
                 data=test_user_input,
                 options=TEST_OPTIONS,
             )
+            hass.data["integrations"] = {DOMAIN: mock.MagicMock()}
             config_entry.add_to_hass(hass)
             await async_setup_entry(hass, config_entry)
             await hass.async_block_till_done()

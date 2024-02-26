@@ -74,9 +74,14 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         The API takes a long time to return updated values (i.e. after setting a new heating mode)
         This function waits for a few second and then refreshes
         """
+
+        # API calls sometimes update the models, so we update the data before waiting for the refresh
+        # to see immediate changes in the UI
+        self.async_set_updated_data(self.data)
         if not delay:
             delay = self.entry.options.get(OPTION_REFRESH_DELAY, DEFAULT_REFRESH_DELAY)
         if delay:
+            _LOGGER.debug("Waiting %ss before refreshing data", delay)
             await asyncio.sleep(delay)
         await self.async_request_refresh()
 

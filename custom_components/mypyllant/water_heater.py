@@ -179,6 +179,7 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
             await self.coordinator.api.set_domestic_hot_water_temperature(
                 self.domestic_hot_water, int(target_temp)
             )
+            await self.coordinator.async_request_refresh_delayed()
 
     async def async_set_operation_mode(
         self, operation_mode: str, **kwargs: Any
