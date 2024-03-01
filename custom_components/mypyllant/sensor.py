@@ -16,6 +16,7 @@ from homeassistant.const import (
     UnitOfPressure,
     UnitOfTemperature,
     UnitOfTime,
+    UnitOfPower,
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
@@ -106,6 +107,12 @@ async def create_system_sensors(
             if device.on_off_cycles is not None:
                 sensors.append(
                     lambda: SystemDeviceOnOffCyclesSensor(
+                        index, device_index, system_coordinator
+                    )
+                )
+            if device.current_power is not None:
+                sensors.append(
+                    lambda: SystemDeviceCurrentPowerSensor(
                         index, device_index, system_coordinator
                     )
                 )
@@ -395,9 +402,9 @@ class HomeEntity(CoordinatorEntity, SensorEntity):
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
-        return (
-            self.system.home.extra_fields | self.system.extra_fields | self.system.rts
-        )
+        rts = self.system.rts if self.system.rts else {}
+        mpc = self.system.mpc if self.system.mpc else {}
+        return self.system.home.extra_fields | self.system.extra_fields | rts | mpc
 
     @property
     def name_prefix(self) -> str:
@@ -1042,3 +1049,24 @@ class SystemDeviceOnOffCyclesSensor(SystemDeviceSensor):
     @property
     def name(self):
         return f"{self.name_prefix} On/Off Cycles"
+
+
+class SystemDeviceCurrentPowerSensor(SystemDeviceSensor):
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_native_unit_of_measurement = UnitOfPower.WATT
+
+    @property
+    def native_value(self):
+        if self.device.current_power is not None:
+            return self.device.current_power
+        else:
+            return None
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_current_power"
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} Current Power"
