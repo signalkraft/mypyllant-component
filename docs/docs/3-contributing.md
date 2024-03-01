@@ -34,7 +34,7 @@ Because the myVAILLANT API isn't documented, you can help the development of thi
     Go to Developer Tools :material-arrow-right: Services and select `mypyllant.generate_test_data`.
     Then call the service and copy the resulting output.
 
-    [![Open your Home Assistant instance and show your service developer tools with a specific service selected.](https://my.home-assistant.io/badges/developer_call_service.svg)](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.set_holiday)
+    [![Open your Home Assistant instance and show your service developer tools with a specific service selected.](https://my.home-assistant.io/badges/developer_call_service.svg)](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.generate_test_data)
 
 === "Shell"
 
