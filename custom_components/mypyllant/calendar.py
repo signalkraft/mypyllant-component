@@ -55,6 +55,11 @@ async def async_setup_entry(
             sensors.append(
                 lambda: DomesticHotWaterCalendar(index, dhw_index, coordinator)
             )
+            sensors.append(
+                lambda: DomesticHotWaterCirculationCalendar(
+                    index, dhw_index, coordinator
+                )
+            )
     async_add_entities(sensors)
 
 
@@ -311,6 +316,46 @@ class DomesticHotWaterCalendar(BaseCalendarEntity, DomesticHotWaterCoordinatorEn
 
     async def update_time_program(self):
         await self.coordinator.api.set_domestic_hot_water_time_program(
+            self.domestic_hot_water, self.time_program
+        )
+        await self.coordinator.async_request_refresh_delayed()
+
+
+class DomesticHotWaterCirculationCalendar(
+    BaseCalendarEntity, DomesticHotWaterCoordinatorEntity
+):
+    _attr_icon = "mdi:water-boiler-auto"
+
+    @property
+    def time_program(self) -> DHWTimeProgram:
+        return self.domestic_hot_water.time_program_circulation_pump
+
+    @property
+    def name(self) -> str:
+        return f"{self.name_prefix} Circulation Schedule"
+
+    def _get_calendar_id_prefix(self):
+        return f"dhw_circulation_{self.domestic_hot_water.index}"
+
+    def build_event(
+        self,
+        time_program_day: DHWTimeProgramDay,
+        start: datetime.datetime,
+        end: datetime.datetime,
+    ):
+        summary = f"{self.name} Circulation"
+        return CalendarEvent(
+            summary=summary,
+            start=start,
+            end=end,
+            description="You can change the start time, end time, or weekdays.",
+            uid=self._get_uid(time_program_day, start),
+            rrule=self._get_rrule(time_program_day),
+            recurrence_id=self._get_recurrence_id(time_program_day),
+        )
+
+    async def update_time_program(self):
+        await self.coordinator.api.set_domestic_hot_water_circulation_time_program(
             self.domestic_hot_water, self.time_program
         )
         await self.coordinator.async_request_refresh_delayed()
