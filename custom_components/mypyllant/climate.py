@@ -37,12 +37,14 @@ from myPyllant.models import (
     System,
     Zone,
     ZoneTimeProgram,
+    AmbisenseRoom,
 )
 from myPyllant.enums import (
     ZoneHeatingOperatingMode,
     ZoneHeatingOperatingModeVRC700,
     ZoneCurrentSpecialFunction,
     CircuitState,
+    AmbisenseRoomOperationMode,
 )
 
 from custom_components.mypyllant.utils import shorten_zone_name, EntityList
@@ -105,6 +107,12 @@ ZONE_HVAC_ACTION_MAP = {
     CircuitState.COOLING: HVACAction.COOLING,
 }
 
+AMBISENSE_ROOM_OPERATION_MODE_MAP = {
+    AmbisenseRoomOperationMode.OFF: HVACMode.OFF,
+    AmbisenseRoomOperationMode.AUTO: HVACMode.AUTO,
+    AmbisenseRoomOperationMode.MANUAL: HVACMode.HEAT_COOL,
+}
+
 
 async def async_setup_entry(
     hass: HomeAssistant, config: ConfigEntry, async_add_entities: AddEntitiesCallback
@@ -119,6 +127,7 @@ async def async_setup_entry(
 
     zone_entities: EntityList[ClimateEntity] = EntityList()
     ventilation_entities: EntityList[ClimateEntity] = EntityList()
+    ambisense_entities: EntityList[ClimateEntity] = EntityList()
 
     for index, system in enumerate(coordinator.data):
         for zone_index, _ in enumerate(system.zones):
@@ -134,6 +143,18 @@ async def async_setup_entry(
                     hass.data[DOMAIN][config.entry_id][data_key],
                 )
             )
+
+        for room in system.ambisense_rooms:
+            ambisense_entities.append(
+                lambda: AmbisenseClimate(
+                    index,
+                    room.room_index,
+                    coordinator,
+                    config,
+                    hass.data[DOMAIN][config.entry_id][data_key],
+                )
+            )
+
         for ventilation_index, _ in enumerate(system.ventilation):
             ventilation_entities.append(
                 lambda: VentilationClimate(
@@ -145,6 +166,7 @@ async def async_setup_entry(
 
     async_add_entities(zone_entities)
     async_add_entities(ventilation_entities)
+    async_add_entities(ambisense_entities)
 
     if len(zone_entities) > 0:
         platform = entity_platform.async_get_current_platform()
@@ -642,3 +664,162 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                     await self.async_set_hvac_mode(HVACMode.OFF)
 
                 await self.coordinator.async_request_refresh_delayed()
+
+
+class AmbisenseClimate(CoordinatorEntity, ClimateEntity):
+    """Climate for a ambisense room."""
+
+    coordinator: SystemCoordinator
+    _attr_temperature_unit = UnitOfTemperature.CELSIUS
+    _enable_turn_on_off_backwards_compatibility = False
+
+    def __init__(
+        self,
+        system_index: int,
+        room_index: int,
+        coordinator: SystemCoordinator,
+        config: ConfigEntry,
+        data: dict,
+    ) -> None:
+        super().__init__(coordinator)
+        self.system_index = system_index
+        self.room_index = room_index
+        self.config = config
+        self.data = data
+        self.data["last_active_hvac_mode"] = (
+            self.hvac_mode if self.hvac_mode != HVACMode.OFF else HVACMode.AUTO
+        )
+        _LOGGER.debug(
+            "Saving last active HVAC mode %s", self.data["last_active_hvac_mode"]
+        )
+
+    async def async_update(self) -> None:
+        """
+        Save last active HVAC mode after update, so it can be restored in turn_on
+        """
+        await super().async_update()
+
+        if self.enabled and self.hvac_mode != HVACMode.OFF:
+            _LOGGER.debug("Saving last active HVAC mode %s", self.hvac_mode)
+            self.data["last_active_hvac_mode"] = self.hvac_mode
+
+    @property
+    def hvac_modes(self) -> list[HVACMode]:
+        return list(set([v for v in AMBISENSE_ROOM_OPERATION_MODE_MAP.values()]))
+
+    @property
+    def default_quick_veto_duration(self):
+        return self.config.options.get(
+            OPTION_DEFAULT_QUICK_VETO_DURATION, DEFAULT_QUICK_VETO_DURATION
+        )
+
+    @property
+    def system(self) -> System:
+        return self.coordinator.data[self.system_index]
+
+    @property
+    def room(self) -> AmbisenseRoom:
+        return [
+            r for r in self.system.ambisense_rooms if r.room_index == self.room_index
+        ][0]
+
+    @property
+    def id_infix(self) -> str:
+        return f"{self.system.id}_room_{self.room_index}"
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.id_infix)},
+            name=self.name,
+            manufacturer=self.system.brand_name,
+        )
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_climate"
+
+    @property
+    def name(self) -> str:
+        return f"{self.system.home.home_name or self.system.home.nomenclature} {self.room.name}"
+
+    @property
+    def extra_state_attributes(self) -> Mapping[str, Any] | None:
+        attr = {
+            "time_program": self.room.time_program,
+            "quick_veto_end_date_time": self.room.room_configuration.quick_veto_end_time,
+            "window_state": self.room.room_configuration.window_state,
+            "button_lock": self.room.room_configuration.button_lock,
+        }
+        return attr | self.room.extra_fields
+
+    async def set_quick_veto(self, **kwargs):
+        _LOGGER.debug("Setting quick veto on %s with params %s", self.room.name, kwargs)
+        temperature = kwargs.get("temperature")
+        duration_hours = kwargs.get("duration_hours")
+        await self.coordinator.api.quick_veto_ambisense_room(
+            self.room, temperature, duration_hours, self.default_quick_veto_duration
+        )
+        await self.coordinator.async_request_refresh_delayed()
+
+    async def remove_quick_veto(self):
+        _LOGGER.debug("Removing quick veto on %s", self.zone.name)
+        await self.coordinator.api.cancel_quick_veto_ambisense_room(self.room)
+        await self.coordinator.async_request_refresh_delayed()
+
+    @property
+    def supported_features(self) -> ClimateEntityFeature:
+        """Return the list of supported features."""
+        return (
+            ClimateEntityFeature.TARGET_TEMPERATURE
+            | ClimateEntityFeature.PRESET_MODE
+            | ClimateEntityFeature.TURN_OFF
+            | ClimateEntityFeature.TURN_ON
+        )
+
+    @property
+    def target_temperature(self) -> float | None:
+        return self.room.room_configuration.temperature_setpoint
+
+    @property
+    def current_temperature(self) -> float | None:
+        return self.room.room_configuration.current_temperature
+
+    @property
+    def current_humidity(self) -> float | None:
+        return self.room.room_configuration.current_humidity
+
+    @property
+    def hvac_mode(self) -> HVACMode:
+        return AMBISENSE_ROOM_OPERATION_MODE_MAP.get(
+            self.room.room_configuration.operation_mode, HVACMode.OFF
+        )
+
+    async def async_set_hvac_mode(self, hvac_mode: HVACMode):
+        mode = [
+            k for k, v in AMBISENSE_ROOM_OPERATION_MODE_MAP.items() if v == hvac_mode
+        ][0]
+        await self.coordinator.api.set_ambisense_room_operation_mode(self.room, mode)
+        await self.coordinator.async_request_refresh_delayed()
+
+    async def turn_on(self) -> None:
+        await self.async_set_hvac_mode(self.data["last_active_hvac_mode"])
+
+    async def turn_off(self) -> None:
+        await self.async_set_hvac_mode(HVACMode.OFF)
+
+    async def async_set_temperature(self, **kwargs: Any) -> None:
+        """
+        Set new target temperature. Depending on heating mode this sets the manual mode setpoint,
+        or it creates a quick veto
+        """
+        _LOGGER.debug(
+            "Setting temperature on %s with params %s", self.zone.name, kwargs
+        )
+        temperature = kwargs.get(ATTR_TEMPERATURE)
+        if not temperature:
+            return
+
+        _LOGGER.debug("Setting quick veto on %s to %s", self.zone.name, temperature)
+        await self.set_quick_veto(temperature=temperature)
+        await self.coordinator.async_request_refresh_delayed()

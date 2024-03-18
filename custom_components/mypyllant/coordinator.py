@@ -153,10 +153,19 @@ class SystemCoordinator(MyPyllantCoordinator):
         _LOGGER.debug("Starting async update data for SystemCoordinator")
         try:
             await self._refresh_session()
+            """
+            kwargs is unsupported in async_add_executor_job, so we have to use positional arguments.
+            The five True *args map to these get_systems() keyword arguments:
+                include_connection_status
+                include_diagnostic_trouble_codes
+                include_rts
+                include_mpc
+                include_ambisense_rooms
+            """
             data = [
                 s
                 async for s in await self.hass.async_add_executor_job(
-                    self.api.get_systems, True, True, True, True
+                    self.api.get_systems, True, True, True, True, True
                 )
             ]
             return data

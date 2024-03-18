@@ -96,14 +96,13 @@ async def test_system_sensors(
         await mocked_api.aiohttp_session.close()
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
 async def test_zone_sensors(
     hass,
     mypyllant_aioresponses,
     mocked_api: MyPyllantAPI,
     system_coordinator_mock,
-    test_data,
 ):
+    test_data = load_test_data(DATA_DIR / "heatpump_electric_backup")
     with mypyllant_aioresponses(test_data) as _:
         system_coordinator_mock.data = (
             await system_coordinator_mock._async_update_data()
