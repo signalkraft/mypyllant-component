@@ -16,7 +16,6 @@ QUOTA_PAUSE_INTERVAL = 3 * 3600  # in seconds
 API_DOWN_PAUSE_INTERVAL = 15 * 60  # in seconds
 
 SERVICE_SET_QUICK_VETO = "set_quick_veto"
-SERVICE_SET_QUICK_VETO_AMBISENSE = "set_quick_veto_ambisense"
 SERVICE_SET_MANUAL_MODE_SETPOINT = "set_manual_mode_setpoint"
 SERVICE_CANCEL_QUICK_VETO = "cancel_quick_veto"
 SERVICE_SET_HOLIDAY = "set_holiday"
