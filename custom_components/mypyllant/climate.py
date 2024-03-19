@@ -712,13 +712,13 @@ class AmbisenseClimate(CoordinatorEntity, ClimateEntity):
     @property
     def default_quick_veto_duration(self):
         """
-        Returns the default quick veto duration in seconds
+        Returns the default quick veto duration in minutes
         """
         return (
             self.config.options.get(
                 OPTION_DEFAULT_QUICK_VETO_DURATION, DEFAULT_QUICK_VETO_DURATION
             )
-            * 3600  # Ambisense rooms expect seconds, but OPTION_DEFAULT_QUICK_VETO_DURATION is in hours
+            * 60  # Ambisense rooms expect minutes, but OPTION_DEFAULT_QUICK_VETO_DURATION is in hours
         )
 
     @property
@@ -764,14 +764,14 @@ class AmbisenseClimate(CoordinatorEntity, ClimateEntity):
     async def set_quick_veto(self, **kwargs):
         _LOGGER.debug("Setting quick veto on %s with params %s", self.room.name, kwargs)
         temperature = kwargs.get("temperature")
-        if "duration_seconds" in kwargs:
-            duration_seconds = kwargs.get("duration_seconds")
+        if "duration_minutes" in kwargs:
+            duration_minutes = kwargs.get("duration_minutes")
         elif "duration_hours" in kwargs:
-            duration_seconds = kwargs.get("duration_hours") * 3600
+            duration_minutes = kwargs.get("duration_hours") * 60
         else:
-            duration_seconds = None
+            duration_minutes = None
         await self.coordinator.api.quick_veto_ambisense_room(
-            self.room, temperature, duration_seconds, self.default_quick_veto_duration
+            self.room, temperature, duration_minutes, self.default_quick_veto_duration
         )
         await self.coordinator.async_request_refresh_delayed()
 
