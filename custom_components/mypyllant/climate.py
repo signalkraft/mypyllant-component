@@ -113,6 +113,8 @@ AMBISENSE_ROOM_OPERATION_MODE_MAP = {
     AmbisenseRoomOperationMode.MANUAL: HVACMode.HEAT_COOL,
 }
 
+AMBISENSE_ROOM_PRESETS = [PRESET_NONE, PRESET_BOOST]
+
 
 async def async_setup_entry(
     hass: HomeAssistant, config: ConfigEntry, async_add_entities: AddEntitiesCallback
@@ -542,10 +544,10 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         circuit_state = self.zone.get_associated_circuit(self.system).circuit_state
         return ZONE_HVAC_ACTION_MAP.get(circuit_state)
 
-    async def turn_on(self) -> None:
+    async def async_turn_on(self) -> None:
         await self.async_set_hvac_mode(self.data["last_active_hvac_mode"])
 
-    async def turn_off(self) -> None:
+    async def async_turn_off(self) -> None:
         await self.async_set_hvac_mode(HVACMode.OFF)
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
@@ -667,10 +669,14 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
 
 class AmbisenseClimate(CoordinatorEntity, ClimateEntity):
-    """Climate for a ambisense room."""
+    """Climate for an ambisense room."""
 
     coordinator: SystemCoordinator
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
+    _attr_hvac_modes = list(
+        set([v for v in AMBISENSE_ROOM_OPERATION_MODE_MAP.values()])
+    )
+    _attr_preset_modes = AMBISENSE_ROOM_PRESETS
     _enable_turn_on_off_backwards_compatibility = False
 
     def __init__(
@@ -702,10 +708,6 @@ class AmbisenseClimate(CoordinatorEntity, ClimateEntity):
         if self.enabled and self.hvac_mode != HVACMode.OFF:
             _LOGGER.debug("Saving last active HVAC mode %s", self.hvac_mode)
             self.data["last_active_hvac_mode"] = self.hvac_mode
-
-    @property
-    def hvac_modes(self) -> list[HVACMode]:
-        return list(set([v for v in AMBISENSE_ROOM_OPERATION_MODE_MAP.values()]))
 
     @property
     def default_quick_veto_duration(self):
@@ -763,7 +765,7 @@ class AmbisenseClimate(CoordinatorEntity, ClimateEntity):
         await self.coordinator.async_request_refresh_delayed()
 
     async def remove_quick_veto(self):
-        _LOGGER.debug("Removing quick veto on %s", self.zone.name)
+        _LOGGER.debug("Removing quick veto on %s", self.room.name)
         await self.coordinator.api.cancel_quick_veto_ambisense_room(self.room)
         await self.coordinator.async_request_refresh_delayed()
 
@@ -802,10 +804,24 @@ class AmbisenseClimate(CoordinatorEntity, ClimateEntity):
         await self.coordinator.api.set_ambisense_room_operation_mode(self.room, mode)
         await self.coordinator.async_request_refresh_delayed()
 
-    async def turn_on(self) -> None:
+    @property
+    def preset_mode(self) -> str | None:
+        if self.room.room_configuration.quick_veto_end_time is not None:
+            return PRESET_BOOST
+        else:
+            return PRESET_NONE
+
+    async def async_set_preset_mode(self, preset_mode: str) -> None:
+        if preset_mode == PRESET_NONE:
+            await self.remove_quick_veto()
+        # Both preset none and boost exist, but going from none to boost makes no sense without a specific
+        # target temperature
+        self._valid_mode_or_raise("preset", preset_mode, [PRESET_NONE])
+
+    async def async_turn_on(self) -> None:
         await self.async_set_hvac_mode(self.data["last_active_hvac_mode"])
 
-    async def turn_off(self) -> None:
+    async def async_turn_off(self) -> None:
         await self.async_set_hvac_mode(HVACMode.OFF)
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
@@ -814,12 +830,10 @@ class AmbisenseClimate(CoordinatorEntity, ClimateEntity):
         or it creates a quick veto
         """
         _LOGGER.debug(
-            "Setting temperature on %s with params %s", self.zone.name, kwargs
+            "Setting temperature on %s with params %s", self.room.name, kwargs
         )
         temperature = kwargs.get(ATTR_TEMPERATURE)
         if not temperature:
             return
 
-        _LOGGER.debug("Setting quick veto on %s to %s", self.zone.name, temperature)
         await self.set_quick_veto(temperature=temperature)
-        await self.coordinator.async_request_refresh_delayed()

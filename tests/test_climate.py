@@ -1,9 +1,10 @@
 from unittest import mock
 
 import pytest as pytest
-from homeassistant.components.climate import HVACMode
-from homeassistant.components.climate.const import FAN_OFF, PRESET_ECO
+from homeassistant.components.climate import HVACMode, PRESET_NONE
+from homeassistant.components.climate.const import FAN_OFF, PRESET_ECO, PRESET_BOOST
 from homeassistant.const import ATTR_TEMPERATURE
+from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers.entity_registry import DATA_REGISTRY, EntityRegistry
 from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
 
@@ -153,6 +154,12 @@ async def test_ambisense_climate(
         assert isinstance(ambisense.current_temperature, float)
         assert isinstance(ambisense.target_temperature, float)
 
+        await ambisense.async_turn_on()
+        await ambisense.async_turn_off()
+        await ambisense.async_set_temperature(temperature=20.0)
         await ambisense.async_set_hvac_mode(HVACMode.OFF)
+        await ambisense.async_set_preset_mode(PRESET_NONE)
+        with pytest.raises(ServiceValidationError):
+            await ambisense.async_set_preset_mode(PRESET_BOOST)
         system_coordinator_mock._debounced_refresh.async_cancel()
         await mocked_api.aiohttp_session.close()
