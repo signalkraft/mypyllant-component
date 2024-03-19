@@ -60,7 +60,7 @@ or the naming of your heating zones (in this case "Zone 1"):
 ## Climate Entities
 
 Home Assistant's built-in climate modes differ from Vaillant's.
-The following table shows the mapping:
+The following table shows the mapping for zones:
 
 === "VRC720 Controller"
         
@@ -83,13 +83,27 @@ The following table shows the mapping:
     | :material-thermostat-auto: Auto | :material-home: Home Preset       | Day Mode      |
     | :material-thermostat-auto: Auto | :material-leaf: Eco Preset        | Night Mode    |
 
+### Ambisense Room Thermostats
+
+There are separate climate entities for Ambisense room thermostats (only supported on VRC700 controllers):
+
+| Home Assistant Mode                                                               | Home Assistant Preset                 | Vaillant Mode   |
+|-----------------------------------------------------------------------------------|---------------------------------------|-----------------|
+| :material-power: Off                                                              | :material-circle-small: No Preset     | Off             |
+| :material-thermostat-auto: Auto                                                   | :material-circle-small: No Preset     | Auto Mode       |
+| :material-sun-snowflake-variant: Heat / Cool                                      | :material-circle-small: No Preset     | Manual Mode     |
+| :material-thermostat-auto: Auto<br />:material-sun-snowflake-variant: Heat / Cool | :material-rocket-launch: Boost Preset | Quick Veto Mode |
+
 ## Calendar Entities
 
 <video style="float: right; width: 40%; margin: 0 0 15px 15px; min-width: 200px;" autoplay muted loop playsinline style="max-width: 600px; width: 100%; margin: 0 auto;">
     <source src="/mypyllant-component/assets/calendar.mp4" type="video/mp4">
 </video>
 
-Each zone and water heater has a calendar for changing the heating schedule. In the calendar, you can:
+Each zone and water heater has a calendar for changing the heating schedule. Water heaters also have a calendar for 
+the circulation pump.
+
+In each calendar, you can:
 
 * Create new time slots (set a target temperature as the event summary)
 * Update existing time slots by changing start time, end time, weekdays, or the target temperature in the event summary
