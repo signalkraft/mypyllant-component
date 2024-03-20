@@ -327,7 +327,7 @@ class DomesticHotWaterCalendar(BaseCalendarEntity, DomesticHotWaterCoordinatorEn
 class DomesticHotWaterCirculationCalendar(
     BaseCalendarEntity, DomesticHotWaterCoordinatorEntity
 ):
-    _attr_icon = "mdi:water-boiler-auto"
+    _attr_icon = "mdi:pump"
 
     @property
     def time_program(self) -> DHWTimeProgram:
