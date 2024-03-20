@@ -30,7 +30,9 @@
           "time_program_overwrite": "Temperaturänderungen in der Zeitsteuerung speichern, statt Quick Veto",
           "default_holiday_setpoint": "Standardtemperatur während Abwesenheitsmodus",
           "country": "Land",
-          "brand": "Hersteller"
+          "brand": "Hersteller",
+          "fetch_rts": "Echtzeit-Statistiken abrufen (nicht auf jedem System unterstützt)",
+          "fetch_mpc": "Echtzeit-Stromverbrauch abrufen (nicht auf jedem System unterstützt)"
         }
       }
     }

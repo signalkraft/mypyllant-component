@@ -30,7 +30,9 @@
           "time_program_overwrite": "Temperature controls overwrite time program instead of setting quick veto",
           "default_holiday_setpoint": "Default temperature setpoint for away mode",
           "country": "Country",
-          "brand": "Brand"
+          "brand": "Brand",
+          "fetch_rts": "Fetch real-time statistics (not supported on every system)",
+          "fetch_mpc": "Fetch real-time power usage (not supported on every system)"
         }
       }
     }
