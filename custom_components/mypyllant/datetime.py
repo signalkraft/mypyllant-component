@@ -8,7 +8,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from custom_components.mypyllant.const import DOMAIN
+from custom_components.mypyllant.const import DOMAIN, DEFAULT_HOLIDAY_SETPOINT
 from custom_components.mypyllant.coordinator import SystemCoordinator
 from custom_components.mypyllant.utils import HolidayEntity, EntityList
 from myPyllant.utils import get_default_holiday_dates
@@ -60,7 +60,12 @@ class SystemHolidayStartDateTimeEntity(HolidayEntity, DateTimeEntity):
             self.system.timezone,
             self.default_holiday_duration,
         )
-        await self.coordinator.api.set_holiday(self.system, start=value, end=end)
+        setpoint = None
+        if self.system.control_identifier.is_vrc700:
+            setpoint = DEFAULT_HOLIDAY_SETPOINT
+        await self.coordinator.api.set_holiday(
+            self.system, start=value, end=end, setpoint=setpoint
+        )
         # Holiday values need a long time to show up in the API
         await self.coordinator.async_request_refresh_delayed(10)
 
@@ -86,8 +91,11 @@ class SystemHolidayEndDateTimeEntity(SystemHolidayStartDateTimeEntity):
 
     async def async_set_value(self, value: datetime) -> None:
         # TODO: Make API tz-aware
+        setpoint = None
+        if self.system.control_identifier.is_vrc700:
+            setpoint = DEFAULT_HOLIDAY_SETPOINT
         await self.coordinator.api.set_holiday(
-            self.system, start=self.holiday_start, end=value
+            self.system, start=self.holiday_start, end=value, setpoint=setpoint
         )
         # Holiday values need a long time to show up in the API
         await self.coordinator.async_request_refresh_delayed(10)

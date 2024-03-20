@@ -7,7 +7,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from custom_components.mypyllant.const import DOMAIN
+from custom_components.mypyllant.const import DOMAIN, DEFAULT_HOLIDAY_SETPOINT
 from custom_components.mypyllant.coordinator import SystemCoordinator
 from custom_components.mypyllant.utils import (
     HolidayEntity,
@@ -59,7 +59,10 @@ class SystemHolidaySwitch(HolidayEntity, SwitchEntity):
             self.system.timezone,
             self.default_holiday_duration,
         )
-        await self.coordinator.api.set_holiday(self.system, end=end)
+        setpoint = None
+        if self.system.control_identifier.is_vrc700:
+            setpoint = DEFAULT_HOLIDAY_SETPOINT
+        await self.coordinator.api.set_holiday(self.system, end=end, setpoint=setpoint)
         # Holiday values need a long time to show up in the API
         await self.coordinator.async_request_refresh_delayed(20)
 
