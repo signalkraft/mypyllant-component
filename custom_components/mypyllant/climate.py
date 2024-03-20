@@ -195,7 +195,7 @@ async def async_setup_entry(
                 vol.Required("temperature"): vol.All(
                     vol.Coerce(float), vol.Clamp(min=0, max=30)
                 ),
-                vol.Required("setpoint_type"): selector.SelectSelector(
+                vol.Optional("setpoint_type"): selector.SelectSelector(
                     selector.SelectSelectorConfig(
                         options=_ZONE_MANUAL_SETPOINT_TYPES_OPTIONS,
                         mode=selector.SelectSelectorMode.DROPDOWN,
@@ -567,7 +567,6 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                 f"Setting manual mode setpoint on {self.zone.name} to {temperature}"
             )
             await self.set_manual_mode_setpoint(temperature=temperature)
-            await self.coordinator.async_request_refresh_delayed()
         else:
             if self.time_program_overwrite and not self.preset_mode == PRESET_BOOST:
                 _LOGGER.debug(
@@ -580,12 +579,12 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                     "heating",  # TODO: Cooling?
                     temperature=temperature,
                 )
+                await self.coordinator.async_request_refresh_delayed()
             else:
                 _LOGGER.debug(
                     "Setting quick veto on %s to %s", self.zone.name, temperature
                 )
                 await self.set_quick_veto(temperature=temperature)
-            await self.coordinator.async_request_refresh_delayed()
 
     @property
     def preset_modes(self) -> list[str]:
@@ -780,6 +779,16 @@ class AmbisenseClimate(CoordinatorEntity, ClimateEntity):
         await self.coordinator.api.cancel_quick_veto_ambisense_room(self.room)
         await self.coordinator.async_request_refresh_delayed()
 
+    async def set_manual_mode_setpoint(self, **kwargs):
+        _LOGGER.debug(
+            f"Setting manual mode setpoint temperature on {self.room.name} with params {kwargs}"
+        )
+        temperature = kwargs.get("temperature")
+        await self.coordinator.api.set_ambisense_room_manual_mode_setpoint_temperature(
+            self.room, temperature
+        )
+        await self.coordinator.async_request_refresh_delayed()
+
     @property
     def supported_features(self) -> ClimateEntityFeature:
         """Return the list of supported features."""
@@ -847,4 +856,10 @@ class AmbisenseClimate(CoordinatorEntity, ClimateEntity):
         if not temperature:
             return
 
-        await self.set_quick_veto(temperature=temperature)
+        if (
+            self.room.room_configuration.operation_mode
+            == AmbisenseRoomOperationMode.MANUAL
+        ):
+            await self.set_manual_mode_setpoint(temperature=temperature)
+        else:
+            await self.set_quick_veto(temperature=temperature)
