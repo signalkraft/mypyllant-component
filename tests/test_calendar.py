@@ -8,12 +8,14 @@ from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
 
 from custom_components.mypyllant.const import DOMAIN
 from myPyllant.api import MyPyllantAPI
-from myPyllant.tests.utils import list_test_data
+from myPyllant.tests.generate_test_data import DATA_DIR
+from myPyllant.tests.utils import list_test_data, load_test_data
 
 from custom_components.mypyllant.calendar import (
     ZoneHeatingCalendar,
     DomesticHotWaterCalendar,
     async_setup_entry,
+    DomesticHotWaterCirculationCalendar,
 )
 from tests.conftest import MockConfigEntry, TEST_OPTIONS
 from tests.test_init import test_user_input
@@ -115,4 +117,50 @@ async def test_dhw_calendar(
             )
             assert len(events) > 0
             assert calendar.event is not None
+    await mocked_api.aiohttp_session.close()
+
+
+async def test_dhw_circulation_calendar(
+    hass,
+    mypyllant_aioresponses,
+    mocked_api: MyPyllantAPI,
+    system_coordinator_mock,
+):
+    test_data = load_test_data(DATA_DIR / "vrc700_dhw.yaml")
+    with mypyllant_aioresponses(test_data) as _:
+        system_coordinator_mock.data = (
+            await system_coordinator_mock._async_update_data()
+        )
+        calendar = DomesticHotWaterCirculationCalendar(0, 0, system_coordinator_mock)
+        with freezegun.freeze_time("2023-01-01T00:00:00+00:00"):
+            events = await calendar.async_get_events(
+                hass,
+                datetime.now(timezone.utc),
+                datetime.now(timezone.utc) + timedelta(days=7),
+            )
+            assert len(events) > 0
+            assert calendar.event is not None
+    await mocked_api.aiohttp_session.close()
+
+
+async def test_dhw_no_circulation_calendar(
+    hass,
+    mypyllant_aioresponses,
+    mocked_api: MyPyllantAPI,
+    system_coordinator_mock,
+):
+    test_data = load_test_data(DATA_DIR / "heatpump_electric_backup")
+    with mypyllant_aioresponses(test_data) as _:
+        system_coordinator_mock.data = (
+            await system_coordinator_mock._async_update_data()
+        )
+        calendar = DomesticHotWaterCirculationCalendar(0, 0, system_coordinator_mock)
+        with freezegun.freeze_time("2023-01-01T00:00:00+00:00"):
+            events = await calendar.async_get_events(
+                hass,
+                datetime.now(timezone.utc),
+                datetime.now(timezone.utc) + timedelta(days=7),
+            )
+            assert len(events) == 0
+            assert calendar.event is None
     await mocked_api.aiohttp_session.close()
