@@ -32,7 +32,8 @@
           "country": "Land",
           "brand": "Hersteller",
           "fetch_rts": "Echtzeit-Statistiken abrufen (nicht auf jedem System unterstützt)",
-          "fetch_mpc": "Echtzeit-Stromverbrauch abrufen (nicht auf jedem System unterstützt)"
+          "fetch_mpc": "Echtzeit-Stromverbrauch abrufen (nicht auf jedem System unterstützt)",
+          "fetch_ambisense_rooms": "Ambisense Raumthermostate abrufen"
         }
       }
     }

@@ -32,7 +32,8 @@
           "country": "Country",
           "brand": "Brand",
           "fetch_rts": "Fetch real-time statistics (not supported on every system)",
-          "fetch_mpc": "Fetch real-time power usage (not supported on every system)"
+          "fetch_mpc": "Fetch real-time power usage (not supported on every system)",
+          "fetch_ambisense_rooms": "Fetch Ambisense Room Thermostats"
         }
       }
     }
