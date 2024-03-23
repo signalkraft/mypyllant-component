@@ -24,13 +24,17 @@
       "init": {
         "data": {
           "update_interval": "Secondi tra le scansioni (valori più bassi riducono il rischio di 'quota exceeded' e ban temporanei)",
+          "update_interval_daily": "Secondi tra gli aggiornamenti dei dati energetici (valori più bassi rischiano errori 'quota exceeded' e ban temporanei)",
           "refresh_delay": "Ritardo prima dell'aggiornamento dei dati",
           "quick_veto_duration": "Durata di default in ore per l'acqua calda rapida",
           "holiday_duration": "Durata di default in giorni per le vacanze",
           "time_program_overwrite": "Controlla la temperatura sovrascrivendo la programmazione oraria invece di attivare acqua calda rapida",
           "default_holiday_setpoint": "Temperatura di default per le vacanze",
           "country": "Stato",
-          "brand": "Marca"
+          "brand": "Marca",
+          "fetch_rts": "Recupera le statistiche in tempo reale (non supportato su tutti i sistemi)",
+          "fetch_mpc": "Recupera l'uso della potenza in tempo reale (non supportato su tutti i sistemi)",
+          "fetch_ambisense_rooms": "Recupera i termostati ambiente Ambisense"
         }
       }
     }

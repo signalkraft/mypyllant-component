@@ -24,6 +24,7 @@ from myPyllant.const import (
     DEFAULT_QUICK_VETO_DURATION,
     DEFAULT_HOLIDAY_DURATION,
 )
+from . import OPTION_UPDATE_INTERVAL_DAILY, DEFAULT_UPDATE_INTERVAL_DAILY
 
 from .const import (
     DEFAULT_COUNTRY,
@@ -120,6 +121,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         OPTION_UPDATE_INTERVAL,
                         default=self.config_entry.options.get(
                             OPTION_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
+                        ),
+                    ): positive_int,
+                    vol.Required(
+                        OPTION_UPDATE_INTERVAL_DAILY,
+                        default=self.config_entry.options.get(
+                            OPTION_UPDATE_INTERVAL_DAILY, DEFAULT_UPDATE_INTERVAL_DAILY
                         ),
                     ): positive_int,
                     vol.Required(

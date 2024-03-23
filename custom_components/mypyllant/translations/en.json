@@ -23,8 +23,9 @@
     "step": {
       "init": {
         "data": {
-          "update_interval": "Seconds between scans (lower values risk 'quota exceeded' errors and temporary bans)",
-          "refresh_delay": "Delay before refreshing data after updates",
+          "update_interval": "Seconds between updates (lowering risks 'quota exceeded' errors and temporary bans)",
+          "update_interval_daily": "Seconds between energy data updates (lowering risks 'quota exceeded' errors and temporary bans)",
+          "refresh_delay": "Delay in seconds before refreshing data after updates",
           "quick_veto_duration": "Default duration in hours for quick veto",
           "holiday_duration": "Default duration in days for away mode",
           "time_program_overwrite": "Temperature controls overwrite time program instead of setting quick veto",

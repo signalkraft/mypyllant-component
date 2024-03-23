@@ -1,5 +1,6 @@
 DOMAIN = "mypyllant"
 OPTION_UPDATE_INTERVAL = "update_interval"
+OPTION_UPDATE_INTERVAL_DAILY = "update_interval_daily"
 OPTION_REFRESH_DELAY = "refresh_delay"
 OPTION_DEFAULT_QUICK_VETO_DURATION = "quick_veto_duration"
 OPTION_DEFAULT_HOLIDAY_DURATION = "holiday_duration"
@@ -11,6 +12,7 @@ OPTION_FETCH_RTS = "fetch_rts"
 OPTION_FETCH_MPC = "fetch_mpc"
 OPTION_FETCH_AMBISENSE_ROOMS = "fetch_ambisense_rooms"
 DEFAULT_UPDATE_INTERVAL = 60  # in seconds
+DEFAULT_UPDATE_INTERVAL_DAILY = 3600  # in seconds
 DEFAULT_REFRESH_DELAY = 5  # in seconds
 DEFAULT_COUNTRY = "germany"
 DEFAULT_TIME_PROGRAM_OVERWRITE = False

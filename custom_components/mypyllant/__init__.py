@@ -30,6 +30,8 @@ from .const import (
     SERVICE_GENERATE_TEST_DATA,
     SERVICE_EXPORT,
     SERVICE_REPORT,
+    OPTION_UPDATE_INTERVAL_DAILY,
+    DEFAULT_UPDATE_INTERVAL_DAILY,
 )
 from .coordinator import SystemCoordinator, DailyDataCoordinator
 
@@ -93,6 +95,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     username: str = entry.data.get("username")  # type: ignore
     password: str = entry.data.get("password")  # type: ignore
     update_interval = entry.options.get(OPTION_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)
+    update_interval_daily = entry.options.get(
+        OPTION_UPDATE_INTERVAL_DAILY, DEFAULT_UPDATE_INTERVAL_DAILY
+    )
     country = entry.options.get(
         OPTION_COUNTRY, entry.data.get(OPTION_COUNTRY, DEFAULT_COUNTRY)
     )
@@ -117,8 +122,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await system_coordinator.async_refresh()
     hass.data[DOMAIN][entry.entry_id]["system_coordinator"] = system_coordinator
 
-    # Daily data coordinator is updated hourly, but requests data for the whole day
-    daily_data_coordinator = DailyDataCoordinator(hass, api, entry, timedelta(hours=1))
+    # Daily data coordinator is updated hourly by default, but requests data for the whole day
+    daily_data_coordinator = DailyDataCoordinator(
+        hass, api, entry, timedelta(seconds=update_interval_daily)
+    )
     _LOGGER.debug("Refreshing DailyDataCoordinator")
     await daily_data_coordinator.async_refresh()
     hass.data[DOMAIN][entry.entry_id]["daily_data_coordinator"] = daily_data_coordinator

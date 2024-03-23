@@ -122,14 +122,25 @@ Uses the [myPyllant Python library](https://github.com/signalkraft/mypyllant).
 
 After setting up the integration, you can configure it further in Settings :material-arrow-right: Devices & Services :material-arrow-right: myVAILLANT :material-arrow-right: Configure.
 
-### Seconds between scans
+### Seconds between updates
 
-:   Wait interval between updating (most) sensors. The energy data and efficiency sensors have a fixed hourly interval.
+:   Wait interval between updating (most) sensors. The energy data and efficiency sensors are controlled by the next option.
     Setting this too low can cause "quota exceeded" errors.
+
+    You should restart Home Assistant after changing this setting.
     
     :material-cog: Default is 60 seconds.
 
-### Delay before refreshing data after updates
+### Seconds between energy data updates
+
+:   Wait interval between updating sensors with hourly data. The energy data and efficiency sensors have a fixed hourly interval.
+    Setting this too low can cause "quota exceeded" errors.
+
+    You should restart Home Assistant after changing this setting.
+    
+    :material-cog: Default is 3600 seconds.
+
+### Delay in seconds before refreshing data after updates
 
 :   How long to wait between making a request (i.e. setting target temperature) and refreshing data.
     The Vaillant API takes some time to return the updated values. Setting this too low will return the old values.
@@ -280,3 +291,24 @@ Home Assistant has certain pre-defined modes, that can't be changed.
 
 ### Energy & Efficiency Sensors are delayed / incomplete / behave oddly around midnight
 
+How Vaillant reports energy data, and how Home Assistant deals with sensor data is not a good match:
+
+* Vaillant's API provides energy data in hourly increments, some time after the full hour has passed (let's say at 10:30am for the energy data from 9-10am)
+* This integration fetches energy data every hour, for the current day, up to the current time
+    * Depending on when your HA schedules this hourly update, it may happen right after Vaillant provides the new hourly data, or almost an hour later
+    * Home Assistant doesn't support setting a past date for a sensor reading, the value is always displayed at the time when it was saved
+    * Data for the whole day is fetched, so that the total is correct even if the API is temporarily unavailable, or the integration misses an hour window for some other reason 
+* Worst case, you end up with a 30min delay from Vaillant and a 59min delay from the integration: Your energy data from 9-10am will show up at 11:29am. Best case is probably around 10:30am.
+* After midnight, the integration will fetch data for the new day, which will be empty until the first full hour + delay has passed
+    * If you have new energy data between 11pm and midnight, it won't show up in your total for the previous day
+
+Home Assistant would need to allow setting a timestamp with each new energy value, to improve this situation.
+The delay would still be there, but at least the values would be displayed at the correct time.
+
+You can lower the update interval for fetching energy data, to minimize the delay between Vaillant's updates and HA.
+See [Options](#seconds-between-energy-data-updates). But it's not recommended, since it's a lot of data to fetch
+and Vaillant may ban you temporarily with 'quota exceeded' errors.
+
+To fix data loss around midnight, the integration could fetch a longer period of time (for example a whole month).
+But then the sensor would no longer show a daily total, which would potentially mess with users' setups.
+The change from daily to monthly would also show up as a strange spike of energy usage when the update is done.

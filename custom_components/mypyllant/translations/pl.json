@@ -24,13 +24,17 @@
       "init": {
         "data": {
           "update_interval": "Sekundy między skanowaniami (niższe wartości grożą błędami 'przekroczenia limitu' i tymczasowymi banami)",
+          "update_interval_daily": "Sekundy między aktualizacjami danych energetycznych (niższe wartości ryzykują błędy 'przekroczono limit' i tymczasowe bany)",
           "refresh_delay": "Opóźnienie przed odświeżeniem danych po aktualizacji",
           "quick_veto_duration": "Domyślny czas trwania szybkiego weta w godzinach",
           "holiday_duration": "Domyślny czas trwania wakacji w dniach",
           "time_program_overwrite": "Kontrola temperatury nadpisuje program czasowy zamiast ustawiać szybkie weto",
           "default_holiday_setpoint": "Domyślna temperatura wakacyjna",
           "country": "Kraj",
-          "brand": "Marka"
+          "brand": "Marka",
+          "fetch_rts": "Pobierz statystyki w czasie rzeczywistym (nie jest obsługiwane na każdym systemie)",
+          "fetch_mpc": "Pobierz rzeczywiste zużycie energii (nie jest obsługiwane na każdym systemie)",
+          "fetch_ambisense_rooms": "Pobierz termostaty pokojowe Ambisense"
         }
       }
     }

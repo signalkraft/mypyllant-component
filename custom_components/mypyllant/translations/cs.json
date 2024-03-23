@@ -24,13 +24,17 @@
       "init": {
         "data": {
           "update_interval": "Sekundy mezi kontrolami (při nižších hodnotách hrozí riziko překročení kvóty a dočasné zákazy)",
+          "update_interval_daily": "Sekundy mezi aktualizacemi energetických dat (při nižších hodnotách hrozí riziko překročení kvóty a dočasné zákazy)",
           "refresh_delay": "Zpoždění před obnovením dat po aktualizacích",
           "quick_veto_duration": "Nastavené trvání v hodinách pro rychlé veto",
           "holiday_duration": "Nastavená doba trvání dovolené ve dnech",
           "time_program_overwrite": "Regulátory teploty přepisují časový program namísto nastavení rychlého veta",
           "default_holiday_setpoint": "Výchozí teplota pro dovolenou",
           "country": "Země",
-          "brand": "Značka"
+          "brand": "Značka",
+          "fetch_rts": "Načíst statistiky v reálném čase (není podporováno na každém systému)",
+          "fetch_mpc": "Načíst využití energie v reálném čase (není podporováno na každém systému)",
+          "fetch_ambisense_rooms": "Načíst termostaty místnosti Ambisense"
         }
       }
     }
