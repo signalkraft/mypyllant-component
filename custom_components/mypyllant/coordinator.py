@@ -17,6 +17,12 @@ from custom_components.mypyllant.const import (
     DEFAULT_REFRESH_DELAY,
     QUOTA_PAUSE_INTERVAL,
     API_DOWN_PAUSE_INTERVAL,
+    OPTION_FETCH_MPC,
+    OPTION_FETCH_RTS,
+    DEFAULT_FETCH_RTS,
+    DEFAULT_FETCH_MPC,
+    OPTION_FETCH_AMBISENSE_ROOMS,
+    DEFAULT_FETCH_AMBISENSE_ROOMS,
 )
 from custom_components.mypyllant.utils import is_quota_exceeded_exception
 from myPyllant.api import MyPyllantAPI
@@ -150,13 +156,25 @@ class SystemCoordinator(MyPyllantCoordinator):
 
     async def _async_update_data(self) -> list[System]:
         self._raise_if_quota_hit()
+        include_connection_status = True
+        include_diagnostic_trouble_codes = True
+        include_rts = self.entry.options.get(OPTION_FETCH_RTS, DEFAULT_FETCH_RTS)
+        include_mpc = self.entry.options.get(OPTION_FETCH_MPC, DEFAULT_FETCH_MPC)
+        include_ambisense_rooms = self.entry.options.get(
+            OPTION_FETCH_AMBISENSE_ROOMS, DEFAULT_FETCH_AMBISENSE_ROOMS
+        )
         _LOGGER.debug("Starting async update data for SystemCoordinator")
         try:
             await self._refresh_session()
             data = [
                 s
                 async for s in await self.hass.async_add_executor_job(
-                    self.api.get_systems, True, True, True, True
+                    self.api.get_systems,
+                    include_connection_status,
+                    include_diagnostic_trouble_codes,
+                    include_rts,
+                    include_mpc,
+                    include_ambisense_rooms,
                 )
             ]
             return data

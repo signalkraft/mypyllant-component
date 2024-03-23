@@ -40,6 +40,10 @@ from .const import (
     OPTION_DEFAULT_HOLIDAY_DURATION,
     OPTION_DEFAULT_HOLIDAY_SETPOINT,
     DEFAULT_HOLIDAY_SETPOINT,
+    OPTION_FETCH_RTS,
+    DEFAULT_FETCH_RTS,
+    OPTION_FETCH_MPC,
+    DEFAULT_FETCH_MPC,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -174,6 +178,20 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             mode=selector.SelectSelectorMode.DROPDOWN,
                         ),
                     ),
+                    vol.Required(
+                        OPTION_FETCH_RTS,
+                        default=self.config_entry.options.get(
+                            OPTION_FETCH_RTS,
+                            DEFAULT_FETCH_RTS,
+                        ),
+                    ): bool,
+                    vol.Required(
+                        OPTION_FETCH_MPC,
+                        default=self.config_entry.options.get(
+                            OPTION_FETCH_MPC,
+                            DEFAULT_FETCH_MPC,
+                        ),
+                    ): bool,
                 }
             ),
         )

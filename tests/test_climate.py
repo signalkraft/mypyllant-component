@@ -1,14 +1,16 @@
 from unittest import mock
 
 import pytest as pytest
-from homeassistant.components.climate import HVACMode
-from homeassistant.components.climate.const import FAN_OFF, PRESET_ECO
+from homeassistant.components.climate import HVACMode, PRESET_NONE
+from homeassistant.components.climate.const import FAN_OFF, PRESET_ECO, PRESET_BOOST
 from homeassistant.const import ATTR_TEMPERATURE
+from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers.entity_registry import DATA_REGISTRY, EntityRegistry
 from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
 
 from myPyllant.api import MyPyllantAPI
-from myPyllant.tests.utils import list_test_data
+from myPyllant.tests.generate_test_data import DATA_DIR
+from myPyllant.tests.utils import list_test_data, load_test_data
 
 from custom_components.mypyllant.const import DOMAIN
 from custom_components.mypyllant.coordinator import SystemCoordinator
@@ -16,6 +18,7 @@ from custom_components.mypyllant.climate import (
     ZoneClimate,
     async_setup_entry,
     ZONE_HVAC_ACTION_MAP,
+    AmbisenseClimate,
 )
 from custom_components.mypyllant.ventilation_climate import VentilationClimate
 from tests.utils import get_config_entry
@@ -103,21 +106,16 @@ async def test_zone_climate(
         await mocked_api.aiohttp_session.close()
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
 async def test_ventilation_climate(
     mypyllant_aioresponses,
     mocked_api: MyPyllantAPI,
     system_coordinator_mock: SystemCoordinator,
-    test_data,
 ):
+    test_data = load_test_data(DATA_DIR / "ventilation")
     with mypyllant_aioresponses(test_data) as _:
         system_coordinator_mock.data = (
             await system_coordinator_mock._async_update_data()
         )
-        if not system_coordinator_mock.data[0].ventilation:
-            await mocked_api.aiohttp_session.close()
-            pytest.skip("No ventilation entity in system")
-
         ventilation = VentilationClimate(
             0,
             0,
@@ -129,5 +127,39 @@ async def test_ventilation_climate(
         assert isinstance(ventilation.fan_mode, str)
 
         await ventilation.async_set_fan_mode(FAN_OFF)
+        system_coordinator_mock._debounced_refresh.async_cancel()
+        await mocked_api.aiohttp_session.close()
+
+
+async def test_ambisense_climate(
+    mypyllant_aioresponses,
+    mocked_api: MyPyllantAPI,
+    system_coordinator_mock: SystemCoordinator,
+):
+    test_data = load_test_data(DATA_DIR / "ambisense")
+    with mypyllant_aioresponses(test_data) as _:
+        system_coordinator_mock.data = (
+            await system_coordinator_mock._async_update_data()
+        )
+        ambisense = AmbisenseClimate(
+            0,
+            1,
+            system_coordinator_mock,
+            get_config_entry(),
+            {},
+        )
+        assert isinstance(ambisense.device_info, dict)
+        assert isinstance(ambisense.extra_state_attributes, dict)
+        assert isinstance(ambisense.hvac_mode, HVACMode)
+        assert isinstance(ambisense.current_temperature, float)
+        assert isinstance(ambisense.target_temperature, float)
+
+        await ambisense.async_turn_on()
+        await ambisense.async_turn_off()
+        await ambisense.async_set_temperature(temperature=20.0)
+        await ambisense.async_set_hvac_mode(HVACMode.OFF)
+        await ambisense.async_set_preset_mode(PRESET_NONE)
+        with pytest.raises(ServiceValidationError):
+            await ambisense.async_set_preset_mode(PRESET_BOOST)
         system_coordinator_mock._debounced_refresh.async_cancel()
         await mocked_api.aiohttp_session.close()

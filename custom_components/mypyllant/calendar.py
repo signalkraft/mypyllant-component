@@ -50,7 +50,10 @@ async def async_setup_entry(
     sensors: EntityList[CalendarEntity] = EntityList()
     for index, system in enumerate(coordinator.data):
         for zone_index, zone in enumerate(system.zones):
-            sensors.append(lambda: ZoneHeatingCalendar(index, zone_index, coordinator))
+            if zone.heating.time_program_heating:
+                sensors.append(
+                    lambda: ZoneHeatingCalendar(index, zone_index, coordinator)
+                )
         for dhw_index, dhw in enumerate(system.domestic_hot_water):
             sensors.append(
                 lambda: DomesticHotWaterCalendar(index, dhw_index, coordinator)
@@ -250,7 +253,7 @@ class ZoneHeatingCalendar(BaseCalendarEntity, ZoneCoordinatorEntity):
 
     @property
     def time_program(self) -> ZoneTimeProgram:
-        return self.zone.heating.time_program_heating
+        return self.zone.heating.time_program_heating  # type: ignore
 
     @property
     def name(self) -> str:
@@ -324,7 +327,7 @@ class DomesticHotWaterCalendar(BaseCalendarEntity, DomesticHotWaterCoordinatorEn
 class DomesticHotWaterCirculationCalendar(
     BaseCalendarEntity, DomesticHotWaterCoordinatorEntity
 ):
-    _attr_icon = "mdi:water-boiler-auto"
+    _attr_icon = "mdi:pump"
 
     @property
     def time_program(self) -> DHWTimeProgram:
