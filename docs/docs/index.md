@@ -297,6 +297,7 @@ How Vaillant reports energy data, and how Home Assistant deals with sensor data 
 * This integration fetches energy data every hour, for the current day, up to the current time
     * Depending on when your HA schedules this hourly update, it may happen right after Vaillant provides the new hourly data, or almost an hour later
     * Home Assistant doesn't support setting a past date for a sensor reading, the value is always displayed at the time when it was saved
+    * Home Assistant also doesn't let you pick when to schedule the hourly update exactly, it depends on when the integration was initialized
     * Data for the whole day is fetched, so that the total is correct even if the API is temporarily unavailable, or the integration misses an hour window for some other reason 
 * Worst case, you end up with a 30min delay from Vaillant and a 59min delay from the integration: Your energy data from 9-10am will show up at 11:29am. Best case is probably around 10:30am.
 * After midnight, the integration will fetch data for the new day, which will be empty until the first full hour + delay has passed
