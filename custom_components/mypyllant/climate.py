@@ -512,7 +512,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     async def set_zone_operating_mode(
         self,
-        mode: ZoneHeatingOperatingMode | ZoneHeatingOperatingModeVRC700,
+        mode: ZoneHeatingOperatingMode | ZoneHeatingOperatingModeVRC700 | str,
         operating_type: str = "heating",
     ):
         """
@@ -528,10 +528,11 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                 raise ValueError(
                     f"Invalid mode, use one of {', '.join(ZoneHeatingOperatingModeVRC700)}"
                 )
-        elif mode not in ZoneHeatingOperatingMode:
-            raise ValueError(
-                f"Invalid mode, use one of {', '.join(ZoneHeatingOperatingMode)}"
-            )
+        else:
+            if mode not in ZoneHeatingOperatingMode:
+                raise ValueError(
+                    f"Invalid mode, use one of {', '.join(ZoneHeatingOperatingMode)}"
+                )
         await self.coordinator.api.set_zone_operating_mode(
             self.zone,
             mode,

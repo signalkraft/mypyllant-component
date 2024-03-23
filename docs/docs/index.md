@@ -172,6 +172,22 @@ After setting up the integration, you can configure it further in Settings :mate
     
         If quick veto is active, the climate controls will always set the quick veto temperature.
 
+### Fetch real-time statistics (not supported on every system)
+
+:   Fetches real-time statistics from the system. This includes on/off cycles and operation time.
+    if you see 404 errors in your logs after enabling this, your system doesn't support this data.
+    It's best to turn it off again.
+
+    :material-cog: Default is off.
+
+### Fetch real-time power usage (not supported on every system)
+
+:   Fetches real-time power usage of the system.
+    if you see 404 errors in your logs after enabling this, your system doesn't support this data.
+    It's best to turn it off again.
+
+    :material-cog: Default is off.
+
 ### Country
 
 :   The country you registered your myVAILLANT account in. The list of options is limited to known supported countries.
@@ -259,4 +275,8 @@ can't be supported by this integration.
 
 ### The modes in Home Assistant and the myVAILLANT app don't match
 
+Home Assistant has certain pre-defined modes, that can't be changed.
 [Check the mapping of modes](2-entities.md#climate-entities) between Home Assistant and myVAILLANT.
+
+### Energy & Efficiency Sensors are delayed / incomplete / behave oddly around midnight
+
