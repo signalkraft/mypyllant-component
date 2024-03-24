@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Mapping
+from dataclasses import asdict
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -38,6 +39,7 @@ from myPyllant.models import (
     Zone,
     ZoneTimeProgram,
     AmbisenseRoom,
+    RoomTimeProgram,
 )
 from myPyllant.enums import (
     ZoneHeatingOperatingMode,
@@ -65,6 +67,7 @@ from .const import (
     OPTION_DEFAULT_HOLIDAY_SETPOINT,
     DEFAULT_HOLIDAY_SETPOINT,
     SERVICE_SET_ZONE_OPERATING_MODE,
+    SERVICE_SET_TIME_PROGRAM,
 )
 from .ventilation_climate import _FAN_STAGE_TYPE_OPTIONS, VentilationClimate
 
@@ -170,7 +173,7 @@ async def async_setup_entry(
     async_add_entities(ventilation_entities)
     async_add_entities(ambisense_entities)
 
-    if len(zone_entities) > 0:
+    if len(zone_entities) > 0 or len(ambisense_entities) > 0:
         platform = entity_platform.async_get_current_platform()
         _LOGGER.debug("Setting up zone climate entity services for %s", platform)
         # noinspection PyTypeChecker
@@ -227,6 +230,24 @@ async def async_setup_entry(
             SERVICE_CANCEL_HOLIDAY,
             {},
             "cancel_holiday",
+        )
+        # noinspection PyTypeChecker
+        # Wrapping the schema in vol.Schema() breaks entity_id passing
+        platform.async_register_entity_service(
+            SERVICE_SET_TIME_PROGRAM,
+            {
+                vol.Required("program_type"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=[
+                            selector.SelectOptionDict(value="heating", label="Heating"),
+                            selector.SelectOptionDict(value="cooling", label="Cooling"),
+                        ],
+                        mode=selector.SelectSelectorMode.LIST,
+                    )
+                ),
+                vol.Required("time_program"): vol.All(dict),
+            },
+            "set_time_program",
         )
         # noinspection PyTypeChecker
         # Wrapping the schema in vol.Schema() breaks entity_id passing
@@ -444,14 +465,21 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         await self.coordinator.api.cancel_holiday(self.system)
         await self.coordinator.async_request_refresh_delayed(20)
 
-    async def set_zone_time_program(self, **kwargs):
-        _LOGGER.debug("Canceling holiday on System %s", self.system.id)
+    async def set_time_program(self, **kwargs):
+        _LOGGER.debug("Setting time program on %s", self.zone)
         program_type = kwargs.get("program_type")
         time_program = ZoneTimeProgram.from_api(**kwargs.get("time_program"))
         await self.coordinator.api.set_zone_time_program(
             self.zone, program_type, time_program
         )
         await self.coordinator.async_request_refresh_delayed()
+
+    async def set_zone_time_program(self, **kwargs):
+        _LOGGER.warning(
+            "set_zone_time_program is deprecated and will be removed in the future. "
+            "Use set_time_program instead"
+        )
+        await self.set_time_program(**kwargs)
 
     async def set_quick_veto(self, **kwargs):
         _LOGGER.debug("Setting quick veto on %s with params %s", self.zone.name, kwargs)
@@ -758,6 +786,7 @@ class AmbisenseClimate(CoordinatorEntity, ClimateEntity):
             "quick_veto_end_date_time": self.room.room_configuration.quick_veto_end_time,
             "window_state": self.room.room_configuration.window_state,
             "button_lock": self.room.room_configuration.button_lock,
+            "devices": [asdict(d) for d in self.room.room_configuration.devices],
         }
         return attr | self.room.extra_fields
 
@@ -813,10 +842,13 @@ class AmbisenseClimate(CoordinatorEntity, ClimateEntity):
         return self.room.room_configuration.current_humidity
 
     @property
-    def hvac_mode(self) -> HVACMode:
-        return AMBISENSE_ROOM_OPERATION_MODE_MAP.get(
-            self.room.room_configuration.operation_mode, HVACMode.OFF
-        )
+    def hvac_mode(self) -> HVACMode | None:
+        if self.room.room_configuration.operation_mode:
+            return AMBISENSE_ROOM_OPERATION_MODE_MAP.get(
+                self.room.room_configuration.operation_mode, HVACMode.OFF
+            )
+        else:
+            return None
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode):
         mode = [
@@ -864,3 +896,31 @@ class AmbisenseClimate(CoordinatorEntity, ClimateEntity):
             await self.set_manual_mode_setpoint(temperature=temperature)
         else:
             await self.set_quick_veto(temperature=temperature)
+
+    async def set_time_program(self, **kwargs):
+        _LOGGER.debug("Setting time program on %s", self.room)
+        if "program_type" in kwargs:
+            _LOGGER.warning(
+                "program_type is not supported in Ambisense room time programs"
+            )
+        time_program = RoomTimeProgram.from_api(**kwargs.get("time_program"))
+        await self.coordinator.api.set_ambisense_room_time_program(
+            self.room, time_program
+        )
+        await self.coordinator.async_request_refresh_delayed()
+
+    async def set_zone_time_program(self, **kwargs):
+        _LOGGER.warning(
+            "set_zone_time_program is deprecated and will be removed in the future. "
+            "Use set_time_program instead"
+        )
+        await self.set_time_program(**kwargs)
+
+    async def set_holiday(self, **kwargs):
+        raise NotImplementedError("Ambisense rooms do not support holiday mode")
+
+    async def cancel_holiday(self):
+        raise NotImplementedError("Ambisense rooms do not support holiday mode")
+
+    async def set_zone_operating_mode(self):
+        raise NotImplementedError("Ambisense rooms do not support zone operating mode")

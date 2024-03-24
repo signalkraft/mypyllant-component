@@ -4,9 +4,11 @@ import pytest
 from homeassistant.helpers.entity_registry import DATA_REGISTRY, EntityRegistry
 from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
 
+from custom_components.mypyllant import SystemCoordinator
 from myPyllant.api import MyPyllantAPI
 from myPyllant.models import System
-from myPyllant.tests.utils import list_test_data
+from myPyllant.tests.generate_test_data import DATA_DIR
+from myPyllant.tests.utils import list_test_data, load_test_data
 
 from custom_components.mypyllant.binary_sensor import (
     CircuitEntity,
@@ -78,4 +80,19 @@ async def test_system_binary_sensors(
         assert isinstance(
             CircuitIsCoolingAllowed(0, 0, system_coordinator_mock).name, str
         )
+        await mocked_api.aiohttp_session.close()
+
+
+async def test_control_error(
+    mypyllant_aioresponses,
+    mocked_api: MyPyllantAPI,
+    system_coordinator_mock: SystemCoordinator,
+):
+    test_data = load_test_data(DATA_DIR / "ambisense2.yml")
+    with mypyllant_aioresponses(test_data) as _:
+        system_coordinator_mock.data = (
+            await system_coordinator_mock._async_update_data()
+        )
+        control_error = ControlError(0, system_coordinator_mock)
+        assert control_error.is_on
         await mocked_api.aiohttp_session.close()

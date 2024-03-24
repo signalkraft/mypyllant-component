@@ -136,30 +136,35 @@ async def test_ambisense_climate(
     mocked_api: MyPyllantAPI,
     system_coordinator_mock: SystemCoordinator,
 ):
-    test_data = load_test_data(DATA_DIR / "ambisense")
-    with mypyllant_aioresponses(test_data) as _:
-        system_coordinator_mock.data = (
-            await system_coordinator_mock._async_update_data()
-        )
-        ambisense = AmbisenseClimate(
-            0,
-            1,
-            system_coordinator_mock,
-            get_config_entry(),
-            {},
-        )
-        assert isinstance(ambisense.device_info, dict)
-        assert isinstance(ambisense.extra_state_attributes, dict)
-        assert isinstance(ambisense.hvac_mode, HVACMode)
-        assert isinstance(ambisense.current_temperature, float)
-        assert isinstance(ambisense.target_temperature, float)
+    test_data_files = ["ambisense", "ambisense2.yml"]
+    for f in test_data_files:
+        test_data = load_test_data(DATA_DIR / f)
+        with mypyllant_aioresponses(test_data) as _:
+            system_coordinator_mock.data = (
+                await system_coordinator_mock._async_update_data()
+            )
+            ambisense = AmbisenseClimate(
+                0,
+                1,
+                system_coordinator_mock,
+                get_config_entry(),
+                {},
+            )
+            assert isinstance(ambisense.device_info, dict)
+            assert isinstance(ambisense.extra_state_attributes, dict)
+            assert isinstance(ambisense.hvac_mode, HVACMode)
+            assert isinstance(ambisense.current_temperature, float)
+            assert isinstance(ambisense.target_temperature, float)
+            assert isinstance(
+                ambisense.extra_state_attributes["devices"][0]["name"], str
+            )
 
-        await ambisense.async_turn_on()
-        await ambisense.async_turn_off()
-        await ambisense.async_set_temperature(temperature=20.0)
-        await ambisense.async_set_hvac_mode(HVACMode.OFF)
-        await ambisense.async_set_preset_mode(PRESET_NONE)
-        with pytest.raises(ServiceValidationError):
-            await ambisense.async_set_preset_mode(PRESET_BOOST)
-        system_coordinator_mock._debounced_refresh.async_cancel()
-        await mocked_api.aiohttp_session.close()
+            await ambisense.async_turn_on()
+            await ambisense.async_turn_off()
+            await ambisense.async_set_temperature(temperature=20.0)
+            await ambisense.async_set_hvac_mode(HVACMode.OFF)
+            await ambisense.async_set_preset_mode(PRESET_NONE)
+            with pytest.raises(ServiceValidationError):
+                await ambisense.async_set_preset_mode(PRESET_BOOST)
+            system_coordinator_mock._debounced_refresh.async_cancel()
+    await mocked_api.aiohttp_session.close()
