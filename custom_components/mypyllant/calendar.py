@@ -22,6 +22,8 @@ from myPyllant.models import (
     DHWTimeProgramDay,
     DHWTimeProgram,
     ZoneTimeProgram,
+    RoomTimeProgramDay,
+    RoomTimeProgram,
 )
 from myPyllant.enums import ZoneTimeProgramType
 
@@ -31,6 +33,7 @@ from .utils import (
     ZoneCoordinatorEntity,
     DomesticHotWaterCoordinatorEntity,
     EntityList,
+    AmbisenseCoordinatorEntity,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -62,6 +65,10 @@ async def async_setup_entry(
                 lambda: DomesticHotWaterCirculationCalendar(
                     index, dhw_index, coordinator
                 )
+            )
+        for room in system.ambisense_rooms:
+            sensors.append(
+                lambda: AmbisenseCalendar(index, room.room_index, coordinator)
             )
     async_add_entities(sensors)
 
@@ -360,5 +367,44 @@ class DomesticHotWaterCirculationCalendar(
     async def update_time_program(self):
         await self.coordinator.api.set_domestic_hot_water_circulation_time_program(
             self.domestic_hot_water, self.time_program
+        )
+        await self.coordinator.async_request_refresh_delayed()
+
+
+class AmbisenseCalendar(BaseCalendarEntity, AmbisenseCoordinatorEntity):
+    _attr_icon = "mdi:thermometer-auto"
+    _has_setpoint = True
+
+    @property
+    def time_program(self) -> RoomTimeProgram:
+        return self.room.time_program  # type: ignore
+
+    @property
+    def name(self) -> str:
+        return f"{self.name_prefix} Schedule"
+
+    def _get_calendar_id_prefix(self):
+        return f"room_{self.room.room_index}"
+
+    def build_event(
+        self,
+        time_program_day: RoomTimeProgramDay,
+        start: datetime.datetime,
+        end: datetime.datetime,
+    ):
+        summary = f"{time_program_day.temperature_setpoint}°C on {self.name}"
+        return CalendarEvent(
+            summary=summary,
+            start=start,
+            end=end,
+            description="You can change the start time, end time, weekdays, or the temperature in the Summary.",
+            uid=self._get_uid(time_program_day, start),
+            rrule=self._get_rrule(time_program_day),
+            recurrence_id=self._get_recurrence_id(time_program_day),
+        )
+
+    async def update_time_program(self):
+        await self.coordinator.api.set_ambisense_room_time_program(
+            self.room, self.time_program
         )
         await self.coordinator.async_request_refresh_delayed()

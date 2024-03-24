@@ -119,7 +119,7 @@ set_time_program:
   fields:
     program_type:
       name: Type
-      description: Type of the time program (heating, cooling)
+      description: Type of the time program (heating, cooling). Ambisense rooms ignore this field
       example: heating
       selector:
         select:
@@ -128,7 +128,7 @@ set_time_program:
             - "cooling"
     time_program:
       name: Time Program
-      description: A dictionary of days with a list of setpoints, start_time, and end_time (in minutes since midnight)
+      description: A dictionary of days with a list of setpoints, start_time, and end_time (in minutes since midnight). Ambisense rooms don't support end_time
       example: >
         monday:
             - start_time: 420
@@ -160,8 +160,8 @@ set_time_program:
               setpoint: 20
 
 set_zone_time_program:
-  name: Set Zone Time Program
-  description: Updates the time program for a zone
+  name: Set Zone Time Program (deprecated)
+  description: Deprecated, use "Set Time Program" instead
   target:
     entity:
       integration: mypyllant

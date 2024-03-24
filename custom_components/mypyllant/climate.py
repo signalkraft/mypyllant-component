@@ -38,7 +38,6 @@ from myPyllant.models import (
     System,
     Zone,
     ZoneTimeProgram,
-    AmbisenseRoom,
     RoomTimeProgram,
 )
 from myPyllant.enums import (
@@ -49,7 +48,11 @@ from myPyllant.enums import (
     AmbisenseRoomOperationMode,
 )
 
-from custom_components.mypyllant.utils import shorten_zone_name, EntityList
+from custom_components.mypyllant.utils import (
+    shorten_zone_name,
+    EntityList,
+    AmbisenseCoordinatorEntity,
+)
 
 from . import SystemCoordinator
 from .const import (
@@ -696,7 +699,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                 await self.coordinator.async_request_refresh_delayed()
 
 
-class AmbisenseClimate(CoordinatorEntity, ClimateEntity):
+class AmbisenseClimate(AmbisenseCoordinatorEntity, ClimateEntity):
     """Climate for an ambisense room."""
 
     coordinator: SystemCoordinator
@@ -715,9 +718,7 @@ class AmbisenseClimate(CoordinatorEntity, ClimateEntity):
         config: ConfigEntry,
         data: dict,
     ) -> None:
-        super().__init__(coordinator)
-        self.system_index = system_index
-        self.room_index = room_index
+        super().__init__(system_index, room_index, coordinator)
         self.config = config
         self.data = data
         self.data["last_active_hvac_mode"] = (
@@ -750,34 +751,8 @@ class AmbisenseClimate(CoordinatorEntity, ClimateEntity):
         )
 
     @property
-    def system(self) -> System:
-        return self.coordinator.data[self.system_index]
-
-    @property
-    def room(self) -> AmbisenseRoom:
-        return [
-            r for r in self.system.ambisense_rooms if r.room_index == self.room_index
-        ][0]
-
-    @property
-    def id_infix(self) -> str:
-        return f"{self.system.id}_room_{self.room_index}"
-
-    @property
-    def device_info(self) -> DeviceInfo:
-        return DeviceInfo(
-            identifiers={(DOMAIN, self.id_infix)},
-            name=self.name,
-            manufacturer=self.system.brand_name,
-        )
-
-    @property
-    def unique_id(self) -> str:
-        return f"{DOMAIN}_{self.id_infix}_climate"
-
-    @property
     def name(self) -> str:
-        return f"{self.system.home.home_name or self.system.home.nomenclature} {self.room.name}"
+        return self.name_prefix
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:

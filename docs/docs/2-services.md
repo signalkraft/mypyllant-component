@@ -16,7 +16,8 @@ There are custom services for almost every functionality of the myVAILLANT app:
 | [Cancel quick veto](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.cancel_quick_veto)                                        | Cancels quick veto temperature and returns to normal schedule / manual setpoint | climate      |                                             |
 | [Set holiday](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.set_holiday)                                                    | Set holiday / away mode with start / end or duration                            | climate      | Start Date, End Date, Duration, Setpoint    |
 | [Cancel Holiday](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.cancel_holiday)                                              | Cancel holiday / away mode                                                      | climate      |                                             |
-| [Set Zone Time Program](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.set_zone_time_program)                                | Updates the time program for a zone                                             | climate      | Type, Time Program                          |
+| [Set Time Program](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.set_time_program)                                          | Updates the time program for a zone or room                                     | climate      | Type, Time Program                          |
+| [Set Zone Time Program (deprecated)](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.set_zone_time_program)                   | Deprecated, use "Set Time Program" instead                                      | climate      | Type, Time Program                          |
 | [Set Zone Operating mode](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.set_zone_operating_mode)                            | Same as setting HVAC mode, but allows setting heating or cooling                | climate      | Operating Mode, Operating Type              |
 | [Set Water Heater Time Program](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.set_dhw_time_program)                         | Updates the time program for a water heater                                     | water_heater | Time Program                                |
 | [Set Water Heater Circulation Time Program](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.set_dhw_circulation_time_program) | Updates the time program for the circulation pump of a water heater             | water_heater | Time Program                                |
@@ -46,8 +47,8 @@ interactive UI.
 
 The following services can be used to set time programs:
 
-* [mypyllant.set_zone_time_program](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.set_zone_time_program)
-  for climate zone temperature schedule (requires an additional `program_type`)
+* [mypyllant.set_time_program](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.set_time_program)
+  for climate temperature schedule (requires an additional `program_type` for zone climate)
 * [mypyllant.set_dhw_time_program](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.set_dhw_time_program)
   for water heater temperature schedule
 * [mypyllant.set_dhw_circulation_time_program](https://my.home-assistant.io/redirect/developer_call_service/?service=mypyllant.set_dhw_circulation_time_program)
@@ -65,10 +66,10 @@ You can also [use the calendar UI](2-entities.md#calendar-entities) to change ti
 
     You can delete all time windows on a day by sending an empty list, for example `monday: []`.
 
-=== "Climate"
+=== "Zone Climate"
 
     ```yaml
-    service: mypyllant.set_zone_time_program
+    service: mypyllant.set_time_program
     data:
       program_type: heating
       time_program:
@@ -100,9 +101,67 @@ You can also [use the calendar UI](2-entities.md#calendar-entities) to change ti
           - start_time: 420
             end_time: 1290
             setpoint: 20
-        type: heating
     target:
       entity_id: climate.home_zone_1_circuit_0_climate
+    ```
+
+=== "Ambisense Climate"
+
+    ```yaml
+    service: mypyllant.set_time_program
+    data:
+      time_program:
+        monday:
+          - startTime: 0
+            temperatureSetpoint: 20
+          - startTime: 360
+            temperatureSetpoint: 19
+          - startTime: 1260
+            temperatureSetpoint: 20
+        tuesday:
+          - startTime: 0
+            temperatureSetpoint: 20
+          - startTime: 360
+            temperatureSetpoint: 19
+          - startTime: 1260
+            temperatureSetpoint: 20
+        wednesday:
+          - startTime: 0
+            temperatureSetpoint: 20
+          - startTime: 360
+            temperatureSetpoint: 19
+          - startTime: 1260
+            temperatureSetpoint: 20
+        thursday:
+          - startTime: 0
+            temperatureSetpoint: 20
+          - startTime: 360
+            temperatureSetpoint: 19
+          - startTime: 1260
+            temperatureSetpoint: 20
+        friday:
+          - startTime: 0
+            temperatureSetpoint: 20
+          - startTime: 360
+            temperatureSetpoint: 19
+          - startTime: 1260
+            temperatureSetpoint: 20
+        saturday:
+          - startTime: 0
+            temperatureSetpoint: 20
+          - startTime: 360
+            temperatureSetpoint: 19
+          - startTime: 1260
+            temperatureSetpoint: 20
+        sunday:
+          - startTime: 0
+            temperatureSetpoint: 20
+          - startTime: 360
+            temperatureSetpoint: 19
+          - startTime: 1260
+            temperatureSetpoint: 20
+    target:
+      entity_id: climate.home_room_1_climate
     ```
 
 === "Water Heater"
@@ -132,7 +191,6 @@ You can also [use the calendar UI](2-entities.md#calendar-entities) to change ti
         sunday:
           - start_time: 420
             end_time: 1290
-        type: heating
     target:
       entity_id: water_heater.home_domestic_hot_water_0
     ```
@@ -164,7 +222,6 @@ You can also [use the calendar UI](2-entities.md#calendar-entities) to change ti
         sunday:
           - start_time: 420
             end_time: 1290
-        type: heating
     target:
       entity_id: water_heater.home_domestic_hot_water_0
     ```

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, time
 from unittest.mock import Mock
 
 import freezegun
@@ -16,6 +16,7 @@ from custom_components.mypyllant.calendar import (
     DomesticHotWaterCalendar,
     async_setup_entry,
     DomesticHotWaterCirculationCalendar,
+    AmbisenseCalendar,
 )
 from tests.conftest import MockConfigEntry, TEST_OPTIONS
 from tests.test_init import test_user_input
@@ -163,4 +164,29 @@ async def test_dhw_no_circulation_calendar(
             )
             assert len(events) == 0
             assert calendar.event is None
+    await mocked_api.aiohttp_session.close()
+
+
+async def test_ambisense_calendar(
+    hass,
+    mypyllant_aioresponses,
+    mocked_api: MyPyllantAPI,
+    system_coordinator_mock,
+):
+    test_data = load_test_data(DATA_DIR / "ambisense")
+    with mypyllant_aioresponses(test_data) as _:
+        system_coordinator_mock.data = (
+            await system_coordinator_mock._async_update_data()
+        )
+        calendar = AmbisenseCalendar(0, 1, system_coordinator_mock)
+        with freezegun.freeze_time("2024-01-01T00:00:00+00:00"):
+            events = await calendar.async_get_events(
+                hass,
+                datetime.now(timezone.utc),
+                datetime.now(timezone.utc) + timedelta(days=7),
+            )
+            assert len(events) > 0
+            assert calendar.event is not None
+            assert calendar.event.end.time() == time(6, 0, 0)
+            assert calendar.event.end.time() == events[1].start.time()
     await mocked_api.aiohttp_session.close()
