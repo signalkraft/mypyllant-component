@@ -111,24 +111,26 @@ async def test_ventilation_climate(
     mocked_api: MyPyllantAPI,
     system_coordinator_mock: SystemCoordinator,
 ):
-    test_data = load_test_data(DATA_DIR / "ventilation")
-    with mypyllant_aioresponses(test_data) as _:
-        system_coordinator_mock.data = (
-            await system_coordinator_mock._async_update_data()
-        )
-        ventilation = VentilationClimate(
-            0,
-            0,
-            system_coordinator_mock,
-        )
-        assert isinstance(ventilation.device_info, dict)
-        assert isinstance(ventilation.extra_state_attributes, dict)
-        assert isinstance(ventilation.hvac_mode, HVACMode)
-        assert isinstance(ventilation.fan_mode, str)
+    test_data_files = ["ventilation", "vrc700_ventilation.yaml"]
+    for f in test_data_files:
+        test_data = load_test_data(DATA_DIR / f)
+        with mypyllant_aioresponses(test_data) as _:
+            system_coordinator_mock.data = (
+                await system_coordinator_mock._async_update_data()
+            )
+            ventilation = VentilationClimate(
+                0,
+                0,
+                system_coordinator_mock,
+            )
+            assert isinstance(ventilation.device_info, dict)
+            assert isinstance(ventilation.extra_state_attributes, dict)
+            assert isinstance(ventilation.hvac_mode, HVACMode)
+            assert isinstance(ventilation.fan_mode, str)
 
-        await ventilation.async_set_fan_mode(FAN_OFF)
-        system_coordinator_mock._debounced_refresh.async_cancel()
-        await mocked_api.aiohttp_session.close()
+            await ventilation.async_set_fan_mode(FAN_OFF)
+            system_coordinator_mock._debounced_refresh.async_cancel()
+    await mocked_api.aiohttp_session.close()
 
 
 async def test_ambisense_climate(
@@ -136,7 +138,7 @@ async def test_ambisense_climate(
     mocked_api: MyPyllantAPI,
     system_coordinator_mock: SystemCoordinator,
 ):
-    test_data_files = ["ambisense", "ambisense2.yml"]
+    test_data_files = ["ambisense", "ambisense2.yaml"]
     for f in test_data_files:
         test_data = load_test_data(DATA_DIR / f)
         with mypyllant_aioresponses(test_data) as _:

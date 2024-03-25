@@ -81,7 +81,7 @@ async def test_ambisense_time_program(
     mocked_api: MyPyllantAPI,
     system_coordinator_mock: SystemCoordinator,
 ) -> None:
-    test_data_files = ["ambisense", "ambisense2.yml"]
+    test_data_files = ["ambisense", "ambisense2.yaml"]
     for f in test_data_files:
         test_data = load_test_data(DATA_DIR / f)
         with mypyllant_aioresponses(test_data) as aio:

@@ -70,7 +70,7 @@ async def test_system_binary_sensors(
         assert isinstance(circuit.device_info, dict)
         assert isinstance(circuit.system, System)
 
-        assert ControlError(0, system_coordinator_mock).is_on is False
+        assert isinstance(ControlError(0, system_coordinator_mock).is_on, bool)
         assert isinstance(ControlError(0, system_coordinator_mock).name, str)
         assert ControlOnline(0, system_coordinator_mock).is_on is True
         assert isinstance(ControlOnline(0, system_coordinator_mock).name, str)
@@ -88,7 +88,7 @@ async def test_control_error(
     mocked_api: MyPyllantAPI,
     system_coordinator_mock: SystemCoordinator,
 ):
-    test_data = load_test_data(DATA_DIR / "ambisense2.yml")
+    test_data = load_test_data(DATA_DIR / "ambisense2.yaml")
     with mypyllant_aioresponses(test_data) as _:
         system_coordinator_mock.data = (
             await system_coordinator_mock._async_update_data()

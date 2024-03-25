@@ -18,18 +18,16 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from custom_components.mypyllant.const import DOMAIN
 from custom_components.mypyllant.coordinator import SystemCoordinator
-from myPyllant.enums import VentilationOperationMode, VentilationFanStageType
+from myPyllant.enums import (
+    VentilationOperationMode,
+    VentilationFanStageType,
+    VentilationOperationModeVRC700,
+)
 from myPyllant.models import System, Ventilation
 
 VENTILATION_HVAC_MODE_MAP = {
     HVACMode.FAN_ONLY: VentilationOperationMode.NORMAL,
     HVACMode.AUTO: VentilationOperationMode.TIME_CONTROLLED,
-}
-VENTILATION_FAN_MODE_MAP = {
-    FAN_OFF: VentilationOperationMode.OFF,
-    FAN_ON: VentilationOperationMode.NORMAL,
-    FAN_LOW: VentilationOperationMode.REDUCED,
-    FAN_AUTO: VentilationOperationMode.TIME_CONTROLLED,
 }
 _FAN_STAGE_TYPE_OPTIONS = [
     selector.SelectOptionDict(value=v.value, label=v.value.title())
@@ -43,7 +41,6 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
     """
 
     coordinator: SystemCoordinator
-    _attr_fan_modes = [str(k) for k in VENTILATION_FAN_MODE_MAP.keys()]
     _attr_hvac_modes = [str(k) for k in VENTILATION_HVAC_MODE_MAP.keys()]
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
 
@@ -105,6 +102,25 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
         return ClimateEntityFeature.FAN_MODE
 
     @property
+    def fan_mode_map(self):
+        if self.ventilation.control_identifier.is_vrc700:
+            return {
+                VentilationOperationModeVRC700.OFF: FAN_OFF,
+                VentilationOperationModeVRC700.NORMAL: FAN_ON,
+                VentilationOperationModeVRC700.REDUCED: FAN_LOW,
+                VentilationOperationModeVRC700.AUTO: FAN_AUTO,
+                VentilationOperationModeVRC700.DAY: FAN_ON,
+                VentilationOperationModeVRC700.SET_BACK: FAN_LOW,
+            }
+        else:
+            return {
+                VentilationOperationMode.OFF: FAN_OFF,
+                VentilationOperationMode.NORMAL: FAN_ON,
+                VentilationOperationMode.REDUCED: FAN_LOW,
+                VentilationOperationMode.TIME_CONTROLLED: FAN_AUTO,
+            }
+
+    @property
     def hvac_mode(self) -> HVACMode:
         if (
             self.ventilation.operation_mode_ventilation
@@ -118,6 +134,10 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
         else:
             return HVACMode.FAN_ONLY
 
+    @property
+    def fan_modes(self) -> list[str]:
+        return [str(k) for k in self.fan_mode_map.values()]
+
     async def async_set_hvac_mode(self, hvac_mode):
         await self.coordinator.api.set_ventilation_operation_mode(
             self.ventilation,
@@ -127,16 +147,13 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def fan_mode(self) -> HVACMode:
-        return [
-            k
-            for k, v in VENTILATION_FAN_MODE_MAP.items()
-            if v == self.ventilation.operation_mode_ventilation
-        ][0]
+        return self.fan_mode_map[self.ventilation.operation_mode_ventilation]
 
     async def async_set_fan_mode(self, fan_mode: str) -> None:
+        mode = [k for k, v in self.fan_mode_map.items() if v == fan_mode][0]
         await self.coordinator.api.set_ventilation_operation_mode(
             self.ventilation,
-            VENTILATION_FAN_MODE_MAP[fan_mode],
+            mode,
         )
         await self.coordinator.async_request_refresh_delayed()
 
