@@ -5,6 +5,7 @@ from homeassistant.helpers.entity_registry import DATA_REGISTRY, EntityRegistry
 from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
 
 from custom_components.mypyllant import SystemCoordinator
+from custom_components.mypyllant.sensor import AmbisenseRSSISensor
 from myPyllant.api import MyPyllantAPI
 from myPyllant.models import System
 from myPyllant.tests.generate_test_data import DATA_DIR
@@ -17,6 +18,9 @@ from custom_components.mypyllant.binary_sensor import (
     ControlOnline,
     SystemControlEntity,
     async_setup_entry,
+    AmbisenseLowBatteryEntity,
+    AmbisenseButtonLockEntity,
+    AmbisenseWindowStateEntity,
 )
 from custom_components.mypyllant.const import DOMAIN
 from tests.conftest import MockConfigEntry, TEST_OPTIONS
@@ -95,4 +99,31 @@ async def test_control_error(
         )
         control_error = ControlError(0, system_coordinator_mock)
         assert control_error.is_on
+        await mocked_api.aiohttp_session.close()
+
+
+async def test_ambisense_binary_sensors(
+    mypyllant_aioresponses,
+    mocked_api: MyPyllantAPI,
+    system_coordinator_mock: SystemCoordinator,
+):
+    test_data = load_test_data(DATA_DIR / "ambisense2.yaml")
+    with mypyllant_aioresponses(test_data) as _:
+        system_coordinator_mock.data = (
+            await system_coordinator_mock._async_update_data()
+        )
+        assert AmbisenseButtonLockEntity(0, 0, system_coordinator_mock).is_on is False
+        assert AmbisenseWindowStateEntity(0, 0, system_coordinator_mock).is_on is False
+        assert (
+            AmbisenseRSSISensor(
+                0, 2, "3014F59C280013D9B0004A03", system_coordinator_mock
+            ).native_value
+            == -70
+        )
+        assert (
+            AmbisenseLowBatteryEntity(
+                0, 0, "3014F59C280013D9B00044B0", system_coordinator_mock
+            ).is_on
+            is False
+        )
         await mocked_api.aiohttp_session.close()

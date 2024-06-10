@@ -17,7 +17,11 @@ from myPyllant.models import Circuit, System
 
 from . import SystemCoordinator
 from .const import DOMAIN
-from .utils import EntityList
+from .utils import (
+    EntityList,
+    AmbisenseDeviceCoordinatorEntity,
+    AmbisenseCoordinatorEntity,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,6 +47,22 @@ async def async_setup_entry(
             sensors.append(
                 lambda: CircuitIsCoolingAllowed(index, circuit_index, coordinator)
             )
+
+        for room in system.ambisense_rooms:
+            _LOGGER.debug("Creating room binary sensors for %s", room)
+            sensors.append(
+                lambda: AmbisenseWindowStateEntity(index, room.room_index, coordinator)
+            )
+            sensors.append(
+                lambda: AmbisenseButtonLockEntity(index, room.room_index, coordinator)
+            )
+            for device in room.room_configuration.devices:
+                _LOGGER.debug("Creating room device binary sensors for %s", device)
+                sensors.append(
+                    lambda: AmbisenseLowBatteryEntity(
+                        index, room.room_index, device.sgtin, coordinator
+                    )
+                )
 
     async_add_entities(sensors)
 
@@ -235,4 +255,68 @@ class CircuitIsCoolingAllowed(CircuitEntity):
 
     @property
     def unique_id(self) -> str:
+        # TODO: Add migration to remove space from ID
         return f"{DOMAIN} {self.id_infix}_cooling_allowed"
+
+
+class AmbisenseWindowStateEntity(AmbisenseCoordinatorEntity, BinarySensorEntity):
+    @property
+    def icon(self) -> str | None:
+        if self.is_on:
+            return "mdi:window-open-variant"
+        else:
+            return "mdi:window-closed-variant"
+
+    @property
+    def is_on(self) -> bool | None:
+        return self.room.room_configuration.window_state
+
+    @property
+    def name(self) -> str:
+        return f"{self.name_prefix} Window State"
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_window_state"
+
+
+class AmbisenseButtonLockEntity(AmbisenseCoordinatorEntity, BinarySensorEntity):
+    @property
+    def icon(self) -> str | None:
+        if self.is_on:
+            return "mdi:lock"
+        else:
+            return "mdi:lock-open"
+
+    @property
+    def is_on(self) -> bool | None:
+        return self.room.room_configuration.button_lock
+
+    @property
+    def name(self) -> str:
+        return f"{self.name_prefix} Button Lock"
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_button_lock"
+
+
+class AmbisenseLowBatteryEntity(AmbisenseDeviceCoordinatorEntity, BinarySensorEntity):
+    @property
+    def icon(self) -> str | None:
+        if self.is_on:
+            return "mdi:battery-alert"
+        else:
+            return "mdi:battery-check"
+
+    @property
+    def is_on(self) -> bool | None:
+        return self.device.low_bat
+
+    @property
+    def name(self) -> str:
+        return f"{self.name_prefix} Low Battery"
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_low_battery"

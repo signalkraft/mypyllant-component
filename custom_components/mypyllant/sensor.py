@@ -17,6 +17,7 @@ from homeassistant.const import (
     UnitOfTemperature,
     UnitOfTime,
     UnitOfPower,
+    SIGNAL_STRENGTH_DECIBELS,
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
@@ -35,6 +36,7 @@ from custom_components.mypyllant.utils import (
     DomesticHotWaterCoordinatorEntity,
     ZoneCoordinatorEntity,
     EntityList,
+    AmbisenseDeviceCoordinatorEntity,
 )
 from myPyllant.utils import prepare_field_value_for_dict
 
@@ -172,6 +174,15 @@ async def create_system_sensors(
                 sensors.append(
                     lambda: CircuitMinFlowTemperatureSetpointSensor(
                         index, circuit_index, system_coordinator
+                    )
+                )
+
+        for room in system.ambisense_rooms:
+            for device in room.room_configuration.devices:
+                _LOGGER.debug("Creating room device sensors for %s", device)
+                sensors.append(
+                    lambda: AmbisenseRSSISensor(
+                        index, circuit_index, device.sgtin, system_coordinator
                     )
                 )
 
@@ -551,6 +562,29 @@ class ZoneCurrentSpecialFunctionSensor(ZoneCoordinatorEntity, SensorEntity):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_current_special_function"
+
+
+class AmbisenseRSSISensor(AmbisenseDeviceCoordinatorEntity, SensorEntity):
+    _attr_native_unit_of_measurement = SIGNAL_STRENGTH_DECIBELS
+    _attr_device_class = SensorDeviceClass.SIGNAL_STRENGTH
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} Signal Strength"
+
+    @property
+    def native_value(self):
+        return self.device.rssi
+
+    @property
+    def extra_state_attributes(self) -> Mapping[str, Any] | None:
+        return {"rssi_peer": self.device.rssi_peer}
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_{self.sgtin}_rssi"
 
 
 class CircuitSensor(CoordinatorEntity, SensorEntity):
