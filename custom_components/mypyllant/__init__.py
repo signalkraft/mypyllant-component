@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime as dt, timedelta
+from datetime import datetime as dt, timedelta, datetime
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
@@ -163,7 +163,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 password=password,
                 brand=brand,
                 country=country,
-                year=call.data.get("year"),
+                year=int(call.data.get("year", datetime.now().year)),
                 write_results=False,
             )
         }

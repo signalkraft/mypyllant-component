@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Mapping
-from typing import Any, Iterable, Sequence
+from typing import Any
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -54,13 +54,13 @@ DATA_UNIT_MAP = {
 
 async def create_system_sensors(
     hass: HomeAssistant, config: ConfigEntry
-) -> Sequence[SensorEntity]:
+) -> EntityList[SensorEntity]:
     system_coordinator: SystemCoordinator = hass.data[DOMAIN][config.entry_id][
         "system_coordinator"
     ]
     if not system_coordinator.data:
         _LOGGER.warning("No system data, skipping sensors")
-        return []
+        return EntityList()
 
     sensors: EntityList[SensorEntity] = EntityList()
     _LOGGER.debug("Creating system sensors for %s", system_coordinator.data)
@@ -203,7 +203,7 @@ async def create_system_sensors(
 
 async def create_daily_data_sensors(
     hass: HomeAssistant, config: ConfigEntry
-) -> Iterable[SensorEntity]:
+) -> EntityList[SensorEntity]:
     daily_data_coordinator: DailyDataCoordinator = hass.data[DOMAIN][config.entry_id][
         "daily_data_coordinator"
     ]
@@ -212,7 +212,7 @@ async def create_daily_data_sensors(
 
     if not daily_data_coordinator.data:
         _LOGGER.warning("No daily data, skipping sensors")
-        return []
+        return EntityList()
 
     sensors: EntityList[SensorEntity] = EntityList()
     for system_id, system_devices in daily_data_coordinator.data.items():
@@ -246,8 +246,8 @@ async def create_daily_data_sensors(
 async def async_setup_entry(
     hass: HomeAssistant, config: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    async_add_entities(await create_system_sensors(hass, config))
-    async_add_entities(await create_daily_data_sensors(hass, config))
+    async_add_entities(await create_system_sensors(hass, config))  # type: ignore
+    async_add_entities(await create_daily_data_sensors(hass, config))  # type: ignore
 
 
 class SystemSensor(SystemCoordinatorEntity, SensorEntity):

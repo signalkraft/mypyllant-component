@@ -20,7 +20,7 @@ addopts = """
 asyncio_mode = "auto"
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.12"
 pretty = true
 follow_imports = "silent"
 ignore_missing_imports = true

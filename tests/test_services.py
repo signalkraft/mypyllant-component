@@ -19,7 +19,9 @@ from tests.utils import call_service, get_config_entry
 
 @pytest.mark.parametrize("test_data", list_test_data())
 @pytest.mark.enable_socket
-@pytest.mark.skip("Broke with upgrade to pytest-homeassistant-custom-component==0.13.142")
+@pytest.mark.skip(
+    "Broke with upgrade to pytest-homeassistant-custom-component==0.13.142"
+)
 async def test_service_generate_test_data(
     hass,
     mypyllant_aioresponses,
@@ -45,7 +47,9 @@ async def test_service_generate_test_data(
 
 
 @pytest.mark.parametrize("test_data", list_test_data())
-@pytest.mark.skip("Broke with upgrade to pytest-homeassistant-custom-component==0.13.142")
+@pytest.mark.skip(
+    "Broke with upgrade to pytest-homeassistant-custom-component==0.13.142"
+)
 async def test_service_export(
     hass,
     mypyllant_aioresponses,

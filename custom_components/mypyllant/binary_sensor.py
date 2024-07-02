@@ -49,7 +49,7 @@ async def async_setup_entry(
                     lambda: ZoneIsManualCoolingActive(index, zone_index, coordinator)
                 )
 
-    async_add_entities(sensors)
+    async_add_entities(sensors)  # type: ignore
 
 
 class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):

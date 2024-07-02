@@ -40,7 +40,7 @@ async def async_setup_entry(
             sensors.append(
                 lambda: ZoneQuickVetoDurationNumber(index, zone_index, coordinator)
             )
-    async_add_entities(sensors)
+    async_add_entities(sensors)  # type: ignore
 
 
 class SystemHolidayDurationNumber(HolidayEntity, NumberEntity):

@@ -65,7 +65,8 @@ async def async_setup_entry(
                 )
             )
 
-    async_add_entities(dhws)
+    async_add_entities(dhws)  # type: ignore
+
     if len(dhws) > 0:
         platform = entity_platform.async_get_current_platform()
         _LOGGER.debug("Setting up water heater entity services for %s", platform)

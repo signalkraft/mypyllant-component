@@ -152,9 +152,9 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
 
 
 class SystemCoordinator(MyPyllantCoordinator):
-    data: list[System]
+    data: list[System]  # type: ignore
 
-    async def _async_update_data(self) -> list[System]:
+    async def _async_update_data(self) -> list[System]:  # type: ignore
         self._raise_if_quota_hit()
         include_connection_status = True
         include_diagnostic_trouble_codes = True

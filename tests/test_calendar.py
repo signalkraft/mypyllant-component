@@ -187,6 +187,8 @@ async def test_ambisense_calendar(
             )
             assert len(events) > 0
             assert calendar.event is not None
+            assert isinstance(events[1].start, datetime)
+            assert isinstance(calendar.event.end, datetime)
             assert calendar.event.end.time() == time(6, 0, 0)
             assert calendar.event.end.time() == events[1].start.time()
     await mocked_api.aiohttp_session.close()

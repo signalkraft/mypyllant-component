@@ -172,9 +172,9 @@ async def async_setup_entry(
                 )
             )
 
-    async_add_entities(zone_entities)
-    async_add_entities(ventilation_entities)
-    async_add_entities(ambisense_entities)
+    async_add_entities(zone_entities)  # type: ignore
+    async_add_entities(ventilation_entities)  # type: ignore
+    async_add_entities(ambisense_entities)  # type: ignore
 
     if len(zone_entities) > 0 or len(ambisense_entities) > 0:
         platform = entity_platform.async_get_current_platform()

@@ -256,8 +256,8 @@ class ZoneCoordinatorEntity(CoordinatorEntity):
         )
 
     @property
-    def available(self) -> bool | None:
-        return self.zone.is_active
+    def available(self) -> bool:
+        return bool(self.zone.is_active)
 
 
 class AmbisenseCoordinatorEntity(CoordinatorEntity):

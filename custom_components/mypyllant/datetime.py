@@ -35,7 +35,7 @@ async def async_setup_entry(
         sensors.append(
             lambda: SystemHolidayEndDateTimeEntity(index, coordinator, config)
         )
-    async_add_entities(sensors)
+    async_add_entities(sensors)  # type: ignore
 
 
 class SystemHolidayStartDateTimeEntity(HolidayEntity, DateTimeEntity):

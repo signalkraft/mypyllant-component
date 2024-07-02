@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import datetime
 import logging
+from abc import ABC, abstractmethod
 from typing import Any
 
 from homeassistant.components.calendar import (
@@ -24,6 +25,7 @@ from myPyllant.models import (
     ZoneTimeProgram,
     RoomTimeProgramDay,
     RoomTimeProgram,
+    System,
 )
 from myPyllant.enums import ZoneTimeProgramType
 
@@ -74,10 +76,10 @@ async def async_setup_entry(
             sensors.append(
                 lambda: AmbisenseCalendar(index, room.room_index, coordinator)
             )
-    async_add_entities(sensors)
+    async_add_entities(sensors)  # type: ignore
 
 
-class BaseCalendarEntity(CalendarEntity):
+class BaseCalendarEntity(CalendarEntity, ABC):
     _attr_supported_features = (
         CalendarEntityFeature.CREATE_EVENT
         | CalendarEntityFeature.DELETE_EVENT
@@ -138,6 +140,11 @@ class BaseCalendarEntity(CalendarEntity):
 
     async def update_time_program(self):
         raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def system(self) -> System:
+        pass
 
     @property
     def event(self) -> CalendarEvent | None:
@@ -258,7 +265,7 @@ class BaseCalendarEntity(CalendarEntity):
         await self.update_time_program()
 
 
-class ZoneHeatingCalendar(BaseCalendarEntity, ZoneCoordinatorEntity):
+class ZoneHeatingCalendar(ZoneCoordinatorEntity, BaseCalendarEntity):
     _attr_icon = "mdi:home-thermometer"
     _has_setpoint = True
 
@@ -302,7 +309,7 @@ class ZoneHeatingCalendar(BaseCalendarEntity, ZoneCoordinatorEntity):
         await self.coordinator.async_request_refresh_delayed()
 
 
-class ZoneCoolingCalendar(BaseCalendarEntity, ZoneCoordinatorEntity):
+class ZoneCoolingCalendar(ZoneCoordinatorEntity, BaseCalendarEntity):
     _attr_icon = "mdi:snowflake-thermometer"
     _has_setpoint = True
 
@@ -341,7 +348,7 @@ class ZoneCoolingCalendar(BaseCalendarEntity, ZoneCoordinatorEntity):
         await self.coordinator.async_request_refresh_delayed()
 
 
-class DomesticHotWaterCalendar(BaseCalendarEntity, DomesticHotWaterCoordinatorEntity):
+class DomesticHotWaterCalendar(DomesticHotWaterCoordinatorEntity, BaseCalendarEntity):
     _attr_icon = "mdi:water-thermometer"
 
     @property
@@ -380,7 +387,7 @@ class DomesticHotWaterCalendar(BaseCalendarEntity, DomesticHotWaterCoordinatorEn
 
 
 class DomesticHotWaterCirculationCalendar(
-    BaseCalendarEntity, DomesticHotWaterCoordinatorEntity
+    DomesticHotWaterCoordinatorEntity, BaseCalendarEntity
 ):
     _attr_icon = "mdi:pump"
 
@@ -419,7 +426,7 @@ class DomesticHotWaterCirculationCalendar(
         await self.coordinator.async_request_refresh_delayed()
 
 
-class AmbisenseCalendar(BaseCalendarEntity, AmbisenseCoordinatorEntity):
+class AmbisenseCalendar(AmbisenseCoordinatorEntity, BaseCalendarEntity):
     _attr_icon = "mdi:thermometer-auto"
     _has_setpoint = True
 

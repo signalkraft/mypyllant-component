@@ -38,7 +38,7 @@ async def async_setup_entry(
             sensors.append(
                 lambda: DomesticHotWaterBoostSwitch(index, dhw_index, coordinator)
             )
-    async_add_entities(sensors)
+    async_add_entities(sensors)  # type: ignore
 
 
 class SystemHolidaySwitch(HolidayEntity, SwitchEntity):

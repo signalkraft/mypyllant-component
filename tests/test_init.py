@@ -64,7 +64,9 @@ async def test_user_flow_minimum_fields(hass: HomeAssistant):
 
 
 @pytest.mark.parametrize("test_data", list_test_data())
-@pytest.mark.skip("Broke with upgrade to pytest-homeassistant-custom-component==0.13.142")
+@pytest.mark.skip(
+    "Broke with upgrade to pytest-homeassistant-custom-component==0.13.142"
+)
 async def test_async_setup(
     hass,
     mypyllant_aioresponses,
