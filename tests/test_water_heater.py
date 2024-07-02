@@ -73,7 +73,7 @@ async def test_water_heater(
             pytest.skip(
                 f"No DHW in system {system_coordinator_mock.data[0]}, skipping water heater tests"
             )
-        dhw = DomesticHotWaterEntity(0, 0, system_coordinator_mock)
+        dhw = DomesticHotWaterEntity(0, 0, system_coordinator_mock, {})
         assert isinstance(dhw.device_info, dict)
         assert isinstance(dhw.min_temp, (int, float, complex))
         assert isinstance(dhw.max_temp, (int, float, complex))

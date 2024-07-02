@@ -17,6 +17,7 @@ from custom_components.mypyllant.binary_sensor import (
     ControlOnline,
     SystemControlEntity,
     async_setup_entry,
+    ZoneIsManualCoolingActive,
 )
 from custom_components.mypyllant.const import DOMAIN
 from tests.conftest import MockConfigEntry, TEST_OPTIONS
@@ -95,4 +96,19 @@ async def test_control_error(
         )
         control_error = ControlError(0, system_coordinator_mock)
         assert control_error.is_on
+        await mocked_api.aiohttp_session.close()
+
+
+async def test_is_manual_cooling_active(
+    mypyllant_aioresponses,
+    mocked_api: MyPyllantAPI,
+    system_coordinator_mock: SystemCoordinator,
+):
+    test_data = load_test_data(DATA_DIR / "ventilation")
+    with mypyllant_aioresponses(test_data) as _:
+        system_coordinator_mock.data = (
+            await system_coordinator_mock._async_update_data()
+        )
+        manual_cooling = ZoneIsManualCoolingActive(0, 0, system_coordinator_mock)
+        assert not manual_cooling.is_on
         await mocked_api.aiohttp_session.close()

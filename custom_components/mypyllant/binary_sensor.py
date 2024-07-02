@@ -17,7 +17,7 @@ from myPyllant.models import Circuit, System
 
 from . import SystemCoordinator
 from .const import DOMAIN
-from .utils import EntityList
+from .utils import EntityList, ZoneCoordinatorEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -39,10 +39,15 @@ async def async_setup_entry(
         sensors.append(lambda: ControlOnline(index, coordinator))
         sensors.append(lambda: FirmwareUpdateRequired(index, coordinator))
         sensors.append(lambda: FirmwareUpdateEnabled(index, coordinator))
-        for circuit_index, circuit in enumerate(system.circuits):
+        for circuit_index, _ in enumerate(system.circuits):
             sensors.append(
                 lambda: CircuitIsCoolingAllowed(index, circuit_index, coordinator)
             )
+        for zone_index, zone in enumerate(system.zones):
+            if zone.is_manual_cooling_active is not None:
+                sensors.append(
+                    lambda: ZoneIsManualCoolingActive(index, zone_index, coordinator)
+                )
 
     async_add_entities(sensors)
 
@@ -236,3 +241,17 @@ class CircuitIsCoolingAllowed(CircuitEntity):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN} {self.id_infix}_cooling_allowed"
+
+
+class ZoneIsManualCoolingActive(ZoneCoordinatorEntity, BinarySensorEntity):
+    @property
+    def is_on(self) -> bool | None:
+        return self.zone.is_manual_cooling_active
+
+    @property
+    def name(self) -> str:
+        return f"{self.name_prefix} Manual Cooling Active"
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN} {self.id_infix}_manual_cooling_active"

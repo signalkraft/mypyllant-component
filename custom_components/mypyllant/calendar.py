@@ -57,6 +57,10 @@ async def async_setup_entry(
                 sensors.append(
                     lambda: ZoneHeatingCalendar(index, zone_index, coordinator)
                 )
+            if zone.cooling and zone.cooling.time_program_cooling:
+                sensors.append(
+                    lambda: ZoneCoolingCalendar(index, zone_index, coordinator)
+                )
         for dhw_index, dhw in enumerate(system.domestic_hot_water):
             sensors.append(
                 lambda: DomesticHotWaterCalendar(index, dhw_index, coordinator)
@@ -255,7 +259,7 @@ class BaseCalendarEntity(CalendarEntity):
 
 
 class ZoneHeatingCalendar(BaseCalendarEntity, ZoneCoordinatorEntity):
-    _attr_icon = "mdi:thermometer-auto"
+    _attr_icon = "mdi:home-thermometer"
     _has_setpoint = True
 
     @property
@@ -264,10 +268,15 @@ class ZoneHeatingCalendar(BaseCalendarEntity, ZoneCoordinatorEntity):
 
     @property
     def name(self) -> str:
-        return f"{self.name_prefix} Heating Schedule"
+        return self.name_prefix
 
     def _get_calendar_id_prefix(self):
         return f"zone_heating_{self.zone.index}"
+
+    def _get_setpoint(self, time_program_day: ZoneTimeProgramDay):
+        if time_program_day.setpoint:
+            return time_program_day.setpoint
+        return self.zone.desired_room_temperature_setpoint_heating
 
     def build_event(
         self,
@@ -275,7 +284,7 @@ class ZoneHeatingCalendar(BaseCalendarEntity, ZoneCoordinatorEntity):
         start: datetime.datetime,
         end: datetime.datetime,
     ):
-        summary = f"{time_program_day.setpoint}°C on {self.name}"
+        summary = f"Heating to {self._get_setpoint(time_program_day)}°C on {self.name}"
         return CalendarEvent(
             summary=summary,
             start=start,
@@ -293,8 +302,47 @@ class ZoneHeatingCalendar(BaseCalendarEntity, ZoneCoordinatorEntity):
         await self.coordinator.async_request_refresh_delayed()
 
 
+class ZoneCoolingCalendar(BaseCalendarEntity, ZoneCoordinatorEntity):
+    _attr_icon = "mdi:snowflake-thermometer"
+    _has_setpoint = True
+
+    @property
+    def time_program(self) -> ZoneTimeProgram:
+        return self.zone.cooling.time_program_cooling  # type: ignore
+
+    @property
+    def name(self) -> str:
+        return self.name_prefix
+
+    def _get_calendar_id_prefix(self):
+        return f"zone_cooling_{self.zone.index}"
+
+    def build_event(
+        self,
+        time_program_day: ZoneTimeProgramDay,
+        start: datetime.datetime,
+        end: datetime.datetime,
+    ):
+        summary = f"Cooling to {self.zone.desired_room_temperature_setpoint_cooling}°C on {self.name}"
+        return CalendarEvent(
+            summary=summary,
+            start=start,
+            end=end,
+            description="You can change the start time, end time, or weekdays. Temperature is the same for all slots.",
+            uid=self._get_uid(time_program_day, start),
+            rrule=self._get_rrule(time_program_day),
+            recurrence_id=self._get_recurrence_id(time_program_day),
+        )
+
+    async def update_time_program(self):
+        await self.coordinator.api.set_zone_time_program(
+            self.zone, str(ZoneTimeProgramType.COOLING), self.time_program
+        )
+        await self.coordinator.async_request_refresh_delayed()
+
+
 class DomesticHotWaterCalendar(BaseCalendarEntity, DomesticHotWaterCoordinatorEntity):
-    _attr_icon = "mdi:water-boiler-auto"
+    _attr_icon = "mdi:water-thermometer"
 
     @property
     def time_program(self) -> DHWTimeProgram:
@@ -302,7 +350,7 @@ class DomesticHotWaterCalendar(BaseCalendarEntity, DomesticHotWaterCoordinatorEn
 
     @property
     def name(self) -> str:
-        return f"{self.name_prefix} Schedule"
+        return self.name_prefix
 
     def _get_calendar_id_prefix(self):
         return f"dhw_{self.domestic_hot_water.index}"
@@ -313,7 +361,7 @@ class DomesticHotWaterCalendar(BaseCalendarEntity, DomesticHotWaterCoordinatorEn
         start: datetime.datetime,
         end: datetime.datetime,
     ):
-        summary = f"{self.domestic_hot_water.tapping_setpoint}°C on {self.name}"
+        summary = f"Heating Water to {self.domestic_hot_water.tapping_setpoint}°C on {self.name}"
         return CalendarEvent(
             summary=summary,
             start=start,
@@ -342,7 +390,7 @@ class DomesticHotWaterCirculationCalendar(
 
     @property
     def name(self) -> str:
-        return f"{self.name_prefix} Circulation Schedule"
+        return f"Circulating Water in {self.name_prefix}"
 
     def _get_calendar_id_prefix(self):
         return f"dhw_circulation_{self.domestic_hot_water.index}"

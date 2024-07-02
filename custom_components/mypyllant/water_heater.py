@@ -53,7 +53,17 @@ async def async_setup_entry(
 
     for index, system in enumerate(coordinator.data):
         for dhw_index, dhw in enumerate(system.domestic_hot_water):
-            dhws.append(lambda: DomesticHotWaterEntity(index, dhw_index, coordinator))
+            data_key = f"dhw_{index}_{dhw_index}"
+            if data_key not in hass.data[DOMAIN][config.entry_id]:
+                hass.data[DOMAIN][config.entry_id][data_key] = {}
+            dhws.append(
+                lambda: DomesticHotWaterEntity(
+                    index,
+                    dhw_index,
+                    coordinator,
+                    hass.data[DOMAIN][config.entry_id][data_key],
+                )
+            )
 
     async_add_entities(dhws)
     if len(dhws) > 0:
@@ -79,11 +89,33 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
     coordinator: SystemCoordinator
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
 
-    def __init__(self, system_index, dhw_index, coordinator) -> None:
+    def __init__(self, system_index, dhw_index, coordinator, data) -> None:
         """Initialize entity."""
         super().__init__(coordinator)
         self.system_index = system_index
         self.dhw_index = dhw_index
+        self.data = data
+        self.data["last_active_operation_mode"] = (
+            self.current_operation
+            if self.current_operation != DHWOperationMode.OFF
+            else DHWOperationMode.TIME_CONTROLLED
+        )
+        _LOGGER.debug(
+            "Saving last active DHW operation %s",
+            self.data["last_active_operation_mode"],
+        )
+
+    async def async_update(self) -> None:
+        """
+        Save last active HVAC mode after update, so it can be restored in turn_on
+        """
+        await super().async_update()
+
+        if self.enabled and self.current_operation != DHWOperationMode.OFF:
+            _LOGGER.debug(
+                "Saving last active DHW operation mode %s", self.current_operation
+            )
+            self.data["last_active_operation_mode"] = self.current_operation
 
     @property
     def operation_list(self):
@@ -172,6 +204,12 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
         if self.domestic_hot_water.is_cylinder_boosting:
             return str(DHWCurrentSpecialFunction.CYLINDER_BOOST.display_value)
         return str(self.domestic_hot_water.operation_mode_dhw.display_value)
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        await self.async_set_operation_mode(self.data["last_active_operation_mode"])
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        await self.async_set_operation_mode(DHWOperationMode.OFF)
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         target_temp = kwargs.get(ATTR_TEMPERATURE)

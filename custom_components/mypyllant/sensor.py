@@ -448,7 +448,9 @@ class ZoneDesiredRoomTemperatureSetpointSensor(ZoneCoordinatorEntity, SensorEnti
 
     @property
     def native_value(self):
-        if self.zone.desired_room_temperature_setpoint_heating:
+        if self.zone.desired_room_temperature_setpoint:
+            return self.zone.desired_room_temperature_setpoint
+        elif self.zone.desired_room_temperature_setpoint_heating:
             return self.zone.desired_room_temperature_setpoint_heating
         elif self.zone.desired_room_temperature_setpoint_cooling:
             return self.zone.desired_room_temperature_setpoint_cooling
@@ -456,6 +458,15 @@ class ZoneDesiredRoomTemperatureSetpointSensor(ZoneCoordinatorEntity, SensorEnti
             if self.zone.is_eco_mode:
                 return self.zone.heating.set_back_temperature
             return self.zone.desired_room_temperature_setpoint
+
+    @property
+    def extra_state_attributes(self) -> Mapping[str, Any] | None:
+        return {
+            "desired_room_temperature_setpoint_heating": self.zone.desired_room_temperature_setpoint_heating,
+            "desired_room_temperature_setpoint_cooling": self.zone.desired_room_temperature_setpoint_cooling,
+            "desired_room_temperature_setpoint": self.zone.desired_room_temperature_setpoint,
+            "is_eco_mode": self.zone.is_eco_mode,
+        }
 
     @property
     def unique_id(self) -> str:
