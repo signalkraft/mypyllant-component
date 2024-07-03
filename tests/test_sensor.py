@@ -102,7 +102,7 @@ async def test_zone_sensors(
     mocked_api: MyPyllantAPI,
     system_coordinator_mock,
 ):
-    test_data = load_test_data(DATA_DIR / "heatpump_electric_backup")
+    test_data = load_test_data(DATA_DIR / "heatpump_cooling")
     with mypyllant_aioresponses(test_data) as _:
         system_coordinator_mock.data = (
             await system_coordinator_mock._async_update_data()
