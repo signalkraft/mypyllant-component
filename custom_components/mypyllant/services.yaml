@@ -109,6 +109,51 @@ cancel_holiday:
       integration: mypyllant
       domain: climate
 
+set_cooling_for_days:
+  name: Set Cooling for Days
+  description: Enables manual cooling between start and end dates
+  target:
+    entity:
+      integration: mypyllant
+      domain: climate
+  fields:
+    start:
+      name: Start Date
+      description: Optional start date of the cooling period, defaults to now
+      example: '"2023-01-10 14:00:00"'
+      selector:
+        datetime:
+    end:
+      name: End Date
+      description: Optional end date of the cooling period, defaults to one year in the future
+      example: '"2023-01-01 0:00:00"'
+      selector:
+        datetime:
+
+cancel_cooling_for_days:
+  name: Cancel Cooling for Days
+  description: Cancel manual cooling
+  target:
+    entity:
+      integration: mypyllant
+      domain: climate
+
+set_ventilation_boost:
+  name: Sets Ventilation Boost
+  description: Disables heating / cooling for 30min for a quick ventilation boost
+  target:
+    entity:
+      integration: mypyllant
+      domain: climate
+
+cancel_ventilation_boost:
+  name: Cancel Ventilation Boost
+  description: Cancels Ventilation Boost early
+  target:
+    entity:
+      integration: mypyllant
+      domain: climate
+
 set_time_program:
   name: Set Time Program
   description: Updates the time program for a zone or room

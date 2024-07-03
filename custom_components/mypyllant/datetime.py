@@ -10,7 +10,11 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from custom_components.mypyllant.const import DOMAIN, DEFAULT_HOLIDAY_SETPOINT
 from custom_components.mypyllant.coordinator import SystemCoordinator
-from custom_components.mypyllant.utils import HolidayEntity, EntityList
+from custom_components.mypyllant.utils import (
+    HolidayEntity,
+    EntityList,
+    ManualCoolingEntity,
+)
 from myPyllant.utils import get_default_holiday_dates
 
 _LOGGER = logging.getLogger(__name__)
@@ -35,6 +39,15 @@ async def async_setup_entry(
         sensors.append(
             lambda: SystemHolidayEndDateTimeEntity(index, coordinator, config)
         )
+        if not system.control_identifier.is_vrc700 and system.is_cooling_allowed:
+            sensors.append(
+                lambda: SystemManualCoolingStartDateTimeEntity(
+                    index, coordinator, config
+                )
+            )
+            sensors.append(
+                lambda: SystemManualCoolingEndDateTimeEntity(index, coordinator, config)
+            )
     async_add_entities(sensors)  # type: ignore
 
 
@@ -103,3 +116,65 @@ class SystemHolidayEndDateTimeEntity(SystemHolidayStartDateTimeEntity):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_holiday_end_date_time"
+
+
+class SystemManualCoolingStartDateTimeEntity(ManualCoolingEntity, DateTimeEntity):
+    _attr_icon = "mdi:snowflake-check"
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} Manual Cooling Start Date"
+
+    @property
+    def native_value(self):
+        return (
+            self.manual_cooling_start.replace(tzinfo=self.system.timezone)
+            if self.manual_cooling_start
+            else None
+        )
+
+    async def async_set_value(self, value: datetime) -> None:
+        _, end = get_default_holiday_dates(
+            self.manual_cooling_start,
+            self.manual_cooling_end,
+            self.system.timezone,
+            self.default_manual_cooling_duration,
+        )
+        await self.coordinator.api.set_cooling_for_days(
+            self.system,
+            start=value,
+            end=end,
+        )
+        await self.coordinator.async_request_refresh_delayed(20)
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_manual_cooling_start_date_time"
+
+
+class SystemManualCoolingEndDateTimeEntity(SystemManualCoolingStartDateTimeEntity):
+    _attr_icon = "mdi:snowflake-off"
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} Manual Cooling End Date"
+
+    @property
+    def native_value(self):
+        return (
+            self.manual_cooling_end.replace(tzinfo=self.system.timezone)
+            if self.manual_cooling_end
+            else None
+        )
+
+    async def async_set_value(self, value: datetime) -> None:
+        await self.coordinator.api.set_cooling_for_days(
+            self.system,
+            start=self.manual_cooling_start,
+            end=value,
+        )
+        await self.coordinator.async_request_refresh_delayed(20)
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_manual_cooling_end_date_time"

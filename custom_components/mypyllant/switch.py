@@ -13,7 +13,10 @@ from custom_components.mypyllant.utils import (
     HolidayEntity,
     DomesticHotWaterCoordinatorEntity,
     EntityList,
+    ManualCoolingEntity,
+    ZoneCoordinatorEntity,
 )
+from myPyllant.enums import ZoneCurrentSpecialFunction
 from myPyllant.utils import get_default_holiday_dates
 
 _LOGGER = logging.getLogger(__name__)
@@ -34,9 +37,17 @@ async def async_setup_entry(
     for index, system in enumerate(coordinator.data):
         sensors.append(lambda: SystemHolidaySwitch(index, coordinator, config))
 
+        if not system.control_identifier.is_vrc700 and system.is_cooling_allowed:
+            sensors.append(
+                lambda: SystemManualCoolingSwitch(index, coordinator, config)
+            )
         for dhw_index, dhw in enumerate(system.domestic_hot_water):
             sensors.append(
                 lambda: DomesticHotWaterBoostSwitch(index, dhw_index, coordinator)
+            )
+        for zone_index, zone in enumerate(system.zones):
+            sensors.append(
+                lambda: ZoneVentilationBoostSwitch(index, zone_index, coordinator)
             )
     async_add_entities(sensors)  # type: ignore
 
@@ -74,6 +85,63 @@ class SystemHolidaySwitch(HolidayEntity, SwitchEntity):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_holiday_switch"
+
+
+class SystemManualCoolingSwitch(ManualCoolingEntity, SwitchEntity):
+    _attr_icon = "mdi:snowflake-check"
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} Manual Cooling"
+
+    @property
+    def is_on(self):
+        return self.system.manual_cooling_planned
+
+    async def async_turn_on(self, **kwargs):
+        _, end = get_default_holiday_dates(
+            self.manual_cooling_start,
+            self.manual_cooling_end,
+            self.system.timezone,
+            self.default_manual_cooling_duration,
+        )
+        await self.coordinator.api.set_cooling_for_days(self.system, end=end)
+        await self.coordinator.async_request_refresh_delayed(20)
+
+    async def async_turn_off(self, **kwargs):
+        await self.coordinator.api.cancel_cooling_for_days(self.system)
+        await self.coordinator.async_request_refresh_delayed(20)
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_manual_cooling_switch"
+
+
+class ZoneVentilationBoostSwitch(ZoneCoordinatorEntity, SwitchEntity):
+    _attr_icon = "mdi:window-open-variant"
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} Ventilation Boost"
+
+    @property
+    def is_on(self):
+        return (
+            self.zone.current_special_function
+            == ZoneCurrentSpecialFunction.VENTILATION_BOOST
+        )
+
+    async def async_turn_on(self, **kwargs):
+        await self.coordinator.api.set_ventilation_boost(self.system)
+        await self.coordinator.async_request_refresh_delayed(20)
+
+    async def async_turn_off(self, **kwargs):
+        await self.coordinator.api.cancel_ventilation_boost(self.system)
+        await self.coordinator.async_request_refresh_delayed(20)
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_ventilation_boost_switch"
 
 
 class DomesticHotWaterBoostSwitch(DomesticHotWaterCoordinatorEntity, SwitchEntity):

@@ -152,6 +152,46 @@ class HolidayEntity(SystemCoordinatorEntity):
         return self.zone.general.holiday_remaining if self.zone else None
 
 
+class ManualCoolingEntity(SystemCoordinatorEntity):
+    def __init__(
+        self,
+        index: int,
+        coordinator: "SystemCoordinator",
+        config: ConfigEntry,
+    ) -> None:
+        super().__init__(index, coordinator)
+        self.config = config
+
+    @property
+    def default_manual_cooling_duration(self):
+        return self.config.options.get(
+            OPTION_DEFAULT_HOLIDAY_DURATION, DEFAULT_HOLIDAY_DURATION
+        )
+
+    @property
+    def extra_state_attributes(self) -> typing.Mapping[str, typing.Any] | None:
+        return {
+            "manual_cooling_ongoing": self.system.manual_cooling_ongoing,
+            "manual_cooling_remaining_seconds": self.system.manual_cooling_remaining.total_seconds()
+            if self.system.manual_cooling_remaining
+            else None,
+            "manual_cooling_start_date_time": self.manual_cooling_start,
+            "manual_cooling_end_date_time": self.manual_cooling_end,
+        }
+
+    @property
+    def manual_cooling_start(self) -> datetime | None:
+        return self.system.manual_cooling_start_date
+
+    @property
+    def manual_cooling_end(self) -> datetime | None:
+        return self.system.manual_cooling_end_date
+
+    @property
+    def manual_cooling_remaining(self) -> timedelta | None:
+        return self.system.manual_cooling_remaining
+
+
 def shorten_zone_name(zone_name: str) -> str:
     if zone_name.startswith("Zone "):
         return zone_name[5:]

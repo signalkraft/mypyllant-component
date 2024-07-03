@@ -13,12 +13,13 @@ from homeassistant.components.climate import (
     HVACMode,
     HVACAction,
     PRESET_COMFORT,
+    ATTR_TARGET_TEMP_LOW,
+    ATTR_TARGET_TEMP_HIGH,
 )
 from homeassistant.components.climate.const import (
     PRESET_AWAY,
     PRESET_BOOST,
     PRESET_NONE,
-    PRESET_SLEEP,
     PRESET_ECO,
 )
 from homeassistant.config_entries import ConfigEntry
@@ -41,8 +42,8 @@ from myPyllant.models import (
     RoomTimeProgram,
 )
 from myPyllant.enums import (
-    ZoneHeatingOperatingMode,
-    ZoneHeatingOperatingModeVRC700,
+    ZoneOperatingMode,
+    ZoneOperatingModeVRC700,
     ZoneCurrentSpecialFunction,
     CircuitState,
     AmbisenseRoomOperationMode,
@@ -71,6 +72,12 @@ from .const import (
     DEFAULT_HOLIDAY_SETPOINT,
     SERVICE_SET_ZONE_OPERATING_MODE,
     SERVICE_SET_TIME_PROGRAM,
+    SERVICE_SET_COOLING_FOR_DAYS,
+    SERVICE_CANCEL_COOLING_FOR_DAYS,
+    HVAC_MODE_COOLING_FOR_DAYS,
+    SERVICE_SET_TIME_CONTROLLED_COOLING_SETPOINT,
+    SERVICE_SET_VENTILATION_BOOST,
+    SERVICE_CANCEL_VENTILATION_BOOST,
 )
 from .ventilation_climate import _FAN_STAGE_TYPE_OPTIONS, VentilationClimate
 
@@ -84,11 +91,7 @@ _ZONE_MANUAL_SETPOINT_TYPES_OPTIONS = [
 _ZONE_OPERATING_MODE_OPTIONS = [
     selector.SelectOptionDict(value=v, label=v.replace("_", " ").title())
     for v in set(
-        [
-            e.value
-            for e in list(ZoneHeatingOperatingMode)
-            + list(ZoneHeatingOperatingModeVRC700)
-        ]
+        [e.value for e in list(ZoneOperatingMode) + list(ZoneOperatingModeVRC700)]
     )
 ]
 
@@ -97,14 +100,15 @@ ZONE_PRESET_MAP = {
     PRESET_ECO: ZoneCurrentSpecialFunction.NONE,
     PRESET_NONE: ZoneCurrentSpecialFunction.NONE,
     PRESET_AWAY: ZoneCurrentSpecialFunction.HOLIDAY,
-    PRESET_SLEEP: ZoneCurrentSpecialFunction.SYSTEM_OFF,
+    "system_off": ZoneCurrentSpecialFunction.SYSTEM_OFF,
+    "ventilation_boost": ZoneCurrentSpecialFunction.VENTILATION_BOOST,
 }
 
 ZONE_PRESET_MAP_VRC700 = {
-    ZoneHeatingOperatingModeVRC700.OFF: PRESET_NONE,
-    ZoneHeatingOperatingModeVRC700.DAY: PRESET_COMFORT,
-    ZoneHeatingOperatingModeVRC700.AUTO: PRESET_NONE,
-    ZoneHeatingOperatingModeVRC700.SET_BACK: PRESET_ECO,
+    ZoneOperatingModeVRC700.OFF: PRESET_NONE,
+    ZoneOperatingModeVRC700.DAY: PRESET_COMFORT,
+    ZoneOperatingModeVRC700.AUTO: PRESET_NONE,
+    ZoneOperatingModeVRC700.SET_BACK: PRESET_ECO,
 }
 
 ZONE_HVAC_ACTION_MAP = {
@@ -211,6 +215,15 @@ async def async_setup_entry(
             "set_manual_mode_setpoint",
         )
         platform.async_register_entity_service(
+            SERVICE_SET_TIME_CONTROLLED_COOLING_SETPOINT,
+            {
+                vol.Required("temperature"): vol.All(
+                    vol.Coerce(float), vol.Clamp(min=0, max=30)
+                ),
+            },
+            "set_time_controlled_cooling_setpoint",
+        )
+        platform.async_register_entity_service(
             SERVICE_CANCEL_QUICK_VETO,
             {},
             "remove_quick_veto",
@@ -233,6 +246,31 @@ async def async_setup_entry(
             SERVICE_CANCEL_HOLIDAY,
             {},
             "cancel_holiday",
+        )
+        # noinspection PyTypeChecker
+        # Wrapping the schema in vol.Schema() breaks entity_id passing
+        platform.async_register_entity_service(
+            SERVICE_SET_COOLING_FOR_DAYS,
+            {
+                vol.Optional("start"): vol.Coerce(as_datetime),
+                vol.Optional("end"): vol.Coerce(as_datetime),
+            },
+            "set_cooling_for_days",
+        )
+        platform.async_register_entity_service(
+            SERVICE_CANCEL_COOLING_FOR_DAYS,
+            {},
+            "cancel_cooling_for_days",
+        )
+        platform.async_register_entity_service(
+            SERVICE_SET_VENTILATION_BOOST,
+            {},
+            "set_ventilation_boost",
+        )
+        platform.async_register_entity_service(
+            SERVICE_CANCEL_VENTILATION_BOOST,
+            {},
+            "cancel_ventilation_boost",
         )
         # noinspection PyTypeChecker
         # Wrapping the schema in vol.Schema() breaks entity_id passing
@@ -321,7 +359,9 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     """Climate for a zone."""
 
     coordinator: SystemCoordinator
+    _attr_translation_key = "mypyllant_zone"
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
+    _attr_target_temperature_step = 0.5
     _enable_turn_on_off_backwards_compatibility = False
 
     def __init__(
@@ -362,17 +402,20 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     def hvac_mode_map(self):
         if self.zone.control_identifier.is_vrc700:
             return {
-                ZoneHeatingOperatingModeVRC700.OFF: HVACMode.OFF,
-                ZoneHeatingOperatingModeVRC700.AUTO: HVACMode.AUTO,
-                ZoneHeatingOperatingModeVRC700.DAY: HVACMode.AUTO,
-                ZoneHeatingOperatingModeVRC700.SET_BACK: HVACMode.AUTO,
+                ZoneOperatingModeVRC700.OFF: HVACMode.OFF,
+                ZoneOperatingModeVRC700.AUTO: HVACMode.AUTO,
+                ZoneOperatingModeVRC700.DAY: HVACMode.AUTO,
+                ZoneOperatingModeVRC700.SET_BACK: HVACMode.AUTO,
             }
         else:
-            return {
-                ZoneHeatingOperatingMode.OFF: HVACMode.OFF,
-                ZoneHeatingOperatingMode.MANUAL: HVACMode.HEAT_COOL,
-                ZoneHeatingOperatingMode.TIME_CONTROLLED: HVACMode.AUTO,
+            mode_map = {
+                ZoneOperatingMode.OFF: HVACMode.OFF,
+                ZoneOperatingMode.MANUAL: HVACMode.HEAT_COOL,
+                ZoneOperatingMode.TIME_CONTROLLED: HVACMode.AUTO,
             }
+            if self.system.is_cooling_allowed:
+                mode_map[HVAC_MODE_COOLING_FOR_DAYS] = HVACMode.COOL
+            return mode_map
 
     @property
     def default_quick_veto_duration(self):
@@ -468,6 +511,50 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         await self.coordinator.api.cancel_holiday(self.system)
         await self.coordinator.async_request_refresh_delayed(20)
 
+    async def set_cooling_for_days(self, **kwargs):
+        _LOGGER.debug(
+            "Setting cooling for days on System %s with params %s",
+            self.system.id,
+            kwargs,
+        )
+        if self.system.control_identifier.is_vrc700:
+            raise ValueError("Can't set cooling for days on VRC700 systems")
+        start = kwargs.get("start")
+        end = kwargs.get("end")
+        await self.coordinator.api.set_cooling_for_days(self.system, start, end)
+        await self.coordinator.async_request_refresh_delayed(20)
+
+    async def cancel_cooling_for_days(self, **kwargs):
+        _LOGGER.debug(
+            "Canceling cooling for days on System %s",
+            self.system.id,
+        )
+        if self.system.control_identifier.is_vrc700:
+            raise ValueError("Can't cancel cooling for days on VRC700 systems")
+        await self.coordinator.api.cancel_cooling_for_days(self.system)
+        await self.coordinator.async_request_refresh_delayed(20)
+
+    async def set_ventilation_boost(self, **kwargs):
+        _LOGGER.debug(
+            "Setting ventilation boost on System %s with params %s",
+            self.system.id,
+            kwargs,
+        )
+        if self.system.control_identifier.is_vrc700:
+            raise ValueError("Can't set ventilation boost on VRC700 systems")
+        await self.coordinator.api.set_ventilation_boost(self.system)
+        await self.coordinator.async_request_refresh_delayed(20)
+
+    async def cancel_ventilation_boost(self, **kwargs):
+        _LOGGER.debug(
+            "Canceling ventilation boost on System %s",
+            self.system.id,
+        )
+        if self.system.control_identifier.is_vrc700:
+            raise ValueError("Can't cancel ventilation boost on VRC700 systems")
+        await self.coordinator.api.cancel_ventilation_boost(self.system)
+        await self.coordinator.async_request_refresh_delayed(20)
+
     async def set_time_program(self, **kwargs):
         _LOGGER.debug("Setting time program on %s", self.zone)
         program_type = kwargs.get("program_type")
@@ -504,16 +591,38 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         )
         await self.coordinator.async_request_refresh_delayed()
 
+    async def set_time_controlled_cooling_setpoint(self, **kwargs):
+        _LOGGER.debug(
+            f"Setting time controlled setpoint temperature on {self.zone.name} with params {kwargs}"
+        )
+        temperature = kwargs.get("temperature")
+        await self.coordinator.api.set_time_controlled_cooling_setpoint(
+            self.zone, temperature
+        )
+        await self.coordinator.async_request_refresh_delayed(10)
+
     async def remove_quick_veto(self):
         _LOGGER.debug("Removing quick veto on %s", self.zone.name)
         await self.coordinator.api.cancel_quick_veto_zone_temperature(self.zone)
         await self.coordinator.async_request_refresh_delayed()
 
     @property
+    def supports_target_temperature_range(self) -> bool:
+        return (
+            self.system.is_cooling_allowed
+            and self.zone.desired_room_temperature_setpoint_heating > 0
+            and self.zone.desired_room_temperature_setpoint_cooling > 0
+        )
+
+    @property
     def supported_features(self) -> ClimateEntityFeature:
         """Return the list of supported features."""
+        if self.supports_target_temperature_range:
+            target_temperature_feature = ClimateEntityFeature.TARGET_TEMPERATURE_RANGE
+        else:
+            target_temperature_feature = ClimateEntityFeature.TARGET_TEMPERATURE
         return (
-            ClimateEntityFeature.TARGET_TEMPERATURE
+            target_temperature_feature
             | ClimateEntityFeature.PRESET_MODE
             | ClimateEntityFeature.TURN_OFF
             | ClimateEntityFeature.TURN_ON
@@ -526,6 +635,20 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         return self.zone.desired_room_temperature_setpoint
 
     @property
+    def target_temperature_low(self) -> float | None:
+        if self.supports_target_temperature_range:
+            return self.zone.desired_room_temperature_setpoint_heating
+        else:
+            return None
+
+    @property
+    def target_temperature_high(self) -> float | None:
+        if self.supports_target_temperature_range:
+            return self.zone.desired_room_temperature_setpoint_cooling
+        else:
+            return None
+
+    @property
     def current_temperature(self) -> float | None:
         return self.zone.current_room_temperature
 
@@ -535,16 +658,25 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def hvac_mode(self) -> HVACMode:
+        if self.system.manual_cooling_ongoing:
+            return self.hvac_mode_map.get(HVAC_MODE_COOLING_FOR_DAYS)
         return self.hvac_mode_map.get(self.zone.heating.operation_mode_heating)
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode):
-        mode = [k for k, v in self.hvac_mode_map.items() if v == hvac_mode][0]
-        await self.set_zone_operating_mode(mode)
+        if hvac_mode == HVACMode.COOL:
+            if not self.system.manual_cooling_ongoing:
+                await self.set_cooling_for_days()
+        else:
+            if self.system.manual_cooling_ongoing:
+                await self.coordinator.api.cancel_cooling_for_days(self.system)
+            mode = [k for k, v in self.hvac_mode_map.items() if v == hvac_mode][0]
+            await self.set_zone_operating_mode(mode, refresh_delay=20)
 
     async def set_zone_operating_mode(
         self,
-        mode: ZoneHeatingOperatingMode | ZoneHeatingOperatingModeVRC700 | str,
+        mode: ZoneOperatingMode | ZoneOperatingModeVRC700 | str,
         operating_type: str = "heating",
+        refresh_delay: int | None = None,
     ):
         """
         Set operating mode for either cooling and heating HVAC mode
@@ -553,23 +685,24 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         Parameters:
             mode: The new operating mode to set
             operating_type: Whether to set the mode for cooling or heating
+            refresh_delay: How long to wait before refreshing the data
         """
         if self.zone.control_identifier.is_vrc700:
-            if mode not in ZoneHeatingOperatingModeVRC700:
+            if mode not in ZoneOperatingModeVRC700:
                 raise ValueError(
-                    f"Invalid mode, use one of {', '.join(ZoneHeatingOperatingModeVRC700)}"
+                    f"Invalid mode, use one of {', '.join(ZoneOperatingModeVRC700)}"
                 )
         else:
-            if mode not in ZoneHeatingOperatingMode:
+            if mode not in ZoneOperatingMode:
                 raise ValueError(
-                    f"Invalid mode, use one of {', '.join(ZoneHeatingOperatingMode)}"
+                    f"Invalid mode, use one of {', '.join(ZoneOperatingMode)}"
                 )
         await self.coordinator.api.set_zone_operating_mode(
             self.zone,
             mode,
             operating_type,
         )
-        await self.coordinator.async_request_refresh_delayed()
+        await self.coordinator.async_request_refresh_delayed(delay=refresh_delay)
 
     @property
     def hvac_action(self) -> HVACAction | None:
@@ -591,32 +724,52 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             "Setting temperature on %s with params %s", self.zone.name, kwargs
         )
         temperature = kwargs.get(ATTR_TEMPERATURE)
-        if not temperature:
-            return
+        target_temp_low = kwargs.get(ATTR_TARGET_TEMP_LOW)
+        target_temp_high = kwargs.get(ATTR_TARGET_TEMP_HIGH)
 
-        if self.zone.heating.operation_mode_heating == ZoneHeatingOperatingMode.MANUAL:
-            _LOGGER.debug(
-                f"Setting manual mode setpoint on {self.zone.name} to {temperature}"
-            )
-            await self.set_manual_mode_setpoint(temperature=temperature)
-        else:
-            if self.time_program_overwrite and not self.preset_mode == PRESET_BOOST:
-                _LOGGER.debug(
-                    "Setting time program temperature in %s to %s",
-                    self.zone.name,
-                    temperature,
+        if target_temp_low is not None and target_temp_high is not None:
+            if self.zone.control_identifier.is_vrc700:
+                raise ValueError(
+                    "Setting target temperature range not supported on VRC700"
                 )
-                await self.coordinator.api.set_time_program_temperature(
-                    self.zone,
-                    "heating",  # TODO: Cooling?
-                    temperature=temperature,
-                )
-                await self.coordinator.async_request_refresh_delayed()
+            _LOGGER.debug("Setting target temperature range on %s", self.zone.name)
+            if target_temp_low != self.zone.desired_room_temperature_setpoint_heating:
+                await self.set_quick_veto(temperature=target_temp_low)
+            if self.zone.cooling.operation_mode_cooling == ZoneOperatingMode.MANUAL:
+                if target_temp_high != self.zone.cooling.manual_mode_setpoint_cooling:
+                    await self.set_manual_mode_setpoint(
+                        temperature=target_temp_high,
+                        setpoint_type="cooling",
+                    )
+            elif (
+                self.zone.cooling.operation_mode_cooling
+                == ZoneOperatingMode.TIME_CONTROLLED
+            ):
+                if target_temp_high != self.zone.cooling.setpoint_cooling:
+                    await self.set_time_controlled_cooling_setpoint(
+                        temperature=target_temp_high
+                    )
+        elif temperature is not None:
+            if self.zone.heating.operation_mode_heating == ZoneOperatingMode.MANUAL:
+                await self.set_manual_mode_setpoint(temperature=temperature)
             else:
-                _LOGGER.debug(
-                    "Setting quick veto on %s to %s", self.zone.name, temperature
-                )
-                await self.set_quick_veto(temperature=temperature)
+                if self.time_program_overwrite and not self.preset_mode == PRESET_BOOST:
+                    _LOGGER.debug(
+                        "Setting time program temperature in %s to %s",
+                        self.zone.name,
+                        temperature,
+                    )
+                    await self.coordinator.api.set_time_program_temperature(
+                        self.zone,
+                        "heating",
+                        temperature=temperature,
+                    )
+                    await self.coordinator.async_request_refresh_delayed()
+                else:
+                    _LOGGER.debug(
+                        "Setting quick veto on %s to %s", self.zone.name, temperature
+                    )
+                    await self.set_quick_veto(temperature=temperature)
 
     @property
     def preset_modes(self) -> list[str]:
@@ -649,7 +802,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             # VRC700 presets map to operating modes instead of special functions
             if preset_mode == PRESET_NONE:
                 # None can map to off or auto mode, if it's selected by the user we want auto
-                requested_mode = ZoneHeatingOperatingModeVRC700.AUTO
+                requested_mode = ZoneOperatingModeVRC700.AUTO
             elif preset_mode in ZONE_PRESET_MAP_VRC700.values():
                 requested_mode = [
                     k for k, v in ZONE_PRESET_MAP_VRC700.items() if v == preset_mode
@@ -666,21 +819,29 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                 )
             requested_mode = ZONE_PRESET_MAP[preset_mode]
             if requested_mode != self.zone.current_special_function:
-                if requested_mode == ZoneCurrentSpecialFunction.NONE:
-                    if (
-                        self.zone.current_special_function
-                        == ZoneCurrentSpecialFunction.QUICK_VETO
-                    ):
-                        # If quick veto is set, we cancel that
-                        await self.coordinator.api.cancel_quick_veto_zone_temperature(
-                            self.zone
-                        )
-                    elif (
-                        self.zone.current_special_function
-                        == ZoneCurrentSpecialFunction.HOLIDAY
-                    ):
-                        # If holiday mode is set, we cancel that instead
-                        await self.cancel_holiday()
+                # Cancel previous special function
+                if (
+                    self.zone.current_special_function
+                    == ZoneCurrentSpecialFunction.QUICK_VETO
+                    and requested_mode != ZoneCurrentSpecialFunction.QUICK_VETO
+                ):
+                    await self.coordinator.api.cancel_quick_veto_zone_temperature(
+                        self.zone
+                    )
+                elif (
+                    self.zone.current_special_function
+                    == ZoneCurrentSpecialFunction.HOLIDAY
+                    and requested_mode != ZoneCurrentSpecialFunction.HOLIDAY
+                ):
+                    await self.cancel_holiday()
+                elif (
+                    self.zone.current_special_function
+                    == ZoneCurrentSpecialFunction.VENTILATION_BOOST
+                    and requested_mode != ZoneCurrentSpecialFunction.VENTILATION_BOOST
+                ):
+                    await self.cancel_ventilation_boost()
+
+                # Set new special function
                 if requested_mode == ZoneCurrentSpecialFunction.QUICK_VETO:
                     await self.coordinator.api.quick_veto_zone_temperature(
                         self.zone,
@@ -689,6 +850,9 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                     )
                 if requested_mode == ZoneCurrentSpecialFunction.HOLIDAY:
                     await self.set_holiday()
+
+                if requested_mode == ZoneCurrentSpecialFunction.VENTILATION_BOOST:
+                    await self.set_ventilation_boost()
 
                 if requested_mode == ZoneCurrentSpecialFunction.SYSTEM_OFF:
                     # SYSTEM_OFF is a valid special function, but since there's no API endpoint we

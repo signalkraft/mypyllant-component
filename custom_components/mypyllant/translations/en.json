@@ -19,6 +19,22 @@
       "unknown": "Unexpected error"
     }
   },
+  "entity": {
+    "climate": {
+      "mypyllant_zone": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "system_off": "System Off",
+              "ventilation_boost": "Ventilation Boost",
+              "boost": "Quick Veto",
+              "away": "Holiday"
+            }
+          }
+        }
+      }
+    }
+  },
   "options": {
     "step": {
       "init": {
