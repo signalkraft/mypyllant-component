@@ -533,8 +533,6 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             "Canceling cooling for days on System %s",
             self.system.id,
         )
-        if self.system.control_identifier.is_vrc700:
-            raise ValueError("Can't cancel cooling for days on VRC700 systems")
         await self.coordinator.api.cancel_cooling_for_days(self.system)
         await self.coordinator.async_request_refresh_delayed(20)
 

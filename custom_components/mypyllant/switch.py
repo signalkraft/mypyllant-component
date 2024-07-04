@@ -40,7 +40,7 @@ async def async_setup_entry(
         if system.eebus:
             sensors.append(lambda: SystemEebusSwitch(index, coordinator))
 
-        if not system.control_identifier.is_vrc700 and system.is_cooling_allowed:
+        if system.is_cooling_allowed:
             sensors.append(
                 lambda: SystemManualCoolingSwitch(index, coordinator, config)
             )
