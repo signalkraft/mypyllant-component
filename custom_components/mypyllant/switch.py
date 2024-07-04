@@ -15,6 +15,7 @@ from custom_components.mypyllant.utils import (
     EntityList,
     ManualCoolingEntity,
     ZoneCoordinatorEntity,
+    SystemCoordinatorEntity,
 )
 from myPyllant.enums import ZoneCurrentSpecialFunction
 from myPyllant.utils import get_default_holiday_dates
@@ -36,6 +37,8 @@ async def async_setup_entry(
     sensors: EntityList[SwitchEntity] = EntityList()
     for index, system in enumerate(coordinator.data):
         sensors.append(lambda: SystemHolidaySwitch(index, coordinator, config))
+        if system.eebus:
+            sensors.append(lambda: SystemEebusSwitch(index, coordinator))
 
         if not system.control_identifier.is_vrc700 and system.is_cooling_allowed:
             sensors.append(
@@ -115,6 +118,42 @@ class SystemManualCoolingSwitch(ManualCoolingEntity, SwitchEntity):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_manual_cooling_switch"
+
+
+class SystemEebusSwitch(SystemCoordinatorEntity, SwitchEntity):
+    _attr_icon = "mdi:check-network"
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} EEBUS"
+
+    @property
+    def available(self) -> bool:
+        return (
+            self.system.eebus.get("spine_capable", False)
+            if self.system.eebus
+            else False
+        )
+
+    @property
+    def is_on(self):
+        return (
+            self.system.eebus.get("spine_enabled", False)
+            if self.system.eebus
+            else False
+        )
+
+    async def async_turn_on(self, **kwargs):
+        await self.coordinator.api.toggle_eebus(self.system, enabled=True)
+        await self.coordinator.async_request_refresh_delayed()
+
+    async def async_turn_off(self, **kwargs):
+        await self.coordinator.api.toggle_eebus(self.system, enabled=False)
+        await self.coordinator.async_request_refresh_delayed()
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_eebus_switch"
 
 
 class ZoneVentilationBoostSwitch(ZoneCoordinatorEntity, SwitchEntity):

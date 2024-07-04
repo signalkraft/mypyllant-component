@@ -23,6 +23,10 @@ from custom_components.mypyllant.const import (
     DEFAULT_FETCH_MPC,
     OPTION_FETCH_AMBISENSE_ROOMS,
     DEFAULT_FETCH_AMBISENSE_ROOMS,
+    OPTION_FETCH_ENERGY_MANAGEMENT,
+    DEFAULT_FETCH_ENERGY_MANAGEMENT,
+    OPTION_FETCH_EEBUS,
+    DEFAULT_FETCH_EEBUS,
 )
 from custom_components.mypyllant.utils import is_quota_exceeded_exception
 from myPyllant.api import MyPyllantAPI
@@ -163,6 +167,10 @@ class SystemCoordinator(MyPyllantCoordinator):
         include_ambisense_rooms = self.entry.options.get(
             OPTION_FETCH_AMBISENSE_ROOMS, DEFAULT_FETCH_AMBISENSE_ROOMS
         )
+        include_energy_management = self.entry.options.get(
+            OPTION_FETCH_ENERGY_MANAGEMENT, DEFAULT_FETCH_ENERGY_MANAGEMENT
+        )
+        include_eebus = self.entry.options.get(OPTION_FETCH_EEBUS, DEFAULT_FETCH_EEBUS)
         _LOGGER.debug("Starting async update data for SystemCoordinator")
         try:
             await self._refresh_session()
@@ -175,6 +183,8 @@ class SystemCoordinator(MyPyllantCoordinator):
                     include_rts,
                     include_mpc,
                     include_ambisense_rooms,
+                    include_energy_management,
+                    include_eebus,
                 )
             ]
             return data
@@ -208,9 +218,10 @@ class DailyDataCoordinator(MyPyllantCoordinator):
                 )
                 end = start + timedelta(days=1)
                 _LOGGER.debug(
-                    "Getting daily data for %s from %s to %s", system, start, end
+                    "Getting daily data for %s from %s to %s", system.id, start, end
                 )
                 if len(system.devices) == 0:
+                    _LOGGER.debug("No devices in %s", system.id)
                     continue
                 data[system.id] = {
                     "home_name": system.home.home_name or system.home.nomenclature,
@@ -218,7 +229,7 @@ class DailyDataCoordinator(MyPyllantCoordinator):
                 }
                 for device in system.devices:
                     device_data = self.api.get_data_by_device(
-                        device, DeviceDataBucketResolution.DAY, start, end
+                        device, DeviceDataBucketResolution.HOUR, start, end
                     )
                     data[system.id]["devices_data"].append(
                         [da async for da in device_data]

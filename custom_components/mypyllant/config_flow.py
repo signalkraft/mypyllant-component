@@ -45,6 +45,12 @@ from .const import (
     DEFAULT_FETCH_RTS,
     OPTION_FETCH_MPC,
     DEFAULT_FETCH_MPC,
+    OPTION_FETCH_AMBISENSE_ROOMS,
+    DEFAULT_FETCH_AMBISENSE_ROOMS,
+    OPTION_FETCH_ENERGY_MANAGEMENT,
+    DEFAULT_FETCH_ENERGY_MANAGEMENT,
+    OPTION_FETCH_EEBUS,
+    DEFAULT_FETCH_EEBUS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -197,6 +203,27 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         default=self.config_entry.options.get(
                             OPTION_FETCH_MPC,
                             DEFAULT_FETCH_MPC,
+                        ),
+                    ): bool,
+                    vol.Required(
+                        OPTION_FETCH_AMBISENSE_ROOMS,
+                        default=self.config_entry.options.get(
+                            OPTION_FETCH_AMBISENSE_ROOMS,
+                            DEFAULT_FETCH_AMBISENSE_ROOMS,
+                        ),
+                    ): bool,
+                    vol.Required(
+                        OPTION_FETCH_ENERGY_MANAGEMENT,
+                        default=self.config_entry.options.get(
+                            OPTION_FETCH_ENERGY_MANAGEMENT,
+                            DEFAULT_FETCH_ENERGY_MANAGEMENT,
+                        ),
+                    ): bool,
+                    vol.Required(
+                        OPTION_FETCH_EEBUS,
+                        default=self.config_entry.options.get(
+                            OPTION_FETCH_EEBUS,
+                            DEFAULT_FETCH_EEBUS,
                         ),
                     ): bool,
                 }

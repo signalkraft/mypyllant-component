@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import datetime
 import logging
+import re
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -110,18 +111,22 @@ class BaseCalendarEntity(CalendarEntity, ABC):
         matching_weekdays = self.time_program.matching_weekdays(time_program_day)
         return f"FREQ=WEEKLY;INTERVAL=1;BYDAY={','.join([WEEKDAYS_TO_RFC5545[d] for d in matching_weekdays])}"
 
-    def _get_weekdays_from_rrule(self, rrule: str) -> list[str]:
+    @staticmethod
+    def _get_weekdays_from_rrule(rrule: str) -> list[str]:
         by_day = [p for p in rrule.split(";") if p.startswith("BYDAY=")][0].replace(
             "BYDAY=", ""
         )
         return [RFC5545_TO_WEEKDAYS[d] for d in by_day.split(",")]
 
-    def get_setpoint_from_summary(self, summary: str):
+    @staticmethod
+    def get_setpoint_from_summary(summary: str) -> float:
+        """
+        Extracts a float temperature value from a string such as "Heating to 21.0°C on Home Zone 1 (Circuit 0)"
+        """
+        match = re.search(r"([0-9.,]+)°?C?", summary)
         try:
-            if " " in summary:
-                summary = summary.split(" ")[0]
-            return float(summary.replace("°C", ""))
-        except ValueError:
+            return float(match.group(1).replace(",", "."))  # type: ignore
+        except (ValueError, AttributeError):
             raise HomeAssistantError("Invalid setpoint, use format '21.5°C' in Summary")
 
     def _check_overlap(self):

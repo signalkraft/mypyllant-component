@@ -26,7 +26,6 @@ from myPyllant.models import (
     Circuit,
     Device,
     DeviceData,
-    DeviceDataBucket,
     System,
 )
 
@@ -402,9 +401,22 @@ class HomeEntity(CoordinatorEntity, SensorEntity):
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
-        rts = self.system.rts if self.system.rts else {}
-        mpc = self.system.mpc if self.system.mpc else {}
-        return self.system.home.extra_fields | self.system.extra_fields | rts | mpc
+        rts = {"rts": self.system.rts} if self.system.rts else {}
+        mpc = {"mpc": self.system.mpc} if self.system.mpc else {}
+        energy_management = (
+            {"energy_management": self.system.energy_management}
+            if self.system.energy_management
+            else {}
+        )
+        eebus = {"eebus": self.system.eebus} if self.system.eebus else {}
+        return (
+            self.system.home.extra_fields
+            | self.system.extra_fields
+            | rts
+            | mpc
+            | energy_management
+            | eebus
+        )
 
     @property
     def name_prefix(self) -> str:
@@ -813,14 +825,10 @@ class DataSensor(CoordinatorEntity, SensorEntity):
         return self.device_data.device
 
     @property
-    def data_bucket(self) -> DeviceDataBucket | None:
+    def total_consumption(self) -> float | None:
         if self.device_data is None:
             return None
-        data = [d for d in self.device_data.data if d.value is not None]
-        if len(data) > 0:
-            return data[-1]
-        else:
-            return None
+        return self.device_data.total_consumption_rounded
 
     @property
     def unique_id(self) -> str | None:
@@ -850,7 +858,7 @@ class DataSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def native_value(self):
-        return self.data_bucket.value if self.data_bucket else None
+        return self.device_data.total_consumption_rounded
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -897,11 +905,9 @@ class EfficiencySensor(CoordinatorEntity, SensorEntity):
         """
         return sum(
             [
-                v.data[-1].value
+                v.total_consumption_rounded
                 for v in self.device_data_list
-                if len(v.data)
-                and v.data[-1].value
-                and v.energy_type == "CONSUMED_ELECTRICAL_ENERGY"
+                if v.energy_type == "CONSUMED_ELECTRICAL_ENERGY"
             ]
         )
 
@@ -912,11 +918,9 @@ class EfficiencySensor(CoordinatorEntity, SensorEntity):
         """
         return sum(
             [
-                v.data[-1].value
+                v.total_consumption_rounded
                 for v in self.device_data_list
-                if len(v.data)
-                and v.data[-1].value
-                and v.energy_type == "HEAT_GENERATED"
+                if v.energy_type == "HEAT_GENERATED"
             ]
         )
 

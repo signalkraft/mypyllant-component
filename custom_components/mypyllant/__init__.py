@@ -133,6 +133,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     async def handle_export(call: ServiceCall) -> ServiceResponse:
+        _LOGGER.debug("Exporting data with params %s", call.data)
         return {
             "export": await export.main(
                 user=username,
