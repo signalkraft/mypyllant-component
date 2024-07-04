@@ -254,6 +254,9 @@ async def async_setup_entry(
             {
                 vol.Optional("start"): vol.Coerce(as_datetime),
                 vol.Optional("end"): vol.Coerce(as_datetime),
+                vol.Optional("duration_days"): vol.All(
+                    vol.Coerce(int), vol.Clamp(min=1)
+                ),
             },
             "set_cooling_for_days",
         )
@@ -517,11 +520,12 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             self.system.id,
             kwargs,
         )
-        if self.system.control_identifier.is_vrc700:
-            raise ValueError("Can't set cooling for days on VRC700 systems")
         start = kwargs.get("start")
         end = kwargs.get("end")
-        await self.coordinator.api.set_cooling_for_days(self.system, start, end)
+        duration_days = kwargs.get("duration_days")
+        await self.coordinator.api.set_cooling_for_days(
+            self.system, start, end, duration_days
+        )
         await self.coordinator.async_request_refresh_delayed(20)
 
     async def cancel_cooling_for_days(self, **kwargs):
@@ -609,7 +613,9 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     @property
     def supports_target_temperature_range(self) -> bool:
         return (
-            self.system.is_cooling_allowed
+            self.system.is_cooling_allowed is True
+            and self.zone.desired_room_temperature_setpoint_heating is not None
+            and self.zone.desired_room_temperature_setpoint_cooling is not None
             and self.zone.desired_room_temperature_setpoint_heating > 0
             and self.zone.desired_room_temperature_setpoint_cooling > 0
         )
@@ -735,14 +741,18 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             _LOGGER.debug("Setting target temperature range on %s", self.zone.name)
             if target_temp_low != self.zone.desired_room_temperature_setpoint_heating:
                 await self.set_quick_veto(temperature=target_temp_low)
-            if self.zone.cooling.operation_mode_cooling == ZoneOperatingMode.MANUAL:
+            if (
+                self.zone.cooling
+                and self.zone.cooling.operation_mode_cooling == ZoneOperatingMode.MANUAL
+            ):
                 if target_temp_high != self.zone.cooling.manual_mode_setpoint_cooling:
                     await self.set_manual_mode_setpoint(
                         temperature=target_temp_high,
                         setpoint_type="cooling",
                     )
             elif (
-                self.zone.cooling.operation_mode_cooling
+                self.zone.cooling
+                and self.zone.cooling.operation_mode_cooling
                 == ZoneOperatingMode.TIME_CONTROLLED
             ):
                 if target_temp_high != self.zone.cooling.setpoint_cooling:

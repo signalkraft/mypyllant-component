@@ -119,16 +119,25 @@ set_cooling_for_days:
   fields:
     start:
       name: Start Date
-      description: Optional start date of the cooling period, defaults to now
+      description: Optional start date of the cooling period, defaults to now (not supported on VRC700 controllers)
       example: '"2023-01-10 14:00:00"'
       selector:
         datetime:
     end:
       name: End Date
-      description: Optional end date of the cooling period, defaults to one year in the future
+      description: Optional end date of the cooling period, defaults to one year in the future (not supported on VRC700 controllers)
       example: '"2023-01-01 0:00:00"'
       selector:
         datetime:
+    duration_days:
+      name: Duration
+      description: Duration in days (only supported on VRC700 controllers)
+      example: 3
+      selector:
+        number:
+          min: 0
+          step: 0.1
+          mode: box
 
 cancel_cooling_for_days:
   name: Cancel Cooling for Days
