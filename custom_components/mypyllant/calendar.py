@@ -28,7 +28,7 @@ from myPyllant.models import (
     RoomTimeProgram,
     System,
 )
-from myPyllant.enums import ZoneTimeProgramType
+from myPyllant.enums import ZoneOperatingType
 
 from . import SystemCoordinator
 from .const import DOMAIN, WEEKDAYS_TO_RFC5545, RFC5545_TO_WEEKDAYS
@@ -309,7 +309,7 @@ class ZoneHeatingCalendar(ZoneCoordinatorEntity, BaseCalendarEntity):
 
     async def update_time_program(self):
         await self.coordinator.api.set_zone_time_program(
-            self.zone, str(ZoneTimeProgramType.HEATING), self.time_program
+            self.zone, str(ZoneOperatingType.HEATING), self.time_program
         )
         await self.coordinator.async_request_refresh_delayed()
 
@@ -348,7 +348,7 @@ class ZoneCoolingCalendar(ZoneCoordinatorEntity, BaseCalendarEntity):
 
     async def update_time_program(self):
         await self.coordinator.api.set_zone_time_program(
-            self.zone, str(ZoneTimeProgramType.COOLING), self.time_program
+            self.zone, str(ZoneOperatingType.COOLING), self.time_program
         )
         await self.coordinator.async_request_refresh_delayed()
 

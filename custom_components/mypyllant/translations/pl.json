@@ -46,6 +46,7 @@
           "holiday_duration": "Domyślny czas trwania wakacji w dniach",
           "time_program_overwrite": "Kontrola temperatury nadpisuje program czasowy zamiast ustawiać szybkie weto",
           "default_holiday_setpoint": "Domyślna temperatura wakacyjna",
+          "manual_cooling_duration": "Domyślny czas trwania ręcznego chłodzenia w dniach",
           "country": "Kraj",
           "brand": "Marka",
           "fetch_rts": "Pobierz statystyki w czasie rzeczywistym (nie jest obsługiwane na każdym systemie)",

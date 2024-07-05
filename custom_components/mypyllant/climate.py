@@ -30,11 +30,7 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.template import as_datetime
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from myPyllant.const import (
-    DEFAULT_MANUAL_SETPOINT_TYPE,
-    DEFAULT_QUICK_VETO_DURATION,
-    ZONE_MANUAL_SETPOINT_TYPES,
-)
+from myPyllant.const import DEFAULT_QUICK_VETO_DURATION
 from myPyllant.models import (
     System,
     Zone,
@@ -47,6 +43,7 @@ from myPyllant.enums import (
     ZoneCurrentSpecialFunction,
     CircuitState,
     AmbisenseRoomOperationMode,
+    ZoneOperatingType,
 )
 
 from custom_components.mypyllant.utils import (
@@ -78,14 +75,15 @@ from .const import (
     SERVICE_SET_TIME_CONTROLLED_COOLING_SETPOINT,
     SERVICE_SET_VENTILATION_BOOST,
     SERVICE_CANCEL_VENTILATION_BOOST,
+    DEFAULT_MANUAL_SETPOINT_TYPE,
 )
 from .ventilation_climate import _FAN_STAGE_TYPE_OPTIONS, VentilationClimate
 
 _LOGGER = logging.getLogger(__name__)
 
 _ZONE_MANUAL_SETPOINT_TYPES_OPTIONS = [
-    selector.SelectOptionDict(value=k, label=v)
-    for k, v in ZONE_MANUAL_SETPOINT_TYPES.items()
+    selector.SelectOptionDict(value=v.value, label=v.title())
+    for v in list(ZoneOperatingType)
 ]
 
 _ZONE_OPERATING_MODE_OPTIONS = [
@@ -94,22 +92,6 @@ _ZONE_OPERATING_MODE_OPTIONS = [
         [e.value for e in list(ZoneOperatingMode) + list(ZoneOperatingModeVRC700)]
     )
 ]
-
-ZONE_PRESET_MAP = {
-    PRESET_BOOST: ZoneCurrentSpecialFunction.QUICK_VETO,
-    PRESET_ECO: ZoneCurrentSpecialFunction.NONE,
-    PRESET_NONE: ZoneCurrentSpecialFunction.NONE,
-    PRESET_AWAY: ZoneCurrentSpecialFunction.HOLIDAY,
-    "system_off": ZoneCurrentSpecialFunction.SYSTEM_OFF,
-    "ventilation_boost": ZoneCurrentSpecialFunction.VENTILATION_BOOST,
-}
-
-ZONE_PRESET_MAP_VRC700 = {
-    ZoneOperatingModeVRC700.OFF: PRESET_NONE,
-    ZoneOperatingModeVRC700.DAY: PRESET_COMFORT,
-    ZoneOperatingModeVRC700.AUTO: PRESET_NONE,
-    ZoneOperatingModeVRC700.SET_BACK: PRESET_ECO,
-}
 
 ZONE_HVAC_ACTION_MAP = {
     CircuitState.STANDBY: HVACAction.IDLE,
@@ -421,6 +403,27 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         return mode_map
 
     @property
+    def preset_mode_map(self):
+        if self.zone.control_identifier.is_vrc700:
+            return {
+                ZoneOperatingModeVRC700.OFF: PRESET_NONE,
+                ZoneOperatingModeVRC700.DAY: PRESET_COMFORT,
+                ZoneOperatingModeVRC700.AUTO: PRESET_NONE,
+                ZoneOperatingModeVRC700.SET_BACK: PRESET_ECO,
+            }
+        else:
+            preset_modes = {
+                PRESET_BOOST: ZoneCurrentSpecialFunction.QUICK_VETO,
+                PRESET_NONE: ZoneCurrentSpecialFunction.NONE,
+                PRESET_AWAY: ZoneCurrentSpecialFunction.HOLIDAY,
+                "system_off": ZoneCurrentSpecialFunction.SYSTEM_OFF,
+                "ventilation_boost": ZoneCurrentSpecialFunction.VENTILATION_BOOST,
+            }
+        if self.zone.is_eco_mode:
+            preset_modes[PRESET_ECO] = ZoneCurrentSpecialFunction.NONE
+        return preset_modes
+
+    @property
     def default_quick_veto_duration(self):
         return self.config.options.get(
             OPTION_DEFAULT_QUICK_VETO_DURATION, DEFAULT_QUICK_VETO_DURATION
@@ -634,8 +637,6 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def target_temperature(self) -> float | None:
-        if self.zone.is_eco_mode:
-            return self.zone.heating.set_back_temperature
         return self.zone.desired_room_temperature_setpoint
 
     @property
@@ -664,17 +665,21 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     def hvac_mode(self) -> HVACMode:
         if self.system.manual_cooling_ongoing:
             return self.hvac_mode_map.get(HVAC_MODE_COOLING_FOR_DAYS)
-        return self.hvac_mode_map.get(self.zone.heating.operation_mode_heating)
+        return self.hvac_mode_map.get(self.zone.active_operation_mode)
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode):
         if hvac_mode == HVACMode.COOL:
             if not self.system.manual_cooling_ongoing:
                 await self.set_cooling_for_days()
         else:
+            refresh_delay = 10
             if self.system.manual_cooling_ongoing:
                 await self.coordinator.api.cancel_cooling_for_days(self.system)
+                refresh_delay = 20
             mode = [k for k, v in self.hvac_mode_map.items() if v == hvac_mode][0]
-            await self.set_zone_operating_mode(mode, refresh_delay=20)
+            await self.set_zone_operating_mode(
+                mode, self.zone.active_operating_type, refresh_delay=refresh_delay
+            )
 
     async def set_zone_operating_mode(
         self,
@@ -701,6 +706,12 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                 raise ValueError(
                     f"Invalid mode, use one of {', '.join(ZoneOperatingMode)}"
                 )
+        _LOGGER.debug(
+            "Setting %s on %s to %s",
+            operating_type,
+            self.zone.name,
+            mode,
+        )
         await self.coordinator.api.set_zone_operating_mode(
             self.zone,
             mode,
@@ -781,20 +792,20 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     @property
     def preset_modes(self) -> list[str]:
         if self.zone.control_identifier.is_vrc700:
-            return list({v for v in ZONE_PRESET_MAP_VRC700.values()})
+            return list({v for v in self.preset_mode_map.values()})
         else:
-            return [k for k in ZONE_PRESET_MAP.keys()]
+            return list(self.preset_mode_map.keys())
 
     @property
     def preset_mode(self) -> str:
         if self.zone.control_identifier.is_vrc700:
-            return ZONE_PRESET_MAP_VRC700[self.zone.heating.operation_mode_heating]  # type: ignore
+            return self.preset_mode_map[self.zone.active_operation_mode]  # type: ignore
         else:
             if self.zone.is_eco_mode:
                 return PRESET_ECO
             return [
                 k
-                for k, v in ZONE_PRESET_MAP.items()
+                for k, v in self.preset_mode_map.items()
                 if v == self.zone.current_special_function
             ][0]
 
@@ -810,21 +821,21 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             if preset_mode == PRESET_NONE:
                 # None can map to off or auto mode, if it's selected by the user we want auto
                 requested_mode = ZoneOperatingModeVRC700.AUTO
-            elif preset_mode in ZONE_PRESET_MAP_VRC700.values():
+            elif preset_mode in self.preset_mode_map.values():
                 requested_mode = [
-                    k for k, v in ZONE_PRESET_MAP_VRC700.items() if v == preset_mode
+                    k for k, v in self.preset_mode_map.items() if v == preset_mode
                 ][0]
             else:
                 raise ValueError(
-                    f'Invalid preset mode, use one of {", ".join(set(ZONE_PRESET_MAP_VRC700.values()))}'
+                    f'Invalid preset mode, use one of {", ".join(set(self.preset_mode_map.values()))}'
                 )
             await self.set_zone_operating_mode(requested_mode)
         else:
-            if preset_mode not in ZONE_PRESET_MAP:
+            if preset_mode not in self.preset_mode_map:
                 raise ValueError(
-                    f'Invalid preset mode, use one of {", ".join(ZONE_PRESET_MAP.keys())}'
+                    f'Invalid preset mode {preset_mode}, use one of {", ".join(self.preset_mode_map.keys())}'
                 )
-            requested_mode = ZONE_PRESET_MAP[preset_mode]
+            requested_mode = self.preset_mode_map[preset_mode]
             if requested_mode != self.zone.current_special_function:
                 # Cancel previous special function
                 if (

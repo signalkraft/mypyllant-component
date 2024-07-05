@@ -102,13 +102,9 @@ class SystemManualCoolingSwitch(ManualCoolingEntity, SwitchEntity):
         return self.system.manual_cooling_planned
 
     async def async_turn_on(self, **kwargs):
-        _, end = get_default_holiday_dates(
-            self.manual_cooling_start,
-            self.manual_cooling_end,
-            self.system.timezone,
-            self.default_manual_cooling_duration,
+        await self.coordinator.api.set_cooling_for_days(
+            self.system, duration_days=self.default_manual_cooling_duration
         )
-        await self.coordinator.api.set_cooling_for_days(self.system, end=end)
         await self.coordinator.async_request_refresh_delayed(20)
 
     async def async_turn_off(self, **kwargs):

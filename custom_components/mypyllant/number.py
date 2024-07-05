@@ -35,6 +35,8 @@ async def async_setup_entry(
     sensors: EntityList[NumberEntity] = EntityList()
     for index, system in enumerate(coordinator.data):
         sensors.append(lambda: SystemHolidayDurationNumber(index, coordinator))
+        if system.is_cooling_allowed:
+            sensors.append(lambda: SystemManualCoolingDays(index, coordinator))
 
         for zone_index, zone in enumerate(system.zones):
             sensors.append(
@@ -114,6 +116,37 @@ class SystemHolidayDurationNumber(HolidayEntity, NumberEntity):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_holiday_duration_remaining"
+
+
+class SystemManualCoolingDays(SystemCoordinatorEntity, NumberEntity):
+    _attr_native_unit_of_measurement = UnitOfTime.DAYS
+    _attr_icon = "mdi:snowflake"
+    _attr_step = 1  # type: ignore
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} Manual Cooling Duration"
+
+    @property
+    def native_value(self):
+        return self.system.manual_cooling_days or 0
+
+    async def async_set_native_value(self, value: float) -> None:
+        if value == 0:
+            await self.coordinator.api.cancel_cooling_for_days(self.system)
+        else:
+            await self.coordinator.api.set_cooling_for_days(
+                self.system, duration_days=int(value)
+            )
+        await self.coordinator.async_request_refresh_delayed(20)
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_manual_cooling_days"
+
+    @property
+    def available(self) -> bool:
+        return self.system.is_cooling_allowed
 
 
 class ZoneQuickVetoDurationNumber(ZoneCoordinatorEntity, NumberEntity):

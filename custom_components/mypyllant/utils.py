@@ -11,7 +11,12 @@ from aiohttp.client_exceptions import ClientResponseError
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from custom_components.mypyllant.const import DOMAIN, OPTION_DEFAULT_HOLIDAY_DURATION
+from custom_components.mypyllant.const import (
+    DOMAIN,
+    OPTION_DEFAULT_HOLIDAY_DURATION,
+    OPTION_DEFAULT_MANUAL_COOLING_DURATION,
+    DEFAULT_MANUAL_COOLING_DURATION,
+)
 from myPyllant.const import DEFAULT_HOLIDAY_DURATION
 
 if typing.TYPE_CHECKING:
@@ -165,7 +170,7 @@ class ManualCoolingEntity(SystemCoordinatorEntity):
     @property
     def default_manual_cooling_duration(self):
         return self.config.options.get(
-            OPTION_DEFAULT_HOLIDAY_DURATION, DEFAULT_HOLIDAY_DURATION
+            OPTION_DEFAULT_MANUAL_COOLING_DURATION, DEFAULT_MANUAL_COOLING_DURATION
         )
 
     @property
@@ -177,6 +182,7 @@ class ManualCoolingEntity(SystemCoordinatorEntity):
             else None,
             "manual_cooling_start_date_time": self.manual_cooling_start,
             "manual_cooling_end_date_time": self.manual_cooling_end,
+            "manual_cooling_days_remaining": self.system.manual_cooling_days,
         }
 
     @property

@@ -51,6 +51,8 @@ from .const import (
     DEFAULT_FETCH_ENERGY_MANAGEMENT,
     OPTION_FETCH_EEBUS,
     DEFAULT_FETCH_EEBUS,
+    OPTION_DEFAULT_MANUAL_COOLING_DURATION,
+    DEFAULT_MANUAL_COOLING_DURATION,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -162,6 +164,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             DEFAULT_HOLIDAY_SETPOINT,
                         ),
                     ): vol.All(vol.Coerce(float), vol.Clamp(min=0, max=30)),
+                    vol.Required(
+                        OPTION_DEFAULT_MANUAL_COOLING_DURATION,
+                        default=self.config_entry.options.get(
+                            OPTION_DEFAULT_MANUAL_COOLING_DURATION,
+                            DEFAULT_MANUAL_COOLING_DURATION,
+                        ),
+                    ): positive_int,
                     vol.Required(
                         OPTION_TIME_PROGRAM_OVERWRITE,
                         default=self.config_entry.options.get(

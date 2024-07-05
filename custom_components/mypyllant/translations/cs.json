@@ -46,6 +46,7 @@
           "holiday_duration": "Nastavená doba trvání dovolené ve dnech",
           "time_program_overwrite": "Regulátory teploty přepisují časový program namísto nastavení rychlého veta",
           "default_holiday_setpoint": "Výchozí teplota pro dovolenou",
+          "manual_cooling_duration": "Doba trvání manuálního chlazení v dnech",
           "country": "Země",
           "brand": "Značka",
           "fetch_rts": "Načíst statistiky v reálném čase (není podporováno na každém systému)",
