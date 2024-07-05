@@ -19,6 +19,22 @@
       "unknown": "Neočakávaná chyba"
     }
   },
+  "entity": {
+    "climate": {
+      "mypyllant_zone": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "system_off": "Vypnuté",
+              "ventilation_boost": "Ventilačný Boost",
+              "boost": "Boost",
+              "away": "Preč"
+            }
+          }
+        }
+      }
+    }
+  },
   "options": {
     "step": {
       "init": {
@@ -34,7 +50,9 @@
           "brand": "Značka",
           "fetch_rts": "Načítať štatistiky v reálnom čase (nie je podporované na každom systéme)",
           "fetch_mpc": "Načítať využitie energie v reálnom čase (nie je podporované na každom systéme)",
-          "fetch_ambisense_rooms": "Načítať termostaty miestnosti Ambisense"
+          "fetch_ambisense_rooms": "Načítať termostaty miestnosti Ambisense",
+          "fetch_energy_management": "Načítať energetické údaje",
+          "fetch_eebus": "Načítať údaje z EEBUS"
         }
       }
     }

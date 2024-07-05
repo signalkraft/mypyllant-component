@@ -19,6 +19,22 @@
       "unknown": "Unerwarteter Fehler, siehe Logs"
     }
   },
+  "entity": {
+    "climate": {
+      "mypyllant_zone": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "system_off": "System aus",
+              "ventilation_boost": "Lüftungs-Boost",
+              "boost": "Quick Veto",
+              "away": "Abwesenheit"
+            }
+          }
+        }
+      }
+    }
+  },
   "options": {
     "step": {
       "init": {
@@ -34,7 +50,9 @@
           "brand": "Hersteller",
           "fetch_rts": "Echtzeit-Statistiken abrufen (nicht auf jedem System unterstützt)",
           "fetch_mpc": "Echtzeit-Stromverbrauch abrufen (nicht auf jedem System unterstützt)",
-          "fetch_ambisense_rooms": "Ambisense Raumthermostate abrufen"
+          "fetch_ambisense_rooms": "Ambisense Raumthermostate abrufen",
+          "fetch_energy_management": "Energiemanagement-Daten abrufen",
+          "fetch_eebus": "EEBUS-Daten abrufen"
         }
       }
     }

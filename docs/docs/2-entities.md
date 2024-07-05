@@ -12,50 +12,64 @@ or the naming of your heating zones (in this case "Zone 1"):
 
 ## Sample Entities
 
-| Entity                                                                        | Unit | Class        | Sample          |
-|-------------------------------------------------------------------------------|------|--------------|-----------------|
-| Home Outdoor Temperature                                                      | °C   | temperature  | 10.3            |
-| Home System Water Pressure                                                    | bar  | pressure     | 1.8             |
-| Home Firmware Version                                                         |      |              | 0357.40.33      |
-| Home Zone 1 (Circuit 0) Desired Temperature                                   | °C   | temperature  | 22.0            |
-| Home Zone 1 (Circuit 0) Current Temperature                                   | °C   | temperature  | 22.4            |
-| Home Zone 1 (Circuit 0) Humidity                                              | %    | humidity     | 41.0            |
-| Home Zone 1 (Circuit 0) Heating Operating Mode                                |      |              | Time Controlled |
-| Home Zone 1 (Circuit 0) Heating State                                         |      |              | Idle            |
-| Home Zone 1 (Circuit 0) Current Special Function                              |      |              | None            |
-| Home Circuit 0 State                                                          |      |              | STANDBY         |
-| Home Circuit 0 Current Flow Temperature                                       | °C   | temperature  | 21.0            |
-| Home Circuit 0 Heating Curve                                                  |      |              | 1.19            |
-| Home Domestic Hot Water 0 Tank Temperature                                    | °C   | temperature  | 48.0            |
-| Home Domestic Hot Water 0 Setpoint                                            | °C   | temperature  | 52.0            |
-| Home Domestic Hot Water 0 Operation Mode                                      |      |              | Time Controlled |
-| Home Domestic Hot Water 0 Current Special Function                            |      |              | Regular         |
-| Home Heating Energy Efficiency                                                |      |              | 3.6             |
-| Home Device 0 aroTHERM plus Heating Energy Efficiency                         |      |              | 3.6             |
-| Home Device 0 aroTHERM plus Consumed Electrical Energy Domestic Hot Water     | Wh   | energy       | 2000.0          |
-| Home Device 0 aroTHERM plus Consumed Electrical Energy Heating                | Wh   | energy       | 12000.0         |
-| Home Device 0 aroTHERM plus Earned Environment Energy Domestic Hot Water      | Wh   | energy       | 4000.0          |
-| Home Device 0 aroTHERM plus Earned Environment Energy Heating                 | Wh   | energy       | 33000.0         |
-| Home Device 0 aroTHERM plus Heat Generated Heating                            | Wh   | energy       | 45000.0         |
-| Home Device 0 aroTHERM plus Heat Generated Domestic Hot Water                 | Wh   | energy       | 6000.0          |
-| Home Device 1 Hydraulic Station Heating Energy Efficiency                     |      |              | unknown         |
-| Home Device 1 Hydraulic Station Consumed Electrical Energy Domestic Hot Water | Wh   | energy       | 0.0             |
-| Home Device 1 Hydraulic Station Consumed Electrical Energy Heating            | Wh   | energy       | 0.0             |
-| Home Trouble Codes                                                            |      | problem      | off             |
-| Home Online Status                                                            |      | connectivity | on              |
-| Home Firmware Update Required                                                 |      | update       | off             |
-| Home Firmware Update Enabled                                                  |      |              | on              |
-| Home Circuit 0 Cooling Allowed                                                |      |              | off             |
-| Home Zone 1 (Circuit 0) Climate                                               |      |              | auto            |
-| Home Away Mode Start Date                                                     |      |              | unknown         |
-| Home Away Mode End Date                                                       |      |              | unknown         |
-| Home Holiday Duration Remaining                                               | d    |              | 0               |
-| Home Zone 1 (Circuit 0) Quick Veto Duration                                   | h    |              | unavailable     |
-| Home Domestic Hot Water 0                                                     |      |              | Time Controlled |
-| Home Zone 1 (Circuit 0) Heating Schedule                                      |      |              | on              |
-| Home Domestic Hot Water 0 Schedule                                            |      |              | on              |
-| Home Away Mode                                                                |      |              | off             |
-| Home Domestic Hot Water 0 Boost                                               |      |              | off             |
+| Entity                                                                        | Unit   | Class        | Sample                    |
+|-------------------------------------------------------------------------------|--------|--------------|---------------------------|
+| Home                                                                          |        |              | 0                         |
+| Home Trouble Codes                                                            |        | problem      | off                       |
+| Home Online Status                                                            |        | connectivity | on                        |
+| Home Firmware Update Required                                                 |        | update       | off                       |
+| Home Firmware Update Enabled                                                  |        |              | on                        |
+| Home EEBUS Enabled                                                            |        |              | off                       |
+| Home EEBUS Capable                                                            |        |              | on                        |
+| Home Circuit 0 Cooling Allowed                                                |        |              | on                        |
+| Home Zone 1 (Circuit 0) Manual Cooling Active                                 |        |              | off                       |
+| Home Zone 1 (Circuit 0)                                                       |        |              | on                        |
+| Home Zone 1 (Circuit 0)                                                       |        |              | on                        |
+| Home Domestic Hot Water 0                                                     |        |              | on                        |
+| Circulating Water in Home Domestic Hot Water 0                                |        |              | off                       |
+| Home Zone 1 (Circuit 0) Climate                                               |        |              | auto                      |
+| Home Away Mode Start Date                                                     |        |              | unknown                   |
+| Home Away Mode End Date                                                       |        |              | unknown                   |
+| Home Manual Cooling Start Date                                                |        |              | unknown                   |
+| Home Manual Cooling End Date                                                  |        |              | unknown                   |
+| Home Holiday Duration Remaining                                               | d      |              | 0                         |
+| Home Zone 1 (Circuit 0) Quick Veto Duration                                   | h      |              | unavailable               |
+| Home Outdoor Temperature                                                      | °C     | temperature  | 20.0                      |
+| Home System Water Pressure                                                    | bar    | pressure     | 1.7                       |
+| Home Firmware Version                                                         |        |              | 0357.40.35                |
+| Home Zone 1 (Circuit 0) Desired Temperature                                   | °C     | temperature  | 24.0                      |
+| Home Zone 1 (Circuit 0) Current Temperature                                   | °C     | temperature  | 21.5                      |
+| Home Zone 1 (Circuit 0) Humidity                                              | %      | humidity     | 58.0                      |
+| Home Zone 1 (Circuit 0) Heating Operating Mode                                |        |              | Time Controlled           |
+| Home Zone 1 (Circuit 0) Heating State                                         |        |              | Idle                      |
+| Home Zone 1 (Circuit 0) Current Special Function                              |        |              | None                      |
+| Home Circuit 0 State                                                          |        |              | STANDBY                   |
+| Home Circuit 0 Current Flow Temperature                                       | °C     | temperature  | 39.0                      |
+| Home Circuit 0 Heating Curve                                                  |        |              | 0.82                      |
+| Home Domestic Hot Water 0 Tank Temperature                                    | °C     | temperature  | 49.5                      |
+| Home Domestic Hot Water 0 Setpoint                                            | °C     | temperature  | 52.0                      |
+| Home Domestic Hot Water 0 Operation Mode                                      |        |              | Time Controlled           |
+| Home Domestic Hot Water 0 Current Special Function                            |        |              | Regular                   |
+| Home Heating Energy Efficiency                                                |        |              | 3.0                       |
+| Home Device 0 aroTHERM plus Heating Energy Efficiency                         |        |              | 3.0                       |
+| Home Device 0 aroTHERM plus Consumed Electrical Energy Cooling                | Wh     | energy       | 0.0                       |
+| Home Device 0 aroTHERM plus Consumed Electrical Energy Domestic Hot Water     | Wh     | energy       | 1000.0                    |
+| Home Device 0 aroTHERM plus Consumed Electrical Energy Heating                | Wh     | energy       | 0.0                       |
+| Home Device 0 aroTHERM plus Earned Environment Energy Cooling                 | Wh     | energy       | 0.0                       |
+| Home Device 0 aroTHERM plus Earned Environment Energy Domestic Hot Water      | Wh     | energy       | 2000.0                    |
+| Home Device 0 aroTHERM plus Earned Environment Energy Heating                 | Wh     | energy       | 0.0                       |
+| Home Device 0 aroTHERM plus Heat Generated Heating                            | Wh     | energy       | 0.0                       |
+| Home Device 0 aroTHERM plus Heat Generated Domestic Hot Water                 | Wh     | energy       | 3000.0                    |
+| Home Device 0 aroTHERM plus Heat Generated Cooling                            | Wh     | energy       | 0.0                       |
+| Home Device 1 Hydraulic Station Heating Energy Efficiency                     |        |              | unknown                   |
+| Home Device 1 Hydraulic Station Consumed Electrical Energy Domestic Hot Water | Wh     | energy       | 0.0                       |
+| Home Device 1 Hydraulic Station Consumed Electrical Energy Heating            | Wh     | energy       | 0.0                       |
+| Home Away Mode                                                                |        |              | off                       |
+| Home EEBUS                                                                    |        |              | off                       |
+| Home Manual Cooling                                                           |        |              | off                       |
+| Home Domestic Hot Water 0 Boost                                               |        |              | off                       |
+| Home Zone 1 (Circuit 0) Ventilation Boost                                     |        |              | off                       |
+| Home Domestic Hot Water 0                                                     |        |              | Time Controlled           |
 
 ## Climate Entities
 
@@ -123,14 +137,17 @@ depending on your devices.
 ### Home Sensor
 
 ```yaml
+migration_finished_at: redacted
+online_state: ONLINE
+cooling_start_temperature: 15
 continuous_heating_start_setpoint: -26
 alternative_point: -21
-heating_circuit_bivalence_point: 0
+heating_circuit_bivalence_point: -10
 dhw_bivalence_point: -7
 automatic_cooling_on_off: false
 adaptive_heating_curve: true
 dhw_maximum_loading_time: 60
-dhw_hysteresis: 3
+dhw_hysteresis: 5
 dhw_flow_setpoint_offset: 25
 continuous_heating_room_setpoint: 20
 hybrid_control_strategy: BIVALENCE_POINT
@@ -138,15 +155,40 @@ max_flow_setpoint_hp_error: 25
 dhw_maximum_temperature: 80
 maximum_preheating_time: 0
 paralell_tank_loading_allowed: false
-outdoor_temperature: 8.019531
-system_water_pressure: 1.6
-outdoor_temperature_average24h: 9.707031
+outdoor_temperature: 20.097656
+outdoor_temperature_average24h: 20.464844
+system_water_pressure: 1.7
+energy_manager_state: STANDBY
+system_off: false
 controller_type: VRC720
 system_scheme: 8
 backup_heater_type: CONDENSING
 backup_heater_allowed_for: DHW_AND_HEATING
+temporary_allow_backup_heater: DISABLED
 module_configuration_v_r71: 3
 energy_provide_power_cut_behavior: DISABLE_HEATPUMP_AND_BACKUP_HEATER
+smart_photovoltaic_buffer_offset: 10
+external_energy_management_activation: false
+energy_management: 
+  energy_manager:
+    available: false
+    compatible: false
+  energy_management_status:
+    thermal_storage:
+      domestic_hot_water:
+        available: false
+        selected: false
+      heating_buffer_cylinder:
+        available: false
+        selected: true
+eebus: 
+  ski: redacted
+  brand: Vaillant
+  type: Gateway
+  model: VR921
+  spine_enabled: false
+  spine_enabled_status: DETERMINED
+  pine_capable: true
 ```
 
 ### Control Error Binary Sensor

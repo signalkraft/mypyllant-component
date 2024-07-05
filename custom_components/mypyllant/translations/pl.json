@@ -19,6 +19,22 @@
       "unknown": "Nieoczekiwany błąd"
     }
   },
+  "entity": {
+    "climate": {
+      "mypyllant_zone": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "system_off": "Wyłączony",
+              "ventilation_boost": "Wentylacja",
+              "boost": "Podgrzewanie",
+              "away": "Poza domem"
+            }
+          }
+        }
+      }
+    }
+  },
   "options": {
     "step": {
       "init": {
@@ -34,7 +50,9 @@
           "brand": "Marka",
           "fetch_rts": "Pobierz statystyki w czasie rzeczywistym (nie jest obsługiwane na każdym systemie)",
           "fetch_mpc": "Pobierz rzeczywiste zużycie energii (nie jest obsługiwane na każdym systemie)",
-          "fetch_ambisense_rooms": "Pobierz termostaty pokojowe Ambisense"
+          "fetch_ambisense_rooms": "Pobierz termostaty pokojowe Ambisense",
+          "fetch_energy_management": "Pobierz zarządzanie energią",
+          "fetch_eebus": "Pobierz informacje o EEBus"
         }
       }
     }

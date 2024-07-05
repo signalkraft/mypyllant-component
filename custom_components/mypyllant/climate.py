@@ -416,9 +416,9 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                 ZoneOperatingMode.MANUAL: HVACMode.HEAT_COOL,
                 ZoneOperatingMode.TIME_CONTROLLED: HVACMode.AUTO,
             }
-            if self.system.is_cooling_allowed:
-                mode_map[HVAC_MODE_COOLING_FOR_DAYS] = HVACMode.COOL
-            return mode_map
+        if self.zone.is_cooling_allowed_circuit:
+            mode_map[HVAC_MODE_COOLING_FOR_DAYS] = HVACMode.COOL
+        return mode_map
 
     @property
     def default_quick_veto_duration(self):
@@ -611,7 +611,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     @property
     def supports_target_temperature_range(self) -> bool:
         return (
-            self.system.is_cooling_allowed is True
+            self.zone.is_cooling_allowed_circuit is True
             and self.zone.desired_room_temperature_setpoint_heating is not None
             and self.zone.desired_room_temperature_setpoint_cooling is not None
             and self.zone.desired_room_temperature_setpoint_heating > 0
@@ -710,8 +710,11 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def hvac_action(self) -> HVACAction | None:
-        circuit_state = self.zone.get_associated_circuit(self.system).circuit_state
-        return ZONE_HVAC_ACTION_MAP.get(circuit_state)
+        if self.zone.associated_circuit:
+            circuit_state = self.zone.associated_circuit.circuit_state
+            return ZONE_HVAC_ACTION_MAP.get(circuit_state)
+        else:
+            return None
 
     async def async_turn_on(self) -> None:
         await self.async_set_hvac_mode(self.data["last_active_hvac_mode"])
@@ -732,10 +735,6 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         target_temp_high = kwargs.get(ATTR_TARGET_TEMP_HIGH)
 
         if target_temp_low is not None and target_temp_high is not None:
-            if self.zone.control_identifier.is_vrc700:
-                raise ValueError(
-                    "Setting target temperature range not supported on VRC700"
-                )
             _LOGGER.debug("Setting target temperature range on %s", self.zone.name)
             if target_temp_low != self.zone.desired_room_temperature_setpoint_heating:
                 await self.set_quick_veto(temperature=target_temp_low)

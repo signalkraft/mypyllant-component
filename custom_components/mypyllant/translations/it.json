@@ -19,6 +19,22 @@
       "unknown": "Errore inaspettato"
     }
   },
+  "entity": {
+    "climate": {
+      "mypyllant_zone": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "system_off": "Spento",
+              "ventilation_boost": "Ventilazione Boost",
+              "boost": "Boost",
+              "away": "Via"
+            }
+          }
+        }
+      }
+    }
+  },
   "options": {
     "step": {
       "init": {
@@ -34,7 +50,9 @@
           "brand": "Marca",
           "fetch_rts": "Recupera le statistiche in tempo reale (non supportato su tutti i sistemi)",
           "fetch_mpc": "Recupera l'uso della potenza in tempo reale (non supportato su tutti i sistemi)",
-          "fetch_ambisense_rooms": "Recupera i termostati ambiente Ambisense"
+          "fetch_ambisense_rooms": "Recupera i termostati ambiente Ambisense",
+          "fetch_energy_management": "Recupera i dati di gestione energetica",
+          "fetch_eebus": "Recupera i dati EEBUS"
         }
       }
     }

@@ -50,7 +50,9 @@
           "brand": "Brand",
           "fetch_rts": "Fetch real-time statistics (not supported on every system)",
           "fetch_mpc": "Fetch real-time power usage (not supported on every system)",
-          "fetch_ambisense_rooms": "Fetch Ambisense Room Thermostats"
+          "fetch_ambisense_rooms": "Fetch Ambisense Room Thermostats",
+          "fetch_energy_management": "Fetch Energy Management Data",
+          "fetch_eebus": "Fetch EEBUS Data"
         }
       }
     }
