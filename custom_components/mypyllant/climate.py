@@ -745,49 +745,83 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         target_temp_low = kwargs.get(ATTR_TARGET_TEMP_LOW)
         target_temp_high = kwargs.get(ATTR_TARGET_TEMP_HIGH)
 
-        if target_temp_low is not None and target_temp_high is not None:
-            _LOGGER.debug("Setting target temperature range on %s", self.zone.name)
-            if target_temp_low != self.zone.desired_room_temperature_setpoint_heating:
-                await self.set_quick_veto(temperature=target_temp_low)
+        if temperature is not None and (
+            target_temp_low is not None or target_temp_high is not None
+        ):
+            raise ValueError(
+                "Can't set temperature and target_temp_low/target_temp_high at the same time"
+            )
+
+        if temperature:
+            # If only one temperature is passed in, set it on the active operating type
+            if self.zone.active_operating_type == ZoneOperatingType.HEATING:
+                target_temp_low = temperature
+            elif self.zone.cooling:
+                target_temp_high = temperature
+            else:
+                _LOGGER.warning("Can't determine operation type on %s", self.zone.name)
+
+        if target_temp_low is not None:
+            # Heating temperature
             if (
-                self.zone.cooling
-                and self.zone.cooling.operation_mode_cooling == ZoneOperatingMode.MANUAL
+                self.zone.heating.operation_mode_heating == ZoneOperatingMode.MANUAL
+                and target_temp_low != self.zone.heating.manual_mode_setpoint_heating
             ):
-                if target_temp_high != self.zone.cooling.manual_mode_setpoint_cooling:
-                    await self.set_manual_mode_setpoint(
-                        temperature=target_temp_high,
-                        setpoint_type="cooling",
-                    )
-            elif (
-                self.zone.cooling
-                and self.zone.cooling.operation_mode_cooling
-                == ZoneOperatingMode.TIME_CONTROLLED
-            ):
-                if target_temp_high != self.zone.cooling.setpoint_cooling:
-                    await self.set_time_controlled_cooling_setpoint(
-                        temperature=target_temp_high
-                    )
-        elif temperature is not None:
-            if self.zone.heating.operation_mode_heating == ZoneOperatingMode.MANUAL:
-                await self.set_manual_mode_setpoint(temperature=temperature)
+                _LOGGER.debug(
+                    "Setting heating manual temperature on %s to %s",
+                    self.zone.name,
+                    target_temp_high,
+                )
+                await self.set_manual_mode_setpoint(temperature=target_temp_low)
             else:
                 if self.time_program_overwrite and not self.preset_mode == PRESET_BOOST:
                     _LOGGER.debug(
-                        "Setting time program temperature in %s to %s",
+                        "Setting heating time program temperature in %s to %s",
                         self.zone.name,
-                        temperature,
+                        target_temp_low,
                     )
                     await self.coordinator.api.set_time_program_temperature(
                         self.zone,
                         "heating",
-                        temperature=temperature,
+                        temperature=target_temp_low,
                     )
                     await self.coordinator.async_request_refresh_delayed()
                 else:
                     _LOGGER.debug(
-                        "Setting quick veto on %s to %s", self.zone.name, temperature
+                        "Setting quick veto on %s to %s",
+                        self.zone.name,
+                        target_temp_low,
                     )
-                    await self.set_quick_veto(temperature=temperature)
+                    await self.set_quick_veto(temperature=target_temp_low)
+
+        if target_temp_high is not None and self.zone.cooling:
+            # Cooling temperature
+            if (
+                self.zone.cooling.operation_mode_cooling == ZoneOperatingMode.MANUAL
+                and target_temp_high != self.zone.cooling.manual_mode_setpoint_cooling
+            ):
+                _LOGGER.debug(
+                    "Setting cooling manual temperature on %s to %s",
+                    self.zone.name,
+                    target_temp_high,
+                )
+                await self.set_manual_mode_setpoint(
+                    temperature=target_temp_high,
+                    setpoint_type="cooling",
+                )
+            elif (
+                self.zone.cooling.operation_mode_cooling
+                == ZoneOperatingMode.TIME_CONTROLLED
+                and target_temp_high != self.zone.cooling.setpoint_cooling
+            ):
+                _LOGGER.debug(
+                    "Setting cooling time controlled temperature on %s to %s",
+                    self.zone.name,
+                    target_temp_high,
+                )
+                await self.set_time_controlled_cooling_setpoint(
+                    temperature=target_temp_high
+                )
 
     @property
     def preset_modes(self) -> list[str]:

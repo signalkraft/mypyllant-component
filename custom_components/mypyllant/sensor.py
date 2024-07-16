@@ -123,6 +123,16 @@ async def create_system_sensors(
                     index, zone_index, system_coordinator
                 )
             )
+            sensors.append(
+                lambda: ZoneDesiredRoomTemperatureSetpointHeatingSensor(
+                    index, zone_index, system_coordinator
+                )
+            )
+            sensors.append(
+                lambda: ZoneDesiredRoomTemperatureSetpointCoolingSensor(
+                    index, zone_index, system_coordinator
+                )
+            )
             if zone.current_room_temperature is not None:
                 sensors.append(
                     lambda: ZoneCurrentRoomTemperatureSensor(
@@ -460,29 +470,43 @@ class ZoneDesiredRoomTemperatureSetpointSensor(ZoneCoordinatorEntity, SensorEnti
 
     @property
     def native_value(self):
-        if self.zone.desired_room_temperature_setpoint:
-            return self.zone.desired_room_temperature_setpoint
-        elif self.zone.desired_room_temperature_setpoint_heating:
-            return self.zone.desired_room_temperature_setpoint_heating
-        elif self.zone.desired_room_temperature_setpoint_cooling:
-            return self.zone.desired_room_temperature_setpoint_cooling
-        else:
-            if self.zone.is_eco_mode:
-                return self.zone.heating.set_back_temperature
-            return self.zone.desired_room_temperature_setpoint
-
-    @property
-    def extra_state_attributes(self) -> Mapping[str, Any] | None:
-        return {
-            "desired_room_temperature_setpoint_heating": self.zone.desired_room_temperature_setpoint_heating,
-            "desired_room_temperature_setpoint_cooling": self.zone.desired_room_temperature_setpoint_cooling,
-            "desired_room_temperature_setpoint": self.zone.desired_room_temperature_setpoint,
-            "is_eco_mode": self.zone.is_eco_mode,
-        }
+        return self.zone.desired_room_temperature_setpoint
 
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_desired_temperature"
+
+
+class ZoneDesiredRoomTemperatureSetpointHeatingSensor(
+    ZoneDesiredRoomTemperatureSetpointSensor
+):
+    @property
+    def name(self):
+        return f"{self.name_prefix} Desired Heating Temperature"
+
+    @property
+    def native_value(self):
+        return self.zone.desired_room_temperature_setpoint_heating
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_desired_heating_temperature"
+
+
+class ZoneDesiredRoomTemperatureSetpointCoolingSensor(
+    ZoneDesiredRoomTemperatureSetpointSensor
+):
+    @property
+    def name(self):
+        return f"{self.name_prefix} Desired Cooling Temperature"
+
+    @property
+    def native_value(self):
+        return self.zone.desired_room_temperature_setpoint_cooling
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_desired_cooling_temperature"
 
 
 class ZoneCurrentRoomTemperatureSensor(ZoneCoordinatorEntity, SensorEntity):
