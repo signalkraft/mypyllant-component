@@ -761,12 +761,12 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             else:
                 _LOGGER.warning("Can't determine operation type on %s", self.zone.name)
 
-        if target_temp_low is not None:
+        if (
+            target_temp_low is not None
+            and target_temp_low != self.zone.desired_room_temperature_setpoint_heating
+        ):
             # Heating temperature
-            if (
-                self.zone.heating.operation_mode_heating == ZoneOperatingMode.MANUAL
-                and target_temp_low != self.zone.heating.manual_mode_setpoint_heating
-            ):
+            if self.zone.heating.operation_mode_heating == ZoneOperatingMode.MANUAL:
                 _LOGGER.debug(
                     "Setting heating manual temperature on %s to %s",
                     self.zone.name,
@@ -794,12 +794,13 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                     )
                     await self.set_quick_veto(temperature=target_temp_low)
 
-        if target_temp_high is not None and self.zone.cooling:
+        if (
+            target_temp_high is not None
+            and self.zone.cooling
+            and target_temp_high != self.zone.desired_room_temperature_setpoint_cooling
+        ):
             # Cooling temperature
-            if (
-                self.zone.cooling.operation_mode_cooling == ZoneOperatingMode.MANUAL
-                and target_temp_high != self.zone.cooling.manual_mode_setpoint_cooling
-            ):
+            if self.zone.cooling.operation_mode_cooling == ZoneOperatingMode.MANUAL:
                 _LOGGER.debug(
                     "Setting cooling manual temperature on %s to %s",
                     self.zone.name,
@@ -812,7 +813,6 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             elif (
                 self.zone.cooling.operation_mode_cooling
                 == ZoneOperatingMode.TIME_CONTROLLED
-                and target_temp_high != self.zone.cooling.setpoint_cooling
             ):
                 _LOGGER.debug(
                     "Setting cooling time controlled temperature on %s to %s",

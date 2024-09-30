@@ -131,7 +131,7 @@ set_cooling_for_days:
         datetime:
     duration_days:
       name: Duration
-      description: Duration in days (only supported on VRC700 controllers)
+      description: Duration in days (required on VRC700 controllers)
       example: 3
       selector:
         number:
