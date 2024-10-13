@@ -21,7 +21,13 @@ from myPyllant.const import DEFAULT_HOLIDAY_DURATION
 
 if typing.TYPE_CHECKING:
     from custom_components.mypyllant.coordinator import SystemCoordinator
-    from myPyllant.models import System, DomesticHotWater, Zone, AmbisenseRoom
+    from myPyllant.models import (
+        System,
+        DomesticHotWater,
+        Zone,
+        AmbisenseRoom,
+        AmbisenseDevice,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -348,3 +354,49 @@ class AmbisenseCoordinatorEntity(CoordinatorEntity):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_climate"
+
+
+class AmbisenseDeviceCoordinatorEntity(CoordinatorEntity):
+    coordinator: SystemCoordinator
+
+    def __init__(
+        self,
+        system_index: int,
+        room_index: int,
+        device: AmbisenseDevice,
+        coordinator: SystemCoordinator,
+    ) -> None:
+        super().__init__(coordinator)
+        self.system_index = system_index
+        self.room_index = room_index
+        self.device = device
+
+    @property
+    def system(self) -> System:
+        return self.coordinator.data[self.system_index]
+
+    @property
+    def room(self) -> AmbisenseRoom:
+        return [
+            r for r in self.system.ambisense_rooms if r.room_index == self.room_index
+        ][0]
+
+    @property
+    def name_prefix(self) -> str:
+        return f"{self.system.home.home_name or self.system.home.nomenclature} {self.device.name}"
+
+    @property
+    def id_infix(self) -> str:
+        return f"{self.system.id}_room_{self.room_index}_device_{self.device.sgtin}"
+
+    @property
+    def device_info(self):
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.id_infix)},
+            name=self.name_prefix,
+            manufacturer=self.system.brand_name,
+        )
+
+    @property
+    def unique_id_fragment(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}"
