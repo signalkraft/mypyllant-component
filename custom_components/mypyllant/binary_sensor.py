@@ -371,7 +371,7 @@ class AmbisenseDeviceUnreachable(AmbisenseDeviceCoordinatorEntity, BinarySensorE
 
     @property
     def unique_id(self) -> str:
-        return self.unique_id_fragment + "unreach"
+        return self.unique_id_fragment + "_unreach"
 
     @property
     def name(self) -> str:
