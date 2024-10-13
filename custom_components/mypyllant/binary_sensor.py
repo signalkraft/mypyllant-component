@@ -51,20 +51,21 @@ async def async_setup_entry(
                 sensors.append(
                     lambda: ZoneIsManualCoolingActive(index, zone_index, coordinator)
                 )
-        for room_index, room in enumerate(system.ambisense_rooms):
-            for device in room.room_configuration.devices:
-                if device.unreach is not None:
-                    sensors.append(
-                        lambda: AmbisenseDeviceLowBattery(
-                            index, room_index, device, coordinator
+        if system.ambisense_rooms:
+            for room_index, room in enumerate(system.ambisense_rooms):
+                for device in room.room_configuration.devices:
+                    if device.unreach is not None:
+                        sensors.append(
+                            lambda: AmbisenseDeviceLowBattery(
+                                index, room_index, device, coordinator
+                            )
                         )
-                    )
-                if device.low_bat is not None:
-                    sensors.append(
-                        lambda: AmbisenseDeviceUnreachable(
-                            index, room_index, device, coordinator
+                    if device.low_bat is not None:
+                        sensors.append(
+                            lambda: AmbisenseDeviceUnreachable(
+                                index, room_index, device, coordinator
+                            )
                         )
-                    )
 
     async_add_entities(sensors)  # type: ignore
 
