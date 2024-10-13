@@ -356,9 +356,7 @@ class AmbisenseCoordinatorEntity(CoordinatorEntity):
         return f"{DOMAIN}_{self.id_infix}_climate"
 
 
-class AmbisenseDeviceCoordinatorEntity(CoordinatorEntity):
-    coordinator: SystemCoordinator
-
+class AmbisenseDeviceCoordinatorEntity(AmbisenseCoordinatorEntity):
     def __init__(
         self,
         system_index: int,
@@ -366,20 +364,8 @@ class AmbisenseDeviceCoordinatorEntity(CoordinatorEntity):
         device: AmbisenseDevice,
         coordinator: SystemCoordinator,
     ) -> None:
-        super().__init__(coordinator)
-        self.system_index = system_index
-        self.room_index = room_index
+        super().__init__(system_index, room_index, coordinator)
         self.device = device
-
-    @property
-    def system(self) -> System:
-        return self.coordinator.data[self.system_index]
-
-    @property
-    def room(self) -> AmbisenseRoom:
-        return [
-            r for r in self.system.ambisense_rooms if r.room_index == self.room_index
-        ][0]
 
     @property
     def name_prefix(self) -> str:
@@ -388,14 +374,6 @@ class AmbisenseDeviceCoordinatorEntity(CoordinatorEntity):
     @property
     def id_infix(self) -> str:
         return f"{self.system.id}_room_{self.room_index}_device_{self.device.sgtin}"
-
-    @property
-    def device_info(self):
-        return DeviceInfo(
-            identifiers={(DOMAIN, self.id_infix)},
-            name=self.name_prefix,
-            manufacturer=self.system.brand_name,
-        )
 
     @property
     def unique_id_fragment(self) -> str:
