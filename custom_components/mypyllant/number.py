@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from homeassistant.components.number import NumberEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfTime
+from homeassistant.const import UnitOfTime, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -16,6 +16,7 @@ from custom_components.mypyllant.utils import (
     SystemCoordinatorEntity,
     ZoneCoordinatorEntity,
     EntityList,
+    CircuitEntity,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -41,6 +42,20 @@ async def async_setup_entry(
         for zone_index, zone in enumerate(system.zones):
             sensors.append(
                 lambda: ZoneQuickVetoDurationNumber(index, zone_index, coordinator)
+            )
+        for circuit_index, circuit in enumerate(system.circuits):
+            sensors.append(
+                lambda: CircuitHeatingCurve(index, circuit_index, coordinator)
+            )
+            sensors.append(
+                lambda: CircuitHeatDemandLimitedByOutsideTemperature(
+                    index, circuit_index, coordinator
+                )
+            )
+            sensors.append(
+                lambda: CircuitMinFlowTemperatureSetpoint(
+                    index, circuit_index, coordinator
+                )
             )
     async_add_entities(sensors)  # type: ignore
 
@@ -180,3 +195,80 @@ class ZoneQuickVetoDurationNumber(ZoneCoordinatorEntity, NumberEntity):
     @property
     def available(self) -> bool:
         return self.zone.quick_veto_ongoing
+
+
+class CircuitHeatingCurve(CircuitEntity, NumberEntity):
+    _attr_native_min_value = 0.1
+    _attr_native_max_value = 5.0
+    _attr_native_step = 0.0000001
+    _attr_icon = "mdi:chart-line"
+
+    @property
+    def native_value(self):
+        return self.circuit.heating_curve
+
+    async def async_set_native_value(self, value: float) -> None:
+        await self.coordinator.api.set_circuit_heating_curve(self.circuit, value)
+        await self.coordinator.async_request_refresh_delayed()
+
+    @property
+    def name(self) -> str:
+        return f"{self.name_prefix} Heating Curve"
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN} {self.id_infix}_heating_curve"
+
+
+class CircuitHeatDemandLimitedByOutsideTemperature(CircuitEntity, NumberEntity):
+    _attr_native_min_value = 0.0
+    _attr_native_max_value = 100.0
+    _attr_native_step = 0.1
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_icon = "mdi:home-thermometer"
+
+    @property
+    def native_value(self):
+        return self.circuit.heat_demand_limited_by_outside_temperature
+
+    async def async_set_native_value(self, value: float) -> None:
+        await (
+            self.coordinator.api.set_circuit_heat_demand_limited_by_outside_temperature(
+                self.circuit, value
+            )
+        )
+        await self.coordinator.async_request_refresh_delayed()
+
+    @property
+    def name(self) -> str:
+        return f"{self.name_prefix} Heat Demand Limited by Outside Temperature"
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN} {self.id_infix}_heat_demand_limited_by_outside_temperature"
+
+
+class CircuitMinFlowTemperatureSetpoint(CircuitEntity, NumberEntity):
+    _attr_native_min_value = 0.0
+    _attr_native_max_value = 100.0
+    _attr_native_step = 0.1
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_icon = "mdi:thermometer-water"
+
+    @property
+    def native_value(self):
+        return self.circuit.heating_flow_temperature_minimum_setpoint
+
+    async def async_set_native_value(self, value: float) -> None:
+        await self.coordinator.api.set_circuit_min_flow_temperature_setpoint(
+            self.circuit, value
+        )
+        await self.coordinator.async_request_refresh_delayed()
+
+    @property
+    def name(self) -> str:
+        return f"{self.name_prefix} Min Flow Temperature Setpoint"
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN} {self.id_infix}_min_flow_temperature_setpoint"

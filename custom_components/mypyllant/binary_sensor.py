@@ -13,11 +13,11 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from myPyllant.models import Circuit, System
+from myPyllant.models import System
 
 from . import SystemCoordinator
 from .const import DOMAIN
-from .utils import EntityList, ZoneCoordinatorEntity
+from .utils import EntityList, ZoneCoordinatorEntity, CircuitEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -242,51 +242,7 @@ class EebusEnabled(SystemControlEntity):
         return f"{DOMAIN}_{self.id_infix}_eebus_enabled"
 
 
-class CircuitEntity(CoordinatorEntity, BinarySensorEntity):
-    def __init__(
-        self,
-        system_index: int,
-        circuit_index: int,
-        coordinator: SystemCoordinator,
-    ):
-        super().__init__(coordinator)
-        self.system_index = system_index
-        self.circuit_index = circuit_index
-
-    @property
-    def system(self) -> System:
-        return self.coordinator.data[self.system_index]
-
-    @property
-    def circuit(self) -> Circuit:
-        return self.coordinator.data[self.system_index].circuits[self.circuit_index]
-
-    @property
-    def name_prefix(self) -> str:
-        return f"{self.system.home.home_name or self.system.home.nomenclature} Circuit {self.circuit_index}"
-
-    @property
-    def id_infix(self) -> str:
-        return f"{self.system.id}_circuit_{self.circuit.index}"
-
-    @property
-    def device_info(self) -> DeviceInfo | None:
-        return DeviceInfo(
-            identifiers={(DOMAIN, self.id_infix)},
-            name=self.name_prefix,
-            manufacturer=self.system.brand_name,
-        )
-
-
-class CircuitIsCoolingAllowed(CircuitEntity):
-    def __init__(
-        self,
-        system_index: int,
-        circuit_index: int,
-        coordinator: SystemCoordinator,
-    ):
-        super().__init__(system_index, circuit_index, coordinator)
-
+class CircuitIsCoolingAllowed(CircuitEntity, BinarySensorEntity):
     @property
     def is_on(self) -> bool | None:
         return self.circuit.is_cooling_allowed
