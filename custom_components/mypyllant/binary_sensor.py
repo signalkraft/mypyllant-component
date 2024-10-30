@@ -13,11 +13,16 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from myPyllant.models import System
+from myPyllant.models import System, AmbisenseDevice
 
 from . import SystemCoordinator
 from .const import DOMAIN
-from .utils import EntityList, ZoneCoordinatorEntity, CircuitEntity
+from .utils import (
+    EntityList,
+    ZoneCoordinatorEntity,
+    AmbisenseDeviceCoordinatorEntity,
+    CircuitEntity,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -51,6 +56,21 @@ async def async_setup_entry(
                 sensors.append(
                     lambda: ZoneIsManualCoolingActive(index, zone_index, coordinator)
                 )
+        if system.ambisense_rooms:
+            for room_index, room in enumerate(system.ambisense_rooms):
+                for device in room.room_configuration.devices:
+                    if device.unreach is not None:
+                        sensors.append(
+                            lambda: AmbisenseDeviceLowBattery(
+                                index, room_index, device, coordinator
+                            )
+                        )
+                    if device.low_bat is not None:
+                        sensors.append(
+                            lambda: AmbisenseDeviceUnreachable(
+                                index, room_index, device, coordinator
+                            )
+                        )
 
     async_add_entities(sensors)  # type: ignore
 
@@ -268,3 +288,57 @@ class ZoneIsManualCoolingActive(ZoneCoordinatorEntity, BinarySensorEntity):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN} {self.id_infix}_manual_cooling_active"
+
+
+class AmbisenseDeviceLowBattery(AmbisenseDeviceCoordinatorEntity, BinarySensorEntity):
+    def __init__(
+        self,
+        system_index: int,
+        room_index: int,
+        device: AmbisenseDevice,
+        coordinator: SystemCoordinator,
+    ) -> None:
+        super().__init__(system_index, room_index, device, coordinator)
+
+    @property
+    def is_on(self) -> bool | None:
+        return self.device.low_bat
+
+    @property
+    def unique_id(self) -> str:
+        return self.unique_id_fragment + "_low_bat"
+
+    @property
+    def name(self) -> str:
+        return f"{self.name_prefix} battery low"
+
+    @property
+    def device_class(self) -> BinarySensorDeviceClass:
+        return BinarySensorDeviceClass.BATTERY
+
+
+class AmbisenseDeviceUnreachable(AmbisenseDeviceCoordinatorEntity, BinarySensorEntity):
+    def __init__(
+        self,
+        system_index: int,
+        room_index: int,
+        device: AmbisenseDevice,
+        coordinator: SystemCoordinator,
+    ) -> None:
+        super().__init__(system_index, room_index, device, coordinator)
+
+    @property
+    def is_on(self) -> bool | None:
+        return not self.device.unreach
+
+    @property
+    def unique_id(self) -> str:
+        return self.unique_id_fragment + "_unreach"
+
+    @property
+    def name(self) -> str:
+        return f"{self.name_prefix} reachable"
+
+    @property
+    def device_class(self) -> BinarySensorDeviceClass:
+        return BinarySensorDeviceClass.CONNECTIVITY

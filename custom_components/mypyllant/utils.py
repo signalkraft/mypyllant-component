@@ -21,7 +21,14 @@ from myPyllant.const import DEFAULT_HOLIDAY_DURATION
 
 if typing.TYPE_CHECKING:
     from custom_components.mypyllant.coordinator import SystemCoordinator
-    from myPyllant.models import System, DomesticHotWater, Zone, AmbisenseRoom, Circuit
+    from myPyllant.models import (
+        System,
+        DomesticHotWater,
+        Zone,
+        AmbisenseRoom,
+        AmbisenseDevice,
+        Circuit,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -348,6 +355,30 @@ class AmbisenseCoordinatorEntity(CoordinatorEntity):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_climate"
+
+
+class AmbisenseDeviceCoordinatorEntity(AmbisenseCoordinatorEntity):
+    def __init__(
+        self,
+        system_index: int,
+        room_index: int,
+        device: AmbisenseDevice,
+        coordinator: SystemCoordinator,
+    ) -> None:
+        super().__init__(system_index, room_index, coordinator)
+        self.device = device
+
+    @property
+    def name_prefix(self) -> str:
+        return f"{self.system.home.home_name or self.system.home.nomenclature} {self.device.name}"
+
+    @property
+    def id_infix(self) -> str:
+        return f"{self.system.id}_room_{self.room_index}_device_{self.device.sgtin}"
+
+    @property
+    def unique_id_fragment(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}"
 
 
 class CircuitEntity(CoordinatorEntity):
