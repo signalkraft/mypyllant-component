@@ -27,8 +27,9 @@ if typing.TYPE_CHECKING:
         Zone,
         AmbisenseRoom,
         AmbisenseDevice,
+        Circuit,
     )
-
+  
 logger = logging.getLogger(__name__)
 
 _T = TypeVar("_T")
@@ -378,3 +379,39 @@ class AmbisenseDeviceCoordinatorEntity(AmbisenseCoordinatorEntity):
     @property
     def unique_id_fragment(self) -> str:
         return f"{DOMAIN}_{self.id_infix}"
+
+      
+class CircuitEntity(CoordinatorEntity):
+    def __init__(
+        self,
+        system_index: int,
+        circuit_index: int,
+        coordinator: SystemCoordinator,
+    ):
+        super().__init__(coordinator)
+        self.system_index = system_index
+        self.circuit_index = circuit_index
+
+    @property
+    def system(self) -> System:
+        return self.coordinator.data[self.system_index]
+
+    @property
+    def circuit(self) -> Circuit:
+        return self.coordinator.data[self.system_index].circuits[self.circuit_index]
+
+    @property
+    def name_prefix(self) -> str:
+        return f"{self.system.home.home_name or self.system.home.nomenclature} Circuit {self.circuit_index}"
+
+    @property
+    def id_infix(self) -> str:
+        return f"{self.system.id}_circuit_{self.circuit.index}"
+
+    @property
+    def device_info(self) -> DeviceInfo | None:
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.id_infix)},
+            name=self.name_prefix,
+            manufacturer=self.system.brand_name,
+        )

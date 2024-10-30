@@ -11,7 +11,6 @@ from myPyllant.tests.generate_test_data import DATA_DIR
 from myPyllant.tests.utils import list_test_data, load_test_data
 
 from custom_components.mypyllant.binary_sensor import (
-    CircuitEntity,
     CircuitIsCoolingAllowed,
     ControlError,
     ControlOnline,
@@ -19,6 +18,7 @@ from custom_components.mypyllant.binary_sensor import (
     async_setup_entry,
     ZoneIsManualCoolingActive,
 )
+from custom_components.mypyllant.utils import CircuitEntity
 from custom_components.mypyllant.const import DOMAIN
 from tests.conftest import MockConfigEntry, TEST_OPTIONS
 from tests.test_init import test_user_input
