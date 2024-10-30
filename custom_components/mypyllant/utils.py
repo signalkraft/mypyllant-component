@@ -29,7 +29,7 @@ if typing.TYPE_CHECKING:
         AmbisenseDevice,
         Circuit,
     )
-  
+
 logger = logging.getLogger(__name__)
 
 _T = TypeVar("_T")
@@ -380,7 +380,7 @@ class AmbisenseDeviceCoordinatorEntity(AmbisenseCoordinatorEntity):
     def unique_id_fragment(self) -> str:
         return f"{DOMAIN}_{self.id_infix}"
 
-      
+
 class CircuitEntity(CoordinatorEntity):
     def __init__(
         self,

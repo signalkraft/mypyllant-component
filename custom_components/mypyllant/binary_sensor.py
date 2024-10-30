@@ -13,11 +13,16 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from myPyllant.models import Circuit, System, AmbisenseDevice
+from myPyllant.models import System, AmbisenseDevice
 
 from . import SystemCoordinator
 from .const import DOMAIN
-from .utils import EntityList, ZoneCoordinatorEntity, AmbisenseDeviceCoordinatorEntity, CircuitEntity
+from .utils import (
+    EntityList,
+    ZoneCoordinatorEntity,
+    AmbisenseDeviceCoordinatorEntity,
+    CircuitEntity,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
