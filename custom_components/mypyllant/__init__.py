@@ -81,17 +81,6 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    if _LOGGER.isEnabledFor(logging.DEBUG):
-        from importlib.metadata import version
-
-        _LOGGER.debug(
-            "Starting mypyllant component %s (library %s) with homeassistant %s, pydantic %s, and aiohttp %s",
-            hass.data["integrations"][DOMAIN].version,
-            version("myPyllant"),
-            version("homeassistant"),
-            version("pydantic"),
-            version("aiohttp"),
-        )
     username: str = entry.data.get("username")  # type: ignore
     password: str = entry.data.get("password")  # type: ignore
     update_interval = entry.options.get(OPTION_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)

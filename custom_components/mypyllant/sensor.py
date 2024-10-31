@@ -63,6 +63,7 @@ async def create_system_sensors(
 
     sensors: EntityList[SensorEntity] = EntityList()
     _LOGGER.debug("Creating system sensors for %s", system_coordinator.data)
+    sensors.append(lambda: SystemAPIRequestCount(system_coordinator))
     for index, system in enumerate(system_coordinator.data):
         if system.outdoor_temperature is not None:
             sensors.append(
@@ -858,7 +859,7 @@ class DataSensor(CoordinatorEntity, SensorEntity):
     def unique_id(self) -> str | None:
         if self.device is None:
             return None
-        return f"{DOMAIN}_{self.system_id}_{self.device.device_uuid}_{self.da_index}"
+        return f"{DOMAIN}_{self.system_id}_{self.device.device_uuid}_{self.da_index}_{self.de_index}"
 
     @property
     def name_prefix(self) -> str:
@@ -1109,3 +1110,19 @@ class SystemDeviceCurrentPowerSensor(SystemDeviceSensor):
     @property
     def name(self):
         return f"{self.name_prefix} Current Power"
+
+
+class SystemAPIRequestCount(SensorEntity, CoordinatorEntity):
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    @property
+    def native_value(self):
+        return self.coordinator.api.aiohttp_session.request_count
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_api_request_count"
+
+    @property
+    def name(self):
+        return "Vaillant API Request Count"
