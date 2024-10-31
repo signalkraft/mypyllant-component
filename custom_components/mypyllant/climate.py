@@ -723,9 +723,9 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     def hvac_action(self) -> HVACAction | None:
         if self.zone.associated_circuit:
             circuit_state = self.zone.associated_circuit.circuit_state
-            return ZONE_HVAC_ACTION_MAP.get(circuit_state)
-        else:
-            return None
+            if circuit_state:
+                return ZONE_HVAC_ACTION_MAP.get(circuit_state)
+        return None
 
     async def async_turn_on(self) -> None:
         await self.async_set_hvac_mode(self.data["last_active_hvac_mode"])
