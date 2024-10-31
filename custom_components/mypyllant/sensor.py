@@ -1114,6 +1114,7 @@ class SystemDeviceCurrentPowerSensor(SystemDeviceSensor):
 
 class SystemAPIRequestCount(SensorEntity, CoordinatorEntity):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
 
     @property
     def native_value(self):
