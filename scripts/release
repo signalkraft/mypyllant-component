@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -e
+
+version="$(jq -r .version custom_components/mypyllant/manifest.json)"
+
+git push
+gh release create "$version" --draft --generate-notes
