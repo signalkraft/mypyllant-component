@@ -93,10 +93,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     brand = entry.options.get(OPTION_BRAND, entry.data.get(OPTION_BRAND, DEFAULT_BRAND))
 
     hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = {
-        "quota_time": None,
-        "quota_exc_info": None,
-    }
+    hass.data[DOMAIN][entry.entry_id] = {}
 
     _LOGGER.debug("Creating API and logging in with %s in realm %s", username, country)
     api = MyPyllantAPI(

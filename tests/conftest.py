@@ -93,14 +93,7 @@ async def system_coordinator_mock(hass, mocked_api) -> SystemCoordinator:
         return_value="mockid",
     ) as entry:
         entry.options = TEST_OPTIONS
-        hass.data = {
-            DOMAIN: {
-                entry.entry_id: {
-                    "quota_time": None,
-                    "quota_exc_info": None,
-                }
-            }
-        }
+        hass.data = {DOMAIN: {entry.entry_id: {}}}
         return SystemCoordinator(hass, mocked_api, entry, update_interval=None)
 
 
@@ -111,14 +104,7 @@ async def daily_data_coordinator_mock(hass, mocked_api) -> DailyDataCoordinator:
         new_callable=mock.PropertyMock,
         return_value="mockid",
     ) as entry:
-        hass.data = {
-            DOMAIN: {
-                entry.entry_id: {
-                    "quota_time": None,
-                    "quota_exc_info": None,
-                }
-            }
-        }
+        hass.data = {DOMAIN: {entry.entry_id: {}}}
         return DailyDataCoordinator(hass, mocked_api, entry, timedelta(seconds=10))
 
 

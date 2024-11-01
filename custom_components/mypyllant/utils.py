@@ -211,7 +211,7 @@ def shorten_zone_name(zone_name: str) -> str:
     return zone_name
 
 
-def is_quota_exceeded_exception(exc_info: Exception) -> bool:
+def is_quota_exceeded_exception(exc_info: BaseException | None) -> bool:
     """
     Returns True if the exception is a quota exceeded ClientResponseError
     """
