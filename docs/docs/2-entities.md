@@ -14,12 +14,11 @@ or the naming of your heating zones (in this case "Zone 1"):
 
 | Entity                                                                        | Unit   | Class        | Sample                    |
 |-------------------------------------------------------------------------------|--------|--------------|---------------------------|
-| Home                                                                          |        |              | 0                         |
 | Home Trouble Codes                                                            |        | problem      | off                       |
 | Home Online Status                                                            |        | connectivity | on                        |
 | Home Firmware Update Required                                                 |        | update       | off                       |
 | Home Firmware Update Enabled                                                  |        |              | on                        |
-| Home EEBUS Enabled                                                            |        |              | off                       |
+| Home EEBUS Enabled                                                            |        |              | on                        |
 | Home EEBUS Capable                                                            |        |              | on                        |
 | Home Circuit 0 Cooling Allowed                                                |        |              | on                        |
 | Home Zone 1 (Circuit 0) Manual Cooling Active                                 |        |              | off                       |
@@ -33,39 +32,46 @@ or the naming of your heating zones (in this case "Zone 1"):
 | Home Manual Cooling Start Date                                                |        |              | unknown                   |
 | Home Manual Cooling End Date                                                  |        |              | unknown                   |
 | Home Holiday Duration Remaining                                               | d      |              | 0                         |
-| Home Zone 1 (Circuit 0) Quick Veto Duration                                   | h      |              | unavailable               |
-| Home Outdoor Temperature                                                      | °C     | temperature  | 20.0                      |
-| Home System Water Pressure                                                    | bar    | pressure     | 1.7                       |
+| Home Manual Cooling Duration                                                  | d      |              | 0                         |
+| Home Zone 1 (Circuit 0) Quick Veto Duration                                   | h      |              | 2                         |
+| Home Circuit 0 Heating Curve                                                  |        |              | 1.2733452                 |
+| Home Circuit 0 Heat Demand Limited by Outside Temperature                     | °C     |              | 18.0                      |
+| Home Circuit 0 Min Flow Temperature Setpoint                                  | °C     |              | 32.0                      |
+| Vaillant API Request Count                                                    |        |              | 51                        |
+| Home Outdoor Temperature                                                      | °C     | temperature  | 17.3                      |
+| Home System Water Pressure                                                    | bar    | pressure     | 1.5                       |
 | Home Firmware Version                                                         |        |              | 0357.40.35                |
-| Home Zone 1 (Circuit 0) Desired Temperature                                   | °C     | temperature  | 24.0                      |
+| Home Zone 1 (Circuit 0) Desired Temperature                                   | °C     | temperature  | 0.0                       |
+| Home Zone 1 (Circuit 0) Desired Heating Temperature                           | °C     | temperature  | 0.0                       |
+| Home Zone 1 (Circuit 0) Desired Cooling Temperature                           | °C     | temperature  | 25.0                      |
 | Home Zone 1 (Circuit 0) Current Temperature                                   | °C     | temperature  | 21.5                      |
-| Home Zone 1 (Circuit 0) Humidity                                              | %      | humidity     | 58.0                      |
+| Home Zone 1 (Circuit 0) Humidity                                              | %      | humidity     | 62.0                      |
 | Home Zone 1 (Circuit 0) Heating Operating Mode                                |        |              | Time Controlled           |
 | Home Zone 1 (Circuit 0) Heating State                                         |        |              | Idle                      |
-| Home Zone 1 (Circuit 0) Current Special Function                              |        |              | None                      |
+| Home Zone 1 (Circuit 0) Current Special Function                              |        |              | Quick Veto                |
 | Home Circuit 0 State                                                          |        |              | STANDBY                   |
-| Home Circuit 0 Current Flow Temperature                                       | °C     | temperature  | 39.0                      |
-| Home Circuit 0 Heating Curve                                                  |        |              | 0.82                      |
-| Home Domestic Hot Water 0 Tank Temperature                                    | °C     | temperature  | 49.5                      |
+| Home Circuit 0 Current Flow Temperature                                       | °C     | temperature  | 41.0                      |
+| Home Circuit 0 Heating Curve                                                  |        |              | 1.27                      |
+| Home Domestic Hot Water 0 Tank Temperature                                    | °C     | temperature  | 51.5                      |
 | Home Domestic Hot Water 0 Setpoint                                            | °C     | temperature  | 52.0                      |
 | Home Domestic Hot Water 0 Operation Mode                                      |        |              | Time Controlled           |
 | Home Domestic Hot Water 0 Current Special Function                            |        |              | Regular                   |
-| Home Heating Energy Efficiency                                                |        |              | 3.0                       |
-| Home Device 0 aroTHERM plus Heating Energy Efficiency                         |        |              | 3.0                       |
+| Home Heating Energy Efficiency                                                |        |              | 4.9                       |
+| Home Device 0 aroTHERM plus Heating Energy Efficiency                         |        |              | 4.9                       |
 | Home Device 0 aroTHERM plus Consumed Electrical Energy Cooling                | Wh     | energy       | 0.0                       |
-| Home Device 0 aroTHERM plus Consumed Electrical Energy Domestic Hot Water     | Wh     | energy       | 1000.0                    |
-| Home Device 0 aroTHERM plus Consumed Electrical Energy Heating                | Wh     | energy       | 0.0                       |
+| Home Device 0 aroTHERM plus Consumed Electrical Energy Domestic Hot Water     | Wh     | energy       | 3000.0                    |
+| Home Device 0 aroTHERM plus Consumed Electrical Energy Heating                | Wh     | energy       | 4000.0                    |
 | Home Device 0 aroTHERM plus Earned Environment Energy Cooling                 | Wh     | energy       | 0.0                       |
-| Home Device 0 aroTHERM plus Earned Environment Energy Domestic Hot Water      | Wh     | energy       | 2000.0                    |
-| Home Device 0 aroTHERM plus Earned Environment Energy Heating                 | Wh     | energy       | 0.0                       |
-| Home Device 0 aroTHERM plus Heat Generated Heating                            | Wh     | energy       | 0.0                       |
-| Home Device 0 aroTHERM plus Heat Generated Domestic Hot Water                 | Wh     | energy       | 3000.0                    |
+| Home Device 0 aroTHERM plus Earned Environment Energy Domestic Hot Water      | Wh     | energy       | 9000.0                    |
+| Home Device 0 aroTHERM plus Earned Environment Energy Heating                 | Wh     | energy       | 18000.0                   |
+| Home Device 0 aroTHERM plus Heat Generated Heating                            | Wh     | energy       | 22000.0                   |
+| Home Device 0 aroTHERM plus Heat Generated Domestic Hot Water                 | Wh     | energy       | 12000.0                   |
 | Home Device 0 aroTHERM plus Heat Generated Cooling                            | Wh     | energy       | 0.0                       |
 | Home Device 1 Hydraulic Station Heating Energy Efficiency                     |        |              | unknown                   |
 | Home Device 1 Hydraulic Station Consumed Electrical Energy Domestic Hot Water | Wh     | energy       | 0.0                       |
 | Home Device 1 Hydraulic Station Consumed Electrical Energy Heating            | Wh     | energy       | 0.0                       |
 | Home Away Mode                                                                |        |              | off                       |
-| Home EEBUS                                                                    |        |              | off                       |
+| Home EEBUS                                                                    |        |              | on                        |
 | Home Manual Cooling                                                           |        |              | off                       |
 | Home Domestic Hot Water 0 Boost                                               |        |              | off                       |
 | Home Zone 1 (Circuit 0) Ventilation Boost                                     |        |              | off                       |
