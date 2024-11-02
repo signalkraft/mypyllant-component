@@ -42,3 +42,22 @@ jobs:
       - name: Run pytest
         run: |
           pytest
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Archive Release
+      uses: thedoctor0/zip-release@0.7.5
+      with:
+        type: 'zip'
+        directory: 'custom_components/mypyllant'
+        filename: 'mypyllant-component.zip'
+    - name: Upload release zip
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: "mypyllant-component.zip"
+        asset_name: "mypyllant-component.zip"
+        asset_content_type: application/zip
