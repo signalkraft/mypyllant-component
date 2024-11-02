@@ -1,7 +1,9 @@
-name: Build & Test
+name: Release
 
 on:
-  release:
+  push:
+    tags:
+      - "v*.*.*"
 
 jobs:
   release:
@@ -11,11 +13,12 @@ jobs:
     - name: Archive Release
       uses: thedoctor0/zip-release@0.7.5
       with:
-        type: 'zip'
-        directory: 'custom_components/mypyllant'
-        filename: 'mypyllant-component.zip'
-    - name: Upload Release
-      uses: ncipollo/release-action@v1.12.0
+        type: zip
+        directory: custom_components/mypyllant
+        filename: mypyllant-component.zip
+    - name: Release
+      uses: softprops/action-gh-release@v2
       with:
-        artifacts: "mypyllant-component.zip"
-        token: ${{ secrets.GITHUB_TOKEN }}
+        draft: true
+        generate_release_notes: true
+        files: mypyllant-component.zip
