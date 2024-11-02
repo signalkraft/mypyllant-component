@@ -21,4 +21,4 @@ jobs:
       with:
         draft: true
         generate_release_notes: true
-        files: mypyllant-component.zip
+        files: custom_components/mypyllant/mypyllant-component.zip
