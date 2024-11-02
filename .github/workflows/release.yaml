@@ -1,0 +1,21 @@
+name: Build & Test
+
+on:
+  release:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Archive Release
+      uses: thedoctor0/zip-release@0.7.5
+      with:
+        type: 'zip'
+        directory: 'custom_components/mypyllant'
+        filename: 'mypyllant-component.zip'
+    - name: Upload Release
+      uses: ncipollo/release-action@v1.12.0
+      with:
+        artifacts: "mypyllant-component.zip"
+        token: ${{ secrets.GITHUB_TOKEN }}
