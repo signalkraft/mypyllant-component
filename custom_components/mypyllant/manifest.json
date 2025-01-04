@@ -6,7 +6,6 @@
   ],
   "config_flow": true,
   "documentation": "https://github.com/signalkraft/mypyllant-component#readme",
-  "homeassistant": "2025.1.0b0",
   "integration_type": "hub",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/signalkraft/mypyllant-component/issues",
