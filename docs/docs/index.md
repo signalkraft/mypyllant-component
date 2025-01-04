@@ -155,6 +155,9 @@ After setting up the integration, you can configure it further in Settings :mate
               - sensor.home_heating_energy_efficiency
     ```
 
+    You only need to update one of the energy entities, all of the other ones will automatically update as well.
+    To reduce API queries and avoid getting blocked, you should disable energy entities in HA that you are not interested in.
+
     You should restart Home Assistant after changing this setting.
     
     :material-cog: Default is 3600 seconds.
