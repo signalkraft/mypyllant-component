@@ -47,6 +47,7 @@
           "time_program_overwrite": "Temperature controls overwrite time program instead of setting quick veto",
           "default_holiday_setpoint": "Default temperature setpoint for away mode",
           "manual_cooling_duration": "Default duration for manual cooling in days",
+          "dhw_legionella_protection_temperature": "Temperature above which legionella protection is considered active",
           "country": "Country",
           "brand": "Brand",
           "fetch_rts": "Fetch real-time statistics (not supported on every system)",

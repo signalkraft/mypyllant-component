@@ -1,0 +1,61 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "password": "Wachtwoord",
+          "username": "Gebruikersnaam",
+          "country": "Land",
+          "brand": "Merk"
+        },
+        "title": "Inloggegevens",
+        "description": "Hetzelfde als de myVAILLANT-app"
+      }
+    },
+    "error": {
+      "login_endpoint_invalid": "Er is geen inlogmethode gevonden voor deze combinatie van merk en land",
+      "realm_invalid": "Voor dit merk moet een land worden geselecteerd",
+      "authentication_failed": "Authenticatie mislukt, controleer uw gebruikersnaam en wachtwoord en zorg ervoor dat u het juiste land en apparaatmerk heeft geselecteerd",
+      "unknown": "Onverwachte fout"
+    }
+  },
+  "entity": {
+    "climate": {
+      "mypyllant_zone": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "system_off": "Systeem uit",
+              "ventilation_boost": "Ventilatieboost",
+              "boost": "Quick Veto",
+              "away": "Vakantie"
+            }
+          }
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "update_interval": "Seconden tussen updates (verkleint het risico op 'quota overschreden'-fouten en tijdelijke verbanningen)",
+          "update_interval_daily": "Seconden tussen updates van energiegegevens (verlagen van het risico op 'quota overschreden'-fouten en tijdelijke verbanningen)",
+          "refresh_delay": "Vertraging in seconden voordat gegevens worden vernieuwd na updates",
+          "quick_veto_duration": "Standaardduur in uren voor quick veto",
+          "holiday_duration": "Standaardduur in dagen voor de afwezigheidsmodus",
+          "time_program_overwrite": "Temperatuurregelaars overschrijven het tijdprogramma in plaats van de instelling quick veto",
+          "default_holiday_setpoint": "Standaard temperatuurinstelpunt voor afwezigheidsmodus",
+          "manual_cooling_duration": "Standaardduur voor handmatige koeling in dagen",
+          "country": "Land",
+          "brand": "Merk",
+          "fetch_rts": "Haal realtime statistieken op (niet op elk systeem ondersteund)",
+          "fetch_mpc": "Realtime energieverbruik ophalen (niet op elk systeem ondersteund)",
+          "fetch_ambisense_rooms": "Haal Ambisense kamerthermostaten op",
+          "fetch_energy_management": "Energiebeheergegevens ophalen",
+          "fetch_eebus": "Haal EEBUS-gegevens op"
+        }
+      }
+    }
+  }
+}

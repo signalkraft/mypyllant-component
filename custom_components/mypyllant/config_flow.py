@@ -53,6 +53,8 @@ from .const import (
     DEFAULT_FETCH_EEBUS,
     OPTION_DEFAULT_MANUAL_COOLING_DURATION,
     DEFAULT_MANUAL_COOLING_DURATION,
+    OPTION_DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE,
+    DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -178,6 +180,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             DEFAULT_TIME_PROGRAM_OVERWRITE,
                         ),
                     ): bool,
+                    vol.Required(
+                        OPTION_DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE,
+                        default=self.config_entry.options.get(
+                            OPTION_DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE,
+                            DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE,
+                        ),
+                    ): float,
                     vol.Required(
                         OPTION_BRAND,
                         default=self.config_entry.options.get(

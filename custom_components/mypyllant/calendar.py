@@ -282,6 +282,10 @@ class ZoneHeatingCalendar(ZoneCoordinatorEntity, BaseCalendarEntity):
     def name(self) -> str:
         return self.name_prefix
 
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_heating_calendar"
+
     def _get_calendar_id_prefix(self):
         return f"zone_heating_{self.zone.index}"
 
@@ -326,6 +330,10 @@ class ZoneCoolingCalendar(ZoneCoordinatorEntity, BaseCalendarEntity):
     def name(self) -> str:
         return self.name_prefix
 
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_coolingg_calendar"
+
     def _get_calendar_id_prefix(self):
         return f"zone_cooling_{self.zone.index}"
 
@@ -363,6 +371,10 @@ class DomesticHotWaterCalendar(DomesticHotWaterCoordinatorEntity, BaseCalendarEn
     @property
     def name(self) -> str:
         return self.name_prefix
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_heating_calendar"
 
     def _get_calendar_id_prefix(self):
         return f"dhw_{self.domestic_hot_water.index}"
@@ -404,6 +416,10 @@ class DomesticHotWaterCirculationCalendar(
     def name(self) -> str:
         return f"Circulating Water in {self.name_prefix}"
 
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_circulation_calendar"
+
     def _get_calendar_id_prefix(self):
         return f"dhw_circulation_{self.domestic_hot_water.index}"
 
@@ -442,6 +458,10 @@ class AmbisenseCalendar(AmbisenseCoordinatorEntity, BaseCalendarEntity):
     @property
     def name(self) -> str:
         return f"{self.name_prefix} Schedule"
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_heating_calendar"
 
     def _get_calendar_id_prefix(self):
         return f"room_{self.room.room_index}"

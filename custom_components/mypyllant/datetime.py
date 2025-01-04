@@ -8,12 +8,17 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from custom_components.mypyllant.const import DOMAIN, DEFAULT_HOLIDAY_SETPOINT
+from custom_components.mypyllant.const import (
+    DOMAIN,
+    DEFAULT_HOLIDAY_SETPOINT,
+    DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE,
+)
 from custom_components.mypyllant.coordinator import SystemCoordinator
 from custom_components.mypyllant.utils import (
     HolidayEntity,
     EntityList,
     ManualCoolingEntity,
+    DomesticHotWaterCoordinatorEntity,
 )
 from myPyllant.utils import get_default_holiday_dates
 
@@ -39,6 +44,19 @@ async def async_setup_entry(
         sensors.append(
             lambda: SystemHolidayEndDateTimeEntity(index, coordinator, config)
         )
+        for dhw_index, dhw in enumerate(system.domestic_hot_water):
+            if dhw.current_dhw_temperature is not None:
+                key = f"{DOMAIN}_{system.id}_{dhw_index}_legionella_protection_datetime"
+                if key not in hass.data[DOMAIN][config.entry_id]:
+                    hass.data[DOMAIN][config.entry_id][key] = None
+                sensors.append(
+                    lambda: DomesticHotWaterLegionellaProtectionDateTime(
+                        index,
+                        dhw_index,
+                        coordinator,
+                        hass.data[DOMAIN][config.entry_id][key],
+                    )
+                )
         if not system.control_identifier.is_vrc700 and system.is_cooling_allowed:
             sensors.append(
                 lambda: SystemManualCoolingStartDateTimeEntity(
@@ -178,3 +196,49 @@ class SystemManualCoolingEndDateTimeEntity(SystemManualCoolingStartDateTimeEntit
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_manual_cooling_end_date_time"
+
+
+class DomesticHotWaterLegionellaProtectionDateTime(
+    DomesticHotWaterCoordinatorEntity, DateTimeEntity
+):
+    _attr_icon = "mdi:temperature-water"
+    data: datetime | None = None
+
+    def __init__(
+        self, system_index: int, dhw_index: int, coordinator: SystemCoordinator, data
+    ):
+        super().__init__(system_index, dhw_index, coordinator)
+        self.data = data
+
+    async def async_update(self) -> None:
+        """
+        Save last active HVAC mode after update, so it can be restored in turn_on
+        """
+        await super().async_update()
+
+        if self.enabled and self.legionella_protection_active:
+            self.data = datetime.now(tz=self.system.timezone)
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} Legionella Protection Temperature Reached"
+
+    @property
+    def legionella_protection_active(self):
+        return (
+            self.domestic_hot_water.current_dhw_temperature
+            > DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE
+        )
+
+    @property
+    def native_value(self):
+        if self.legionella_protection_active:
+            self.data = datetime.now(tz=self.system.timezone)
+        return self.data
+
+    def set_value(self, value: datetime) -> None:
+        self.data = value
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_legionella_protection_datetime"

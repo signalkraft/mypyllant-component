@@ -52,7 +52,7 @@ async def test_user_flow_minimum_fields(hass: HomeAssistant):
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}
     )
-    assert result["type"] == data_entry_flow.RESULT_TYPE_FORM
+    assert result["type"] == data_entry_flow.FlowResultType.FORM
     assert result["step_id"] == "user"
 
     result = await hass.config_entries.flow.async_configure(
@@ -60,7 +60,7 @@ async def test_user_flow_minimum_fields(hass: HomeAssistant):
         user_input=test_user_input,
     )
 
-    assert result["type"] == data_entry_flow.RESULT_TYPE_FORM
+    assert result["type"] == data_entry_flow.FlowResultType.FORM
 
 
 @pytest.mark.parametrize("test_data", list_test_data())
