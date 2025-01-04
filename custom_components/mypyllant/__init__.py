@@ -108,9 +108,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await system_coordinator.async_refresh()
     hass.data[DOMAIN][entry.entry_id]["system_coordinator"] = system_coordinator
 
-    # Daily data coordinator is updated hourly by default, but requests data for the whole day
+    # Daily data coordinator is fetched once by default (to get all entities), but not updated on a regular basis
+    # to prevent quota errors
     daily_data_coordinator = DailyDataCoordinator(
-        hass, api, entry, timedelta(seconds=update_interval_daily)
+        hass,
+        api,
+        entry,
+        timedelta(seconds=update_interval_daily) if update_interval_daily else None,
     )
     _LOGGER.debug("Refreshing DailyDataCoordinator")
     await daily_data_coordinator.async_refresh()

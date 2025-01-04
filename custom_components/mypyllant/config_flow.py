@@ -133,7 +133,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             OPTION_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
                         ),
                     ): positive_int,
-                    vol.Required(
+                    vol.Optional(
                         OPTION_UPDATE_INTERVAL_DAILY,
                         default=self.config_entry.options.get(
                             OPTION_UPDATE_INTERVAL_DAILY, DEFAULT_UPDATE_INTERVAL_DAILY

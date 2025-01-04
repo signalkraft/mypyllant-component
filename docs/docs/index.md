@@ -133,8 +133,27 @@ After setting up the integration, you can configure it further in Settings :mate
 
 ### Seconds between energy data updates
 
-:   Wait interval between updating sensors with hourly data. The energy data and efficiency sensors have a fixed hourly interval.
-    Setting this too low can cause "quota exceeded" errors.
+:   Wait interval between updating sensors with hourly data. Default is off, because querying for energy data can get
+    you blocked by Vaillant quite easily ("quota exceeded" errors).
+
+    Most users seem to be OK with 7200s (2 hours) or more.
+
+    You can also schedule your own updates with an automation, for example once a day just before midnight:
+    
+    ```yaml
+    description: "Update myVAILLANT energy data at midnight"
+    mode: single
+    triggers:
+      - trigger: time
+        at: "23:59:00"
+    conditions: []
+    actions:
+        - action: homeassistant.update_entity
+          metadata: {}
+          data:
+            entity_id:
+              - sensor.home_heating_energy_efficiency
+    ```
 
     You should restart Home Assistant after changing this setting.
     
