@@ -1,0 +1,61 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "password": "Mot de passe",
+          "username": "Utilisateur",
+          "country": "Pays",
+          "brand": "Marque"
+        },
+        "title": "Information de connexion",
+        "description": "Identique à l'app myVAILLANT"
+      }
+    },
+    "error": {
+      "login_endpoint_invalid": "Pas d'authentification trouvée avec la combinaison Marque et Pays",
+      "realm_invalid": "Cette marque nécessite la sélection d'un pays",
+      "authentication_failed": "Erreur d'authentification, vérifiez l'utilisateur et le mot de passe et assurez-vous d'avoir sélectionné le bon pays et la bonne marque d'appareil",
+      "unknown": "Erreur inattendue"
+    }
+  },
+  "entity": {
+    "climate": {
+      "mypyllant_zone": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "system_off": "Système à l'arrêt",
+              "ventilation_boost": "Ventilation boostée",
+              "boost": "Boost temporaire",
+              "away": "Absent"
+            }
+          }
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "update_interval": "Secondes entre les mises à jour (abaisser risque des erreurs de 'quota dépassé' et d'interdictions temporaires)",
+          "update_interval_daily": "Secondes entre les mises à jour de données d'énergie (abaisser risque des erreurs de 'quota dépassé' et d'interdictions temporaires)",
+          "refresh_delay": "Délai en secondes avant le rafraîchissement des données après des mises à jour",
+          "quick_veto_duration": "Durée par défaut en heures pour le Boost temporaire",
+          "holiday_duration": "Durée par défaut en jours pour le mode Absent",
+          "time_program_overwrite": "Les contrôles de température remplacent le programme horaire au lieu de définir un Boost temporaire",
+          "default_holiday_setpoint": "Consigne de température par défaut en mode Absent",
+          "manual_cooling_duration": "Durée par défaut pour le rafraîchissement manuel en jours",
+          "country": "Pays",
+          "brand": "Marque",
+          "fetch_rts": "Récupérer les statistiques en temps réel (non supporté par tous les systèmes)",
+          "fetch_mpc": "Récupérer la consommation d'énergie en temps réel (non supporté par tous les systèmes)",
+          "fetch_ambisense_rooms": "Récupérer les thermostats d'ambiance Ambisense",
+          "fetch_energy_management": "Récupérer les données de gestion d'énergie",
+          "fetch_eebus": "Récupérer les données EEBUS"
+        }
+      }
+    }
+  }
+}

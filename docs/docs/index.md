@@ -160,7 +160,7 @@ After setting up the integration, you can configure it further in Settings :mate
 
     You should restart Home Assistant after changing this setting.
     
-    :material-cog: Default is 3600 seconds.
+    :material-cog: Default is off.
 
 ### Delay in seconds before refreshing data after updates
 
