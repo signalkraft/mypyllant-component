@@ -24,10 +24,9 @@ from myPyllant.const import (
     DEFAULT_QUICK_VETO_DURATION,
     DEFAULT_HOLIDAY_DURATION,
 )
-from . import OPTION_UPDATE_INTERVAL_DAILY, DEFAULT_UPDATE_INTERVAL_DAILY
+from . import OPTION_UPDATE_INTERVAL_DAILY
 
 from .const import (
-    DEFAULT_COUNTRY,
     DEFAULT_REFRESH_DELAY,
     DEFAULT_TIME_PROGRAM_OVERWRITE,
     DEFAULT_UPDATE_INTERVAL,
@@ -101,6 +100,66 @@ DATA_SCHEMA = vol.Schema(
     },
 )
 
+OPTIONS_SCHEMA = vol.Schema(
+    {
+        vol.Required(
+            OPTION_UPDATE_INTERVAL,
+            default=DEFAULT_UPDATE_INTERVAL,
+        ): positive_int,
+        vol.Optional(
+            OPTION_UPDATE_INTERVAL_DAILY,
+        ): positive_int,
+        vol.Required(
+            OPTION_REFRESH_DELAY,
+            default=DEFAULT_REFRESH_DELAY,
+        ): positive_int,
+        vol.Required(
+            OPTION_DEFAULT_QUICK_VETO_DURATION,
+            default=DEFAULT_QUICK_VETO_DURATION,
+        ): positive_int,
+        vol.Required(
+            OPTION_DEFAULT_HOLIDAY_DURATION,
+            default=DEFAULT_HOLIDAY_DURATION,
+        ): positive_int,
+        vol.Required(
+            OPTION_DEFAULT_HOLIDAY_SETPOINT,
+            default=DEFAULT_HOLIDAY_SETPOINT,
+        ): vol.All(vol.Coerce(float), vol.Clamp(min=0, max=30)),
+        vol.Required(
+            OPTION_DEFAULT_MANUAL_COOLING_DURATION,
+            default=DEFAULT_MANUAL_COOLING_DURATION,
+        ): positive_int,
+        vol.Required(
+            OPTION_TIME_PROGRAM_OVERWRITE,
+            default=DEFAULT_TIME_PROGRAM_OVERWRITE,
+        ): bool,
+        vol.Required(
+            OPTION_DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE,
+            default=DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE,
+        ): vol.All(vol.Coerce(float), vol.Clamp(min=0, max=100)),
+        vol.Required(
+            OPTION_FETCH_RTS,
+            default=DEFAULT_FETCH_RTS,
+        ): bool,
+        vol.Required(
+            OPTION_FETCH_MPC,
+            default=DEFAULT_FETCH_MPC,
+        ): bool,
+        vol.Required(
+            OPTION_FETCH_AMBISENSE_ROOMS,
+            default=DEFAULT_FETCH_AMBISENSE_ROOMS,
+        ): bool,
+        vol.Required(
+            OPTION_FETCH_ENERGY_MANAGEMENT,
+            default=DEFAULT_FETCH_ENERGY_MANAGEMENT,
+        ): bool,
+        vol.Required(
+            OPTION_FETCH_EEBUS,
+            default=DEFAULT_FETCH_EEBUS,
+        ): bool,
+    }
+)
+
 
 async def validate_input(hass: HomeAssistant, data: dict) -> str:
     async with MyPyllantAPI(**data) as api:
@@ -114,133 +173,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Manage the options."""
         if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
-
-        config_country = self.config_entry.data.get(OPTION_COUNTRY, DEFAULT_COUNTRY)
-        config_brand = self.config_entry.data.get(OPTION_BRAND, DEFAULT_BRAND)
+            return self.async_create_entry(data=user_input)
 
         return self.async_show_form(
             step_id="init",
-            data_schema=vol.Schema(
-                {
-                    vol.Required(
-                        OPTION_UPDATE_INTERVAL,
-                        default=self.config_entry.options.get(
-                            OPTION_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
-                        ),
-                    ): positive_int,
-                    vol.Optional(
-                        OPTION_UPDATE_INTERVAL_DAILY,
-                        default=self.config_entry.options.get(
-                            OPTION_UPDATE_INTERVAL_DAILY, DEFAULT_UPDATE_INTERVAL_DAILY
-                        ),
-                    ): positive_int,
-                    vol.Required(
-                        OPTION_REFRESH_DELAY,
-                        default=self.config_entry.options.get(
-                            OPTION_REFRESH_DELAY, DEFAULT_REFRESH_DELAY
-                        ),
-                    ): positive_int,
-                    vol.Required(
-                        OPTION_DEFAULT_QUICK_VETO_DURATION,
-                        default=self.config_entry.options.get(
-                            OPTION_DEFAULT_QUICK_VETO_DURATION,
-                            DEFAULT_QUICK_VETO_DURATION,
-                        ),
-                    ): positive_int,
-                    vol.Required(
-                        OPTION_DEFAULT_HOLIDAY_DURATION,
-                        default=self.config_entry.options.get(
-                            OPTION_DEFAULT_HOLIDAY_DURATION,
-                            DEFAULT_HOLIDAY_DURATION,
-                        ),
-                    ): positive_int,
-                    vol.Required(
-                        OPTION_DEFAULT_HOLIDAY_SETPOINT,
-                        default=self.config_entry.options.get(
-                            OPTION_DEFAULT_HOLIDAY_SETPOINT,
-                            DEFAULT_HOLIDAY_SETPOINT,
-                        ),
-                    ): vol.All(vol.Coerce(float), vol.Clamp(min=0, max=30)),
-                    vol.Required(
-                        OPTION_DEFAULT_MANUAL_COOLING_DURATION,
-                        default=self.config_entry.options.get(
-                            OPTION_DEFAULT_MANUAL_COOLING_DURATION,
-                            DEFAULT_MANUAL_COOLING_DURATION,
-                        ),
-                    ): positive_int,
-                    vol.Required(
-                        OPTION_TIME_PROGRAM_OVERWRITE,
-                        default=self.config_entry.options.get(
-                            OPTION_TIME_PROGRAM_OVERWRITE,
-                            DEFAULT_TIME_PROGRAM_OVERWRITE,
-                        ),
-                    ): bool,
-                    vol.Required(
-                        OPTION_DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE,
-                        default=self.config_entry.options.get(
-                            OPTION_DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE,
-                            DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE,
-                        ),
-                    ): float,
-                    vol.Required(
-                        OPTION_BRAND,
-                        default=self.config_entry.options.get(
-                            OPTION_BRAND, config_brand
-                        ),
-                    ): selector.SelectSelector(
-                        selector.SelectSelectorConfig(
-                            options=_BRANDS_OPTIONS,
-                            mode=selector.SelectSelectorMode.LIST,
-                        ),
-                    ),
-                    vol.Optional(
-                        OPTION_COUNTRY,
-                        default=self.config_entry.options.get(
-                            OPTION_COUNTRY, config_country
-                        ),
-                    ): selector.SelectSelector(
-                        selector.SelectSelectorConfig(
-                            options=_COUNTRIES_OPTIONS,
-                            mode=selector.SelectSelectorMode.DROPDOWN,
-                        ),
-                    ),
-                    vol.Required(
-                        OPTION_FETCH_RTS,
-                        default=self.config_entry.options.get(
-                            OPTION_FETCH_RTS,
-                            DEFAULT_FETCH_RTS,
-                        ),
-                    ): bool,
-                    vol.Required(
-                        OPTION_FETCH_MPC,
-                        default=self.config_entry.options.get(
-                            OPTION_FETCH_MPC,
-                            DEFAULT_FETCH_MPC,
-                        ),
-                    ): bool,
-                    vol.Required(
-                        OPTION_FETCH_AMBISENSE_ROOMS,
-                        default=self.config_entry.options.get(
-                            OPTION_FETCH_AMBISENSE_ROOMS,
-                            DEFAULT_FETCH_AMBISENSE_ROOMS,
-                        ),
-                    ): bool,
-                    vol.Required(
-                        OPTION_FETCH_ENERGY_MANAGEMENT,
-                        default=self.config_entry.options.get(
-                            OPTION_FETCH_ENERGY_MANAGEMENT,
-                            DEFAULT_FETCH_ENERGY_MANAGEMENT,
-                        ),
-                    ): bool,
-                    vol.Required(
-                        OPTION_FETCH_EEBUS,
-                        default=self.config_entry.options.get(
-                            OPTION_FETCH_EEBUS,
-                            DEFAULT_FETCH_EEBUS,
-                        ),
-                    ): bool,
-                }
+            data_schema=self.add_suggested_values_to_schema(
+                OPTIONS_SCHEMA, self.config_entry.options
             ),
         )
 
