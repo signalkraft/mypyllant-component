@@ -2,26 +2,39 @@ import json
 from dataclasses import asdict
 
 import pytest
+from homeassistant.helpers.entity_registry import DATA_REGISTRY, EntityRegistry
+from homeassistant.loader import (
+    DATA_COMPONENTS,
+    DATA_INTEGRATIONS,
+    DATA_PRELOAD_PLATFORMS,
+    DATA_MISSING_PLATFORMS,
+)
 
 from custom_components.mypyllant import SystemCoordinator
 from custom_components.mypyllant.climate import AmbisenseClimate
 from custom_components.mypyllant.const import (
     SERVICE_GENERATE_TEST_DATA,
     SERVICE_EXPORT,
+    DOMAIN,
 )
 from myPyllant.api import MyPyllantAPI
 from myPyllant.models import RoomTimeProgram
 from myPyllant.tests.generate_test_data import DATA_DIR
 from myPyllant.tests.utils import list_test_data, load_test_data
 
-from tests.utils import call_service, get_config_entry
+from tests.utils import get_config_entry
+
+
+def setup_hass_for_service_test(hass):
+    hass.data[DATA_COMPONENTS] = {}
+    hass.data[DATA_INTEGRATIONS] = {}
+    hass.data[DATA_PRELOAD_PLATFORMS] = {}
+    hass.data[DATA_MISSING_PLATFORMS] = {}
+    hass.data[DATA_REGISTRY] = EntityRegistry(hass)
+    return hass
 
 
 @pytest.mark.parametrize("test_data", list_test_data())
-@pytest.mark.enable_socket
-@pytest.mark.skip(
-    "Broke with upgrade to pytest-homeassistant-custom-component==0.13.142"
-)
 async def test_service_generate_test_data(
     hass,
     mypyllant_aioresponses,
@@ -29,15 +42,19 @@ async def test_service_generate_test_data(
     system_coordinator_mock,
     test_data,
 ):
-    result = await call_service(
-        SERVICE_GENERATE_TEST_DATA,
-        {"blocking": True, "return_response": True},
-        hass,
-        mypyllant_aioresponses,
-        mocked_api,
-        system_coordinator_mock,
-        test_data,
-    )
+    hass = setup_hass_for_service_test(hass)
+
+    with mypyllant_aioresponses(test_data):
+        config_entry = get_config_entry()
+        config_entry.add_to_hass(hass)
+        await hass.config_entries.async_setup(config_entry.entry_id)
+        await hass.async_block_till_done()
+        result = await hass.services.async_call(
+            DOMAIN,
+            SERVICE_GENERATE_TEST_DATA,
+            blocking=True,
+            return_response=True,
+        )
     if "homes" not in result:
         await mocked_api.aiohttp_session.close()
         pytest.skip("No home data")
@@ -47,9 +64,6 @@ async def test_service_generate_test_data(
 
 
 @pytest.mark.parametrize("test_data", list_test_data())
-@pytest.mark.skip(
-    "Broke with upgrade to pytest-homeassistant-custom-component==0.13.142"
-)
 async def test_service_export(
     hass,
     mypyllant_aioresponses,
@@ -57,15 +71,19 @@ async def test_service_export(
     system_coordinator_mock,
     test_data,
 ):
-    result = await call_service(
-        SERVICE_EXPORT,
-        {"blocking": True, "return_response": True},
-        hass,
-        mypyllant_aioresponses,
-        mocked_api,
-        system_coordinator_mock,
-        test_data,
-    )
+    hass = setup_hass_for_service_test(hass)
+
+    with mypyllant_aioresponses(test_data):
+        config_entry = get_config_entry()
+        config_entry.add_to_hass(hass)
+        await hass.config_entries.async_setup(config_entry.entry_id)
+        await hass.async_block_till_done()
+        result = await hass.services.async_call(
+            DOMAIN,
+            SERVICE_EXPORT,
+            blocking=True,
+            return_response=True,
+        )
     assert isinstance(result, dict)
     assert isinstance(result["export"], list)
     assert "home" in result["export"][0]

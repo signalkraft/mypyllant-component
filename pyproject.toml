@@ -19,6 +19,7 @@ addopts = """
 --cov=custom_components"""
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+filterwarnings = ["ignore:Inheritance class CountingClientSession from ClientSession is discouraged:DeprecationWarning"]
 
 [tool.mypy]
 python_version = "3.12"

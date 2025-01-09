@@ -22,8 +22,6 @@ from custom_components.mypyllant.climate import (
 )
 from custom_components.mypyllant.ventilation_climate import VentilationClimate
 from tests.utils import get_config_entry
-from tests.conftest import MockConfigEntry, TEST_OPTIONS
-from tests.test_init import test_user_input
 
 
 @pytest.mark.parametrize("test_data", list_test_data())
@@ -38,12 +36,7 @@ async def test_async_setup_climate(
     hass.data[DATA_INTEGRATIONS] = {}
     hass.data[DATA_REGISTRY] = EntityRegistry(hass)
     with mypyllant_aioresponses(test_data) as _:
-        config_entry = MockConfigEntry(
-            domain=DOMAIN,
-            title="Mock Title",
-            data=test_user_input,
-            options=TEST_OPTIONS,
-        )
+        config_entry = get_config_entry()
         system_coordinator_mock.data = (
             await system_coordinator_mock._async_update_data()
         )
@@ -93,7 +86,6 @@ async def test_zone_climate(
         await climate.async_set_preset_mode(preset_mode=PRESET_NONE)
         system_coordinator_mock._debounced_refresh.async_cancel()
 
-        print(system_coordinator_mock.data[0].state["zones"])
         zone_state = system_coordinator_mock.data[0].state["zones"][0]
         if "currentRoomTemperature" in zone_state:
             assert isinstance(climate.current_temperature, float)

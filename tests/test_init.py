@@ -2,28 +2,20 @@
 import logging
 from unittest import mock
 
-import pytest
 from homeassistant import data_entry_flow
 from homeassistant.config_entries import SOURCE_USER
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_registry import DATA_REGISTRY, EntityRegistry
-from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
+
 from myPyllant.api import MyPyllantAPI
-from myPyllant.tests.utils import list_test_data
+from myPyllant.tests.generate_test_data import DATA_DIR
+from myPyllant.tests.utils import load_test_data
 
 from custom_components.mypyllant.const import DOMAIN
 from custom_components.mypyllant import async_setup_entry, async_unload_entry
 from custom_components.mypyllant.config_flow import DATA_SCHEMA
-from tests.conftest import TEST_OPTIONS, MockConfigEntry
+from tests.utils import get_config_entry, test_user_input
 
 _LOGGER = logging.getLogger(__name__)
-
-test_user_input = {
-    "username": "username",
-    "password": "password",
-    "country": "germany",
-    "brand": "vaillant",
-}
 
 
 async def test_flow_init(hass):
@@ -63,26 +55,18 @@ async def test_user_flow_minimum_fields(hass: HomeAssistant):
     assert result["type"] == data_entry_flow.FlowResultType.FORM
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
-@pytest.mark.skip(
-    "Broke with upgrade to pytest-homeassistant-custom-component==0.13.142"
-)
 async def test_async_setup(
     hass,
     mypyllant_aioresponses,
     mocked_api: MyPyllantAPI,
-    test_data,
 ):
-    hass.data[DATA_COMPONENTS] = {}
-    hass.data[DATA_INTEGRATIONS] = {}
-    hass.data[DATA_REGISTRY] = EntityRegistry(hass)
+    test_data = load_test_data(DATA_DIR / "heatpump_heat_curve")
     with mypyllant_aioresponses(test_data) as _:
-        config_entry = MockConfigEntry(
-            domain=DOMAIN,
-            title="Mock Title",
-            data=test_user_input,
-            options=TEST_OPTIONS,
-        )
+        config_entry = get_config_entry()
+        config_entry.add_to_hass(hass)
+        await hass.config_entries.async_setup(config_entry.entry_id)
+        await hass.async_block_till_done()
+
         mock.patch("myPyllant.api.MyPyllantAPI", mocked_api)
         result = await async_setup_entry(hass, config_entry)
         assert result, "Component did not setup successfully"

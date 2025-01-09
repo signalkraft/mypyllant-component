@@ -18,8 +18,7 @@ from custom_components.mypyllant.calendar import (
     DomesticHotWaterCirculationCalendar,
     AmbisenseCalendar,
 )
-from tests.conftest import MockConfigEntry, TEST_OPTIONS
-from tests.test_init import test_user_input
+from tests.utils import get_config_entry
 
 
 @pytest.mark.parametrize("test_data", list_test_data())
@@ -34,12 +33,7 @@ async def test_async_setup_calendar(
     hass.data[DATA_INTEGRATIONS] = {}
     hass.data[DATA_REGISTRY] = EntityRegistry(hass)
     with mypyllant_aioresponses(test_data) as _:
-        config_entry = MockConfigEntry(
-            domain=DOMAIN,
-            title="Mock Title",
-            data=test_user_input,
-            options=TEST_OPTIONS,
-        )
+        config_entry = get_config_entry()
         system_coordinator_mock.data = (
             await system_coordinator_mock._async_update_data()
         )

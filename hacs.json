@@ -1,5 +1,8 @@
 {
   "name": "MyVaillant",
   "render_readme": true,
-  "homeassistant": "2025.1.0b0"
+  "homeassistant": "2025.1.0",
+  "iot_class": "Cloud Polling",
+  "zip_release": true,
+  "filename": "mypyllant-component.zip"
 }

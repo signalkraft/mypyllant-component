@@ -4,5 +4,7 @@ set -e
 
 version="$(jq -r .version custom_components/mypyllant/manifest.json)"
 
-git push
-gh release create "$version" --draft --generate-notes
+git tag "$version"
+git push origin "$version"
+
+echo "Open release job: $(gh run list -w release --json url --limit 1 | jq -r '.[].url')"

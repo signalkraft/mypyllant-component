@@ -1,9 +1,7 @@
-import uuid
 from datetime import timedelta
 from unittest import mock
 
 import pytest
-from homeassistant import config_entries
 
 from custom_components.mypyllant.coordinator import (
     SystemCoordinator,
@@ -106,57 +104,3 @@ async def daily_data_coordinator_mock(hass, mocked_api) -> DailyDataCoordinator:
     ) as entry:
         hass.data = {DOMAIN: {entry.entry_id: {}}}
         return DailyDataCoordinator(hass, mocked_api, entry, timedelta(seconds=10))
-
-
-class MockConfigEntry(config_entries.ConfigEntry):
-    """Helper for creating config entries that adds some defaults."""
-
-    def __init__(
-        self,
-        *,
-        domain="test",
-        data=None,
-        version=1,
-        entry_id=None,
-        source=config_entries.SOURCE_USER,
-        title="Mock Title",
-        state=None,
-        options={},
-        discovery_keys={},
-        pref_disable_new_entities=None,
-        pref_disable_polling=None,
-        unique_id=None,
-        disabled_by=None,
-        reason=None,
-        minor_version=None,
-    ):
-        """Initialize a mock config entry."""
-        kwargs = {
-            "entry_id": entry_id or str(uuid.uuid4()),
-            "domain": domain,
-            "data": data or {},
-            "pref_disable_new_entities": pref_disable_new_entities,
-            "pref_disable_polling": pref_disable_polling,
-            "options": options,
-            "discovery_keys": discovery_keys,
-            "version": version,
-            "title": title,
-            "unique_id": unique_id,
-            "disabled_by": disabled_by,
-            "minor_version": minor_version,
-        }
-        if source is not None:
-            kwargs["source"] = source
-        if state is not None:
-            kwargs["state"] = state
-        super().__init__(**kwargs)
-        if reason is not None:
-            self.reason = reason
-
-    def add_to_hass(self, hass):
-        """Test helper to add entry to hass."""
-        hass.config_entries._entries[self.entry_id] = self
-
-    def add_to_manager(self, manager):
-        """Test helper to add entry to entry manager."""
-        manager._entries[self.entry_id] = self
