@@ -47,6 +47,7 @@
           "time_program_overwrite": "Les contrôles de température remplacent le programme horaire au lieu de définir un Boost temporaire",
           "default_holiday_setpoint": "Consigne de température par défaut en mode Absent",
           "manual_cooling_duration": "Durée par défaut pour le rafraîchissement manuel en jours",
+          "dhw_legionella_protection_temperature": "Température au-dessus de laquelle la protection contre la légionellose est considérée comme active",
           "country": "Pays",
           "brand": "Marque",
           "fetch_rts": "Récupérer les statistiques en temps réel (non supporté par tous les systèmes)",
