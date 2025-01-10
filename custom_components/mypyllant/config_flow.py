@@ -6,7 +6,7 @@ from typing import Any
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.data_entry_flow import FlowResult
+from homeassistant.data_entry_flow import FlowResult, AbortFlow
 from homeassistant.helpers import selector
 from homeassistant.helpers.config_validation import positive_int
 from myPyllant.api import (
@@ -209,10 +209,102 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignore
                 errors["country"] = "login_endpoint_invalid"
             except RealmInvalid:
                 errors["country"] = "realm_invalid"
+            except AbortFlow:
+                errors["base"] = "already_configured"
             except Exception as e:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception", exc_info=e)
                 errors["base"] = "unknown"
+            if "password" in user_input:
+                del user_input["password"]
 
         return self.async_show_form(
-            step_id="user", data_schema=DATA_SCHEMA, errors=errors
+            step_id="user",
+            data_schema=self.add_suggested_values_to_schema(DATA_SCHEMA, user_input),
+            errors=errors,
+        )
+
+    async def async_step_reauth(self, *args, **kwargs):
+        """Perform reauthentication upon an API authentication error."""
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reauth_confirm(self, user_input: dict[str, Any] | None = None):
+        """Confirm reauthentication dialog."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            try:
+                username = await validate_input(self.hass, user_input)
+                await self.async_set_unique_id(username)
+                self._abort_if_unique_id_mismatch(reason="wrong_account")
+            except AuthenticationFailed:
+                errors["base"] = "authentication_failed"
+            except LoginEndpointInvalid:
+                errors["country"] = "login_endpoint_invalid"
+            except RealmInvalid:
+                errors["country"] = "realm_invalid"
+            except AbortFlow:
+                errors["base"] = "already_configured"
+            except Exception as e:  # pylint: disable=broad-except
+                _LOGGER.exception("Unexpected exception", exc_info=e)
+                errors["base"] = "unknown"
+            else:
+                return self.async_update_reload_and_abort(
+                    self._get_reauth_entry(),
+                    data_updates=user_input,
+                )
+        else:
+            config_entry = self.hass.config_entries.async_get_entry(
+                self.context["entry_id"]
+            )
+            user_input = dict(config_entry.data)
+
+        if "password" in user_input:
+            del user_input["password"]
+
+        return self.async_show_form(
+            step_id="reauth_confirm",
+            data_schema=self.add_suggested_values_to_schema(DATA_SCHEMA, user_input),
+            errors=errors,
+        )
+
+    async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None):
+        """Handle a reconfiguration flow initialized by the user."""
+        config_entry = self.hass.config_entries.async_get_entry(
+            self.context["entry_id"]
+        )
+        if not config_entry:
+            return self.async_abort(reason="entry_not_found")
+
+        errors = {}
+
+        if user_input is not None:
+            try:
+                await validate_input(self.hass, user_input)
+            except AuthenticationFailed:
+                errors["base"] = "authentication_failed"
+            except LoginEndpointInvalid:
+                errors["country"] = "login_endpoint_invalid"
+            except RealmInvalid:
+                errors["country"] = "realm_invalid"
+            except Exception as e:  # pylint: disable=broad-except
+                _LOGGER.exception("Unexpected exception", exc_info=e)
+                errors["base"] = "unknown"
+            else:
+                updated_config = {**config_entry.data, **user_input}
+                self.hass.config_entries.async_update_entry(
+                    config_entry,
+                    data=updated_config,
+                )
+                await self.hass.config_entries.async_reload(config_entry.entry_id)
+                return self.async_abort(reason="reconfiguration_successful")
+        else:
+            user_input = dict(config_entry.data)
+
+        if "password" in user_input:
+            del user_input["password"]
+
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=self.add_suggested_values_to_schema(DATA_SCHEMA, user_input),
+            errors=errors,
         )

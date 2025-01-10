@@ -1,5 +1,10 @@
 {
   "config": {
+    "abort": {
+      "entry_not_found": "No configuration entry was found for this user",
+      "reauth_successful": "Reconfiguration was successful!",
+      "wrong_account": "The account you're trying to reconfigure is not the same as the one you logged in with"
+    },
     "step": {
       "user": {
         "data": {
@@ -10,12 +15,34 @@
         },
         "title": "Login Information",
         "description": "Same as myVAILLANT app"
+      },
+      "reauth_confirm": {
+        "data": {
+          "password": "Password",
+          "username": "Username",
+          "country": "Country",
+          "brand": "Brand"
+        },
+        "title": "Reauthenticate to myVAILLANT",
+        "description": "Same as myVAILLANT app"
+      },
+      "reconfigure": {
+        "data": {
+          "password": "Password",
+          "username": "Username",
+          "country": "Country",
+          "brand": "Brand"
+        },
+        "title": "Reconfigure myVAILLANT",
+        "description": "Same as myVAILLANT app"
       }
     },
     "error": {
       "login_endpoint_invalid": "No login method was found for this combination of brand and country",
       "realm_invalid": "This brand requires a country to be selected",
       "authentication_failed": "Authentication failed, check your username and password and make sure you selected the right country and device brand",
+      "already_configured": "There's already a hub for this user configured",
+      "another_user": "There's already a hub for this user configured",
       "unknown": "Unexpected error"
     }
   },

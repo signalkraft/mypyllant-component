@@ -11,6 +11,7 @@ from homeassistant.core import (
     ServiceCall,
     ServiceResponse,
 )
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import selector
 from homeassistant.helpers.template import as_datetime
 
@@ -19,6 +20,11 @@ from myPyllant import export, report
 from myPyllant.api import MyPyllantAPI
 from myPyllant.const import DEFAULT_BRAND
 from myPyllant.enums import DeviceDataBucketResolution
+from myPyllant.http_client import (
+    AuthenticationFailed,
+    RealmInvalid,
+    LoginEndpointInvalid,
+)
 from myPyllant.tests import generate_test_data
 from .const import (
     DEFAULT_COUNTRY,
@@ -99,7 +105,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     api = MyPyllantAPI(
         username=username, password=password, brand=brand, country=country
     )
-    await api.login()
+    try:
+        await api.login()
+    except (AuthenticationFailed, LoginEndpointInvalid, RealmInvalid) as e:
+        raise ConfigEntryAuthFailed from e
 
     system_coordinator = SystemCoordinator(
         hass, api, entry, timedelta(seconds=update_interval)
