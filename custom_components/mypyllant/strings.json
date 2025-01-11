@@ -1,31 +1,87 @@
 {
   "config": {
+    "abort": {
+      "entry_not_found": "No configuration entry was found for this user",
+      "reauth_successful": "Reconfiguration was successful!",
+      "wrong_account": "The account you're trying to reconfigure is not the same as the one you logged in with"
+    },
     "step": {
       "user": {
         "data": {
-          "password": "Password",
-          "username": "Username",
+          "password": "[%key:common::config_flow::data::password%]",
+          "username": "[%key:common::config_flow::data::email%]",
           "country": "Country",
           "brand": "Brand"
         },
         "title": "Login Information",
         "description": "Same as myVAILLANT app"
+      },
+      "reauth_confirm": {
+        "data": {
+          "password": "[%key:common::config_flow::data::password%]",
+          "username": "[%key:common::config_flow::data::email%]",
+          "country": "Country",
+          "brand": "Brand"
+        },
+        "title": "Reauthenticate to myVAILLANT",
+        "description": "Same as myVAILLANT app"
+      },
+      "reconfigure": {
+        "data": {
+          "password": "[%key:common::config_flow::data::password%]",
+          "username": "[%key:common::config_flow::data::email%]",
+          "country": "Country",
+          "brand": "Brand"
+        },
+        "title": "Reconfigure myVAILLANT",
+        "description": "Same as myVAILLANT app"
       }
     },
     "error": {
       "login_endpoint_invalid": "No login method was found for this combination of brand and country",
-      "authentication_failed": "Authentication failed, check your username and password and make sure you selected the right country and device brand",
+      "realm_invalid": "This brand requires a country to be selected",
+      "authentication_failed": "Authentication failed, check your e-mail and password and make sure you selected the right country and device brand",
+      "already_configured": "There's already a hub for this user configured",
+      "another_user": "There's already a hub for this user configured",
       "unknown": "Unexpected error"
+    }
+  },
+  "entity": {
+    "climate": {
+      "mypyllant_zone": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "system_off": "System Off",
+              "ventilation_boost": "Ventilation Boost",
+              "boost": "Quick Veto",
+              "away": "Holiday"
+            }
+          }
+        }
+      }
     }
   },
   "options": {
     "step": {
       "init": {
         "data": {
-          "update_interval": "Seconds between scans",
+          "update_interval": "Seconds between updates (lowering risks 'quota exceeded' errors and temporary bans)",
+          "update_interval_daily": "Seconds between energy data updates (lowering risks 'quota exceeded' errors and temporary bans)",
+          "refresh_delay": "Delay in seconds before refreshing data after updates",
           "quick_veto_duration": "Default duration in hours for quick veto",
+          "holiday_duration": "Default duration in days for away mode",
+          "time_program_overwrite": "Temperature controls overwrite time program instead of setting quick veto",
+          "default_holiday_setpoint": "Default temperature setpoint for away mode",
+          "manual_cooling_duration": "Default duration for manual cooling in days",
+          "dhw_legionella_protection_temperature": "Temperature above which legionella protection is considered active",
           "country": "Country",
-          "brand": "Brand"
+          "brand": "Brand",
+          "fetch_rts": "Fetch real-time statistics (not supported on every system)",
+          "fetch_mpc": "Fetch real-time power usage (not supported on every system)",
+          "fetch_ambisense_rooms": "Fetch Ambisense Room Thermostats",
+          "fetch_energy_management": "Fetch Energy Management Data",
+          "fetch_eebus": "Fetch EEBUS Data"
         }
       }
     }
