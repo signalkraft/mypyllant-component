@@ -50,6 +50,7 @@ from custom_components.mypyllant.utils import (
     shorten_zone_name,
     EntityList,
     AmbisenseCoordinatorEntity,
+    ensure_token_refresh,
 )
 
 from . import SystemCoordinator
@@ -106,12 +107,6 @@ AMBISENSE_ROOM_OPERATION_MODE_MAP = {
 }
 
 AMBISENSE_ROOM_PRESETS = [PRESET_NONE, PRESET_BOOST]
-
-def ensure_token_refresh(func):
-    async def wrapper(self, *args, **kwargs):
-        await self.coordinator._refresh_session()
-        return await func(self, *args, **kwargs)
-    return wrapper
 
 async def async_setup_entry(
     hass: HomeAssistant, config: ConfigEntry, async_add_entities: AddEntitiesCallback

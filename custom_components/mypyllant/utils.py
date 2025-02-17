@@ -34,6 +34,11 @@ logger = logging.getLogger(__name__)
 
 _T = TypeVar("_T")
 
+def ensure_token_refresh(func):
+    async def wrapper(self, *args, **kwargs):
+        await self.coordinator._refresh_session()
+        return await func(self, *args, **kwargs)
+    return wrapper
 
 class EntityList(MutableSequence[_T | typing.Callable[[], _T]]):
     """
