@@ -10,6 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from custom_components.mypyllant.const import DOMAIN, DEFAULT_HOLIDAY_SETPOINT
+from custom_components.mypyllant.decorators import ensure_token_refresh
 from custom_components.mypyllant.coordinator import SystemCoordinator
 from custom_components.mypyllant.utils import (
     HolidayEntity,
@@ -17,7 +18,6 @@ from custom_components.mypyllant.utils import (
     ZoneCoordinatorEntity,
     EntityList,
     CircuitEntity,
-    ensure_token_refresh,
 )
 
 _LOGGER = logging.getLogger(__name__)

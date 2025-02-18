@@ -8,6 +8,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from custom_components.mypyllant.const import DOMAIN, DEFAULT_HOLIDAY_SETPOINT
+from custom_components.mypyllant.decorators import ensure_token_refresh
 from custom_components.mypyllant.coordinator import SystemCoordinator
 from custom_components.mypyllant.utils import (
     HolidayEntity,
@@ -16,7 +17,6 @@ from custom_components.mypyllant.utils import (
     ManualCoolingEntity,
     ZoneCoordinatorEntity,
     SystemCoordinatorEntity,
-    ensure_token_refresh,
 )
 from myPyllant.enums import ZoneCurrentSpecialFunction
 from myPyllant.utils import get_default_holiday_dates

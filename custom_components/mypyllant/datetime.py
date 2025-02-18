@@ -13,13 +13,13 @@ from custom_components.mypyllant.const import (
     DEFAULT_HOLIDAY_SETPOINT,
     DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE,
 )
+from custom_components.mypyllant.decorators import ensure_token_refresh
 from custom_components.mypyllant.coordinator import SystemCoordinator
 from custom_components.mypyllant.utils import (
     HolidayEntity,
     EntityList,
     ManualCoolingEntity,
     DomesticHotWaterCoordinatorEntity,
-    ensure_token_refresh,
 )
 from myPyllant.utils import get_default_holiday_dates
 

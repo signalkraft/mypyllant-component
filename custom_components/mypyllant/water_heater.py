@@ -33,10 +33,8 @@ from .const import (
     SERVICE_SET_DHW_CIRCULATION_TIME_PROGRAM,
     SERVICE_SET_DHW_TIME_PROGRAM,
 )
-from .utils import (
-    EntityList,
-    ensure_token_refresh,
-)
+from .decorators import ensure_token_refresh
+from .utils import EntityList
 
 _LOGGER = logging.getLogger(__name__)
 

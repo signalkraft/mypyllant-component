@@ -46,11 +46,12 @@ from myPyllant.enums import (
     ZoneOperatingType,
 )
 
+from custom_components.mypyllant.decorators import ensure_token_refresh
+
 from custom_components.mypyllant.utils import (
     shorten_zone_name,
     EntityList,
     AmbisenseCoordinatorEntity,
-    ensure_token_refresh,
 )
 
 from . import SystemCoordinator

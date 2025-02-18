@@ -32,12 +32,12 @@ from myPyllant.enums import ZoneOperatingType
 
 from . import SystemCoordinator
 from .const import DOMAIN, WEEKDAYS_TO_RFC5545, RFC5545_TO_WEEKDAYS
+from .decorators import ensure_token_refresh
 from .utils import (
     ZoneCoordinatorEntity,
     DomesticHotWaterCoordinatorEntity,
     EntityList,
     AmbisenseCoordinatorEntity,
-    ensure_token_refresh,
 )
 
 _LOGGER = logging.getLogger(__name__)
