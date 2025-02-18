@@ -9,4 +9,4 @@ def ensure_token_refresh(func):
         await self.coordinator._refresh_session()
         return await func(self, *args, **kwargs)
 
-    return wrapper   
+    return wrapper
