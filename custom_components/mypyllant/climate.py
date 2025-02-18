@@ -109,6 +109,7 @@ AMBISENSE_ROOM_OPERATION_MODE_MAP = {
 
 AMBISENSE_ROOM_PRESETS = [PRESET_NONE, PRESET_BOOST]
 
+
 async def async_setup_entry(
     hass: HomeAssistant, config: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
