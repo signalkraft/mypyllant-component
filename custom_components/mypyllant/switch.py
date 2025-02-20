@@ -8,6 +8,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from custom_components.mypyllant.const import DOMAIN, DEFAULT_HOLIDAY_SETPOINT
+from custom_components.mypyllant.decorators import ensure_token_refresh
 from custom_components.mypyllant.coordinator import SystemCoordinator
 from custom_components.mypyllant.utils import (
     HolidayEntity,
@@ -66,6 +67,7 @@ class SystemHolidaySwitch(HolidayEntity, SwitchEntity):
     def is_on(self):
         return self.zone.general.holiday_planned if self.zone else False
 
+    @ensure_token_refresh
     async def async_turn_on(self, **kwargs):
         _, end = get_default_holiday_dates(
             self.holiday_start,
@@ -80,6 +82,7 @@ class SystemHolidaySwitch(HolidayEntity, SwitchEntity):
         # Holiday values need a long time to show up in the API
         await self.coordinator.async_request_refresh_delayed(20)
 
+    @ensure_token_refresh
     async def async_turn_off(self, **kwargs):
         await self.coordinator.api.cancel_holiday(self.system)
         # Holiday values need a long time to show up in the API
@@ -101,12 +104,14 @@ class SystemManualCoolingSwitch(ManualCoolingEntity, SwitchEntity):
     def is_on(self):
         return self.system.manual_cooling_planned
 
+    @ensure_token_refresh
     async def async_turn_on(self, **kwargs):
         await self.coordinator.api.set_cooling_for_days(
             self.system, duration_days=self.default_manual_cooling_duration
         )
         await self.coordinator.async_request_refresh_delayed(20)
 
+    @ensure_token_refresh
     async def async_turn_off(self, **kwargs):
         await self.coordinator.api.cancel_cooling_for_days(self.system)
         await self.coordinator.async_request_refresh_delayed(20)
@@ -139,10 +144,12 @@ class SystemEebusSwitch(SystemCoordinatorEntity, SwitchEntity):
             else False
         )
 
+    @ensure_token_refresh
     async def async_turn_on(self, **kwargs):
         await self.coordinator.api.toggle_eebus(self.system, enabled=True)
         await self.coordinator.async_request_refresh_delayed()
 
+    @ensure_token_refresh
     async def async_turn_off(self, **kwargs):
         await self.coordinator.api.toggle_eebus(self.system, enabled=False)
         await self.coordinator.async_request_refresh_delayed()
@@ -166,10 +173,12 @@ class ZoneVentilationBoostSwitch(ZoneCoordinatorEntity, SwitchEntity):
             == ZoneCurrentSpecialFunction.VENTILATION_BOOST
         )
 
+    @ensure_token_refresh
     async def async_turn_on(self, **kwargs):
         await self.coordinator.api.set_ventilation_boost(self.system)
         await self.coordinator.async_request_refresh_delayed(20)
 
+    @ensure_token_refresh
     async def async_turn_off(self, **kwargs):
         await self.coordinator.api.cancel_ventilation_boost(self.system)
         await self.coordinator.async_request_refresh_delayed(20)
@@ -188,12 +197,14 @@ class DomesticHotWaterBoostSwitch(DomesticHotWaterCoordinatorEntity, SwitchEntit
     def is_on(self):
         return self.domestic_hot_water.is_cylinder_boosting
 
+    @ensure_token_refresh
     async def async_turn_on(self, **kwargs):
         await self.coordinator.api.boost_domestic_hot_water(
             self.domestic_hot_water,
         )
         await self.coordinator.async_request_refresh_delayed()
 
+    @ensure_token_refresh
     async def async_turn_off(self, **kwargs):
         await self.coordinator.api.cancel_hot_water_boost(
             self.domestic_hot_water,

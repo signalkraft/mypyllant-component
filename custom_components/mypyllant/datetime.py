@@ -13,6 +13,7 @@ from custom_components.mypyllant.const import (
     DEFAULT_HOLIDAY_SETPOINT,
     DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE,
 )
+from custom_components.mypyllant.decorators import ensure_token_refresh
 from custom_components.mypyllant.coordinator import SystemCoordinator
 from custom_components.mypyllant.utils import (
     HolidayEntity,
@@ -84,6 +85,7 @@ class SystemHolidayStartDateTimeEntity(HolidayEntity, DateTimeEntity):
             else None
         )
 
+    @ensure_token_refresh
     async def async_set_value(self, value: datetime) -> None:
         _, end = get_default_holiday_dates(
             self.holiday_start,
@@ -120,6 +122,7 @@ class SystemHolidayEndDateTimeEntity(SystemHolidayStartDateTimeEntity):
             else None
         )
 
+    @ensure_token_refresh
     async def async_set_value(self, value: datetime) -> None:
         # TODO: Make API tz-aware
         setpoint = None
@@ -151,6 +154,7 @@ class SystemManualCoolingStartDateTimeEntity(ManualCoolingEntity, DateTimeEntity
             else None
         )
 
+    @ensure_token_refresh
     async def async_set_value(self, value: datetime) -> None:
         _, end = get_default_holiday_dates(
             self.manual_cooling_start,
@@ -185,6 +189,7 @@ class SystemManualCoolingEndDateTimeEntity(SystemManualCoolingStartDateTimeEntit
             else None
         )
 
+    @ensure_token_refresh
     async def async_set_value(self, value: datetime) -> None:
         await self.coordinator.api.set_cooling_for_days(
             self.system,

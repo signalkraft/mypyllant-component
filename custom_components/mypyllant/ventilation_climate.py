@@ -17,6 +17,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from custom_components.mypyllant.const import DOMAIN
+from custom_components.mypyllant.decorators import ensure_token_refresh
 from custom_components.mypyllant.coordinator import SystemCoordinator
 from myPyllant.enums import (
     VentilationOperationMode,
@@ -138,6 +139,7 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
     def fan_modes(self) -> list[str]:
         return [str(k) for k in self.fan_mode_map.values()]
 
+    @ensure_token_refresh
     async def async_set_hvac_mode(self, hvac_mode):
         await self.coordinator.api.set_ventilation_operation_mode(
             self.ventilation,
@@ -149,6 +151,7 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
     def fan_mode(self) -> HVACMode:
         return self.fan_mode_map[self.ventilation.operation_mode_ventilation]
 
+    @ensure_token_refresh
     async def async_set_fan_mode(self, fan_mode: str) -> None:
         mode = [k for k, v in self.fan_mode_map.items() if v == fan_mode][0]
         await self.coordinator.api.set_ventilation_operation_mode(
@@ -157,6 +160,7 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
         )
         await self.coordinator.async_request_refresh_delayed()
 
+    @ensure_token_refresh
     async def set_ventilation_fan_stage(
         self, maximum_fan_stage: int | str, **kwargs: Any
     ) -> None:

@@ -32,6 +32,7 @@ from myPyllant.enums import ZoneOperatingType
 
 from . import SystemCoordinator
 from .const import DOMAIN, WEEKDAYS_TO_RFC5545, RFC5545_TO_WEEKDAYS
+from .decorators import ensure_token_refresh
 from .utils import (
     ZoneCoordinatorEntity,
     DomesticHotWaterCoordinatorEntity,
@@ -311,6 +312,7 @@ class ZoneHeatingCalendar(ZoneCoordinatorEntity, BaseCalendarEntity):
             recurrence_id=self._get_recurrence_id(time_program_day),
         )
 
+    @ensure_token_refresh
     async def update_time_program(self):
         await self.coordinator.api.set_zone_time_program(
             self.zone, str(ZoneOperatingType.HEATING), self.time_program
@@ -354,6 +356,7 @@ class ZoneCoolingCalendar(ZoneCoordinatorEntity, BaseCalendarEntity):
             recurrence_id=self._get_recurrence_id(time_program_day),
         )
 
+    @ensure_token_refresh
     async def update_time_program(self):
         await self.coordinator.api.set_zone_time_program(
             self.zone, str(ZoneOperatingType.COOLING), self.time_program
@@ -396,6 +399,7 @@ class DomesticHotWaterCalendar(DomesticHotWaterCoordinatorEntity, BaseCalendarEn
             recurrence_id=self._get_recurrence_id(time_program_day),
         )
 
+    @ensure_token_refresh
     async def update_time_program(self):
         await self.coordinator.api.set_domestic_hot_water_time_program(
             self.domestic_hot_water, self.time_program
@@ -440,6 +444,7 @@ class DomesticHotWaterCirculationCalendar(
             recurrence_id=self._get_recurrence_id(time_program_day),
         )
 
+    @ensure_token_refresh
     async def update_time_program(self):
         await self.coordinator.api.set_domestic_hot_water_circulation_time_program(
             self.domestic_hot_water, self.time_program
@@ -483,6 +488,7 @@ class AmbisenseCalendar(AmbisenseCoordinatorEntity, BaseCalendarEntity):
             recurrence_id=self._get_recurrence_id(time_program_day),
         )
 
+    @ensure_token_refresh
     async def update_time_program(self):
         await self.coordinator.api.set_ambisense_room_time_program(
             self.room, self.time_program

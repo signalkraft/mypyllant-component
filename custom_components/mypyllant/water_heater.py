@@ -33,6 +33,7 @@ from .const import (
     SERVICE_SET_DHW_CIRCULATION_TIME_PROGRAM,
     SERVICE_SET_DHW_TIME_PROGRAM,
 )
+from .decorators import ensure_token_refresh
 from .utils import EntityList
 
 _LOGGER = logging.getLogger(__name__)
@@ -212,6 +213,7 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
     async def async_turn_off(self, **kwargs: Any) -> None:
         await self.async_set_operation_mode(DHWOperationMode.OFF)
 
+    @ensure_token_refresh
     async def async_set_temperature(self, **kwargs: Any) -> None:
         target_temp = kwargs.get(ATTR_TEMPERATURE)
         if isinstance(target_temp, (int, float)):
@@ -220,6 +222,7 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
             )
             await self.coordinator.async_request_refresh_delayed()
 
+    @ensure_token_refresh
     async def async_set_operation_mode(
         self, operation_mode: str, **kwargs: Any
     ) -> None:
@@ -254,6 +257,7 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
             )
         await self.coordinator.async_request_refresh_delayed()
 
+    @ensure_token_refresh
     async def set_dhw_time_program(self, **kwargs):
         time_program = DHWTimeProgram.from_api(**kwargs.get("time_program"))
         await self.coordinator.api.set_domestic_hot_water_time_program(
@@ -261,6 +265,7 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
         )
         await self.coordinator.async_request_refresh_delayed()
 
+    @ensure_token_refresh
     async def set_dhw_circulation_time_program(self, **kwargs):
         time_program = DHWTimeProgram.from_api(**kwargs.get("time_program"))
         await self.coordinator.api.set_domestic_hot_water_circulation_time_program(

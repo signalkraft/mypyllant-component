@@ -10,6 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from custom_components.mypyllant.const import DOMAIN, DEFAULT_HOLIDAY_SETPOINT
+from custom_components.mypyllant.decorators import ensure_token_refresh
 from custom_components.mypyllant.coordinator import SystemCoordinator
 from custom_components.mypyllant.utils import (
     HolidayEntity,
@@ -110,6 +111,7 @@ class SystemHolidayDurationNumber(HolidayEntity, NumberEntity):
         else:
             return 0
 
+    @ensure_token_refresh
     async def async_set_native_value(self, value: float) -> None:
         if value == 0:
             await self.coordinator.api.cancel_holiday(self.system)
@@ -146,6 +148,7 @@ class SystemManualCoolingDays(SystemCoordinatorEntity, NumberEntity):
     def native_value(self):
         return self.system.manual_cooling_days or 0
 
+    @ensure_token_refresh
     async def async_set_native_value(self, value: float) -> None:
         if value == 0:
             await self.coordinator.api.cancel_cooling_for_days(self.system)
@@ -180,6 +183,7 @@ class ZoneQuickVetoDurationNumber(ZoneCoordinatorEntity, NumberEntity):
             else 0
         )
 
+    @ensure_token_refresh
     async def async_set_native_value(self, value: float) -> None:
         if value == 0:
             await self.coordinator.api.cancel_quick_veto_zone_temperature(self.zone)
@@ -207,6 +211,7 @@ class CircuitHeatingCurve(CircuitEntity, NumberEntity):
     def native_value(self):
         return self.circuit.heating_curve
 
+    @ensure_token_refresh
     async def async_set_native_value(self, value: float) -> None:
         await self.coordinator.api.set_circuit_heating_curve(self.circuit, value)
         await self.coordinator.async_request_refresh_delayed()
@@ -231,6 +236,7 @@ class CircuitHeatDemandLimitedByOutsideTemperature(CircuitEntity, NumberEntity):
     def native_value(self):
         return self.circuit.heat_demand_limited_by_outside_temperature
 
+    @ensure_token_refresh
     async def async_set_native_value(self, value: float) -> None:
         await (
             self.coordinator.api.set_circuit_heat_demand_limited_by_outside_temperature(
@@ -259,6 +265,7 @@ class CircuitMinFlowTemperatureSetpoint(CircuitEntity, NumberEntity):
     def native_value(self):
         return self.circuit.heating_flow_temperature_minimum_setpoint
 
+    @ensure_token_refresh
     async def async_set_native_value(self, value: float) -> None:
         await self.coordinator.api.set_circuit_min_flow_temperature_setpoint(
             self.circuit, value

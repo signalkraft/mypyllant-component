@@ -46,6 +46,8 @@ from myPyllant.enums import (
     ZoneOperatingType,
 )
 
+from custom_components.mypyllant.decorators import ensure_token_refresh
+
 from custom_components.mypyllant.utils import (
     shorten_zone_name,
     EntityList,
@@ -485,6 +487,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         }
         return attr | self.zone.extra_fields
 
+    @ensure_token_refresh
     async def set_holiday(self, **kwargs):
         _LOGGER.debug(
             "Setting holiday mode on System %s with params %s",
@@ -512,11 +515,13 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         )
         await self.coordinator.async_request_refresh_delayed(20)
 
+    @ensure_token_refresh
     async def cancel_holiday(self):
         _LOGGER.debug("Canceling holiday on System %s", self.system.id)
         await self.coordinator.api.cancel_holiday(self.system)
         await self.coordinator.async_request_refresh_delayed(20)
 
+    @ensure_token_refresh
     async def set_cooling_for_days(self, **kwargs):
         _LOGGER.debug(
             "Setting cooling for days on System %s with params %s",
@@ -531,6 +536,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         )
         await self.coordinator.async_request_refresh_delayed(20)
 
+    @ensure_token_refresh
     async def cancel_cooling_for_days(self, **kwargs):
         _LOGGER.debug(
             "Canceling cooling for days on System %s",
@@ -539,6 +545,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         await self.coordinator.api.cancel_cooling_for_days(self.system)
         await self.coordinator.async_request_refresh_delayed(20)
 
+    @ensure_token_refresh
     async def set_ventilation_boost(self, **kwargs):
         _LOGGER.debug(
             "Setting ventilation boost on System %s with params %s",
@@ -550,6 +557,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         await self.coordinator.api.set_ventilation_boost(self.system)
         await self.coordinator.async_request_refresh_delayed(20)
 
+    @ensure_token_refresh
     async def cancel_ventilation_boost(self, **kwargs):
         _LOGGER.debug(
             "Canceling ventilation boost on System %s",
@@ -560,6 +568,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         await self.coordinator.api.cancel_ventilation_boost(self.system)
         await self.coordinator.async_request_refresh_delayed(20)
 
+    @ensure_token_refresh
     async def set_time_program(self, **kwargs):
         _LOGGER.debug("Setting time program on %s", self.zone)
         program_type = kwargs.get("program_type")
@@ -576,6 +585,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         )
         await self.set_time_program(**kwargs)
 
+    @ensure_token_refresh
     async def set_quick_veto(self, **kwargs):
         _LOGGER.debug("Setting quick veto on %s with params %s", self.zone.name, kwargs)
         temperature = kwargs.get("temperature")
@@ -585,6 +595,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         )
         await self.coordinator.async_request_refresh_delayed()
 
+    @ensure_token_refresh
     async def set_manual_mode_setpoint(self, **kwargs):
         _LOGGER.debug(
             f"Setting manual mode setpoint temperature on {self.zone.name} with params {kwargs}"
@@ -596,6 +607,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         )
         await self.coordinator.async_request_refresh_delayed()
 
+    @ensure_token_refresh
     async def set_time_controlled_cooling_setpoint(self, **kwargs):
         _LOGGER.debug(
             f"Setting time controlled setpoint temperature on {self.zone.name} with params {kwargs}"
@@ -606,6 +618,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         )
         await self.coordinator.async_request_refresh_delayed(10)
 
+    @ensure_token_refresh
     async def remove_quick_veto(self):
         _LOGGER.debug("Removing quick veto on %s", self.zone.name)
         await self.coordinator.api.cancel_quick_veto_zone_temperature(self.zone)
@@ -667,6 +680,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             return self.hvac_mode_map.get(HVAC_MODE_COOLING_FOR_DAYS)
         return self.hvac_mode_map.get(self.zone.active_operation_mode)
 
+    @ensure_token_refresh
     async def async_set_hvac_mode(self, hvac_mode: HVACMode):
         if hvac_mode == HVACMode.COOL:
             if not self.system.manual_cooling_ongoing:
@@ -681,6 +695,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                 mode, self.zone.active_operating_type, refresh_delay=refresh_delay
             )
 
+    @ensure_token_refresh
     async def set_zone_operating_mode(
         self,
         mode: ZoneOperatingMode | ZoneOperatingModeVRC700 | str,
@@ -733,6 +748,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     async def async_turn_off(self) -> None:
         await self.async_set_hvac_mode(HVACMode.OFF)
 
+    @ensure_token_refresh
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """
         Set new target temperature. Depending on heating mode this sets the manual mode setpoint,
@@ -843,6 +859,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                 if v == self.zone.current_special_function
             ][0]
 
+    @ensure_token_refresh
     async def async_set_preset_mode(self, preset_mode):
         """
         When setting a new preset, sometimes the old one needs to be canceled
@@ -981,6 +998,7 @@ class AmbisenseClimate(AmbisenseCoordinatorEntity, ClimateEntity):
         }
         return attr | self.room.extra_fields
 
+    @ensure_token_refresh
     async def set_quick_veto(self, **kwargs):
         _LOGGER.debug("Setting quick veto on %s with params %s", self.room.name, kwargs)
         temperature = kwargs.get("temperature")
@@ -995,11 +1013,13 @@ class AmbisenseClimate(AmbisenseCoordinatorEntity, ClimateEntity):
         )
         await self.coordinator.async_request_refresh_delayed()
 
+    @ensure_token_refresh
     async def remove_quick_veto(self):
         _LOGGER.debug("Removing quick veto on %s", self.room.name)
         await self.coordinator.api.cancel_quick_veto_ambisense_room(self.room)
         await self.coordinator.async_request_refresh_delayed()
 
+    @ensure_token_refresh
     async def set_manual_mode_setpoint(self, **kwargs):
         _LOGGER.debug(
             f"Setting manual mode setpoint temperature on {self.room.name} with params {kwargs}"
@@ -1041,6 +1061,7 @@ class AmbisenseClimate(AmbisenseCoordinatorEntity, ClimateEntity):
         else:
             return None
 
+    @ensure_token_refresh
     async def async_set_hvac_mode(self, hvac_mode: HVACMode):
         mode = [
             k for k, v in AMBISENSE_ROOM_OPERATION_MODE_MAP.items() if v == hvac_mode
@@ -1088,6 +1109,7 @@ class AmbisenseClimate(AmbisenseCoordinatorEntity, ClimateEntity):
         else:
             await self.set_quick_veto(temperature=temperature)
 
+    @ensure_token_refresh
     async def set_time_program(self, **kwargs):
         _LOGGER.debug("Setting time program on %s", self.room)
         if "program_type" in kwargs:
