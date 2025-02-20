@@ -9,7 +9,7 @@
       "user": {
         "data": {
           "password": "Password",
-          "username": "Username",
+          "username": "Email Address",
           "country": "Country",
           "brand": "Brand"
         },

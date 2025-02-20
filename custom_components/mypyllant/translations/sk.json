@@ -4,7 +4,7 @@
       "user": {
         "data": {
           "password": "Heslo",
-          "username": "Používateľské meno",
+          "username": "Email",
           "country": "Krajina",
           "brand": "Značka"
         },
