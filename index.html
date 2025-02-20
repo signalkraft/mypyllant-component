@@ -1,0 +1,1433 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Home Assistant component that interfaces with the myVAILLANT API (and branded versions of it, such as the MiGo Link app from Saunier Duval & Bulex).">
+      
+      
+      
+        <link rel="canonical" href="https://signalkraft.com/mypyllant-component/">
+      
+      
+      
+        <link rel="next" href="1-automations/">
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.5">
+    
+    
+      
+        <title>Getting Started - myPyllant Library & Home Assistant Component</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.8608ea7d.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="stylesheets/extra.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+      
+        <meta  property="og:type"  content="website" >
+      
+        <meta  property="og:title"  content="myPyllant Library & Home Assistant Component" >
+      
+        <meta  property="og:description"  content="Home Assistant component that interfaces with the myVAILLANT API (and branded versions of it, such as the MiGo Link app from Saunier Duval & Bulex)." >
+      
+        <meta  property="og:image"  content="https://signalkraft.com/mypyllant-component/assets/images/social/index.png" >
+      
+        <meta  property="og:image:type"  content="image/png" >
+      
+        <meta  property="og:image:width"  content="1200" >
+      
+        <meta  property="og:image:height"  content="630" >
+      
+        <meta  property="og:url"  content="https://signalkraft.com/mypyllant-component/" >
+      
+        <meta  name="twitter:card"  content="summary_large_image" >
+      
+        <meta  name="twitter:title"  content="myPyllant Library & Home Assistant Component" >
+      
+        <meta  name="twitter:description"  content="Home Assistant component that interfaces with the myVAILLANT API (and branded versions of it, such as the MiGo Link app from Saunier Duval & Bulex)." >
+      
+        <meta  name="twitter:image"  content="https://signalkraft.com/mypyllant-component/assets/images/social/index.png" >
+      
+    
+    
+   <link href="assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+    html.glightbox-open { overflow: initial; height: 100%; }
+    .gslide-title { margin-top: 0px; user-select: text; }
+    .gslide-desc { color: #666; user-select: text; }
+    .gslide-image img { background: white; }
+    .gscrollbar-fixer { padding-right: 15px; }
+    .gdesc-inner { font-size: 0.75rem; }
+    body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+    body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+    body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}</style> <script src="assets/javascripts/glightbox.min.js"></script></head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#getting-started" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="myPyllant Library &amp; Home Assistant Component" class="md-header__button md-logo" aria-label="myPyllant Library & Home Assistant Component" data-md-component="logo">
+      
+  <img src="assets/logo-white.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            myPyllant Library & Home Assistant Component
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Getting Started
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/signalkraft/mypyllant-component/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="." class="md-tabs__link">
+        
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="1-automations/" class="md-tabs__link">
+        
+  
+    
+  
+  Automations &amp; Cards
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="2-entities/" class="md-tabs__link">
+        
+  
+    
+  
+  Entities
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="2-services/" class="md-tabs__link">
+        
+  
+    
+  
+  Services
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="3-contributing/" class="md-tabs__link">
+        
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="3-library/" class="md-tabs__link">
+        
+  
+    
+  
+  CLI &amp; Python Library
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="3-reverse-engineering/" class="md-tabs__link">
+        
+  
+    
+  
+  Reverse Engineering Android Apps
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+                
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" hidden>
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="myPyllant Library &amp; Home Assistant Component" class="md-nav__button md-logo" aria-label="myPyllant Library & Home Assistant Component" data-md-component="logo">
+      
+  <img src="assets/logo-white.png" alt="logo">
+
+    </a>
+    myPyllant Library & Home Assistant Component
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/signalkraft/mypyllant-component/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Features
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tested-setups" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tested Setups
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#seconds-between-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Seconds between updates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#seconds-between-energy-data-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Seconds between energy data updates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delay-in-seconds-before-refreshing-data-after-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Delay in seconds before refreshing data after updates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-duration-in-hours-for-quick-veto" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default duration in hours for quick veto
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-duration-in-days-for-away-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default duration in days for away mode
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-temperature-setpoint-for-away-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default temperature setpoint for away mode
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temperature-controls-overwrite-time-program-instead-of-setting-quick-veto" class="md-nav__link">
+    <span class="md-ellipsis">
+      Temperature controls overwrite time program instead of setting quick veto
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fetch-real-time-statistics-not-supported-on-every-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fetch real-time statistics (not supported on every system)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fetch-real-time-power-usage-not-supported-on-every-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fetch real-time power usage (not supported on every system)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#country" class="md-nav__link">
+    <span class="md-ellipsis">
+      Country
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#brand" class="md-nav__link">
+    <span class="md-ellipsis">
+      Brand
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-brands-countries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Brands &amp; Countries
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Known Issues
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Known Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lack-of-test-data-for-different-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Lack of Test Data for Different Systems
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vaillant-api-is-occasionally-unavailable" class="md-nav__link">
+    <span class="md-ellipsis">
+      Vaillant API is occasionally unavailable
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#some-features-that-are-available-on-the-controller-or-in-the-maintenance-settings-are-not-available" class="md-nav__link">
+    <span class="md-ellipsis">
+      Some features that are available on the controller or in the maintenance settings are not available
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-modes-in-home-assistant-and-the-myvaillant-app-dont-match" class="md-nav__link">
+    <span class="md-ellipsis">
+      The modes in Home Assistant and the myVAILLANT app don't match
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#energy-efficiency-sensors-are-delayed-incomplete-behave-oddly-around-midnight" class="md-nav__link">
+    <span class="md-ellipsis">
+      Energy &amp; Efficiency Sensors are delayed / incomplete / behave oddly around midnight
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="1-automations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Automations &amp; Cards
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="2-entities/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Entities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="2-services/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Services
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="3-contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="3-library/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CLI &amp; Python Library
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="3-reverse-engineering/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Reverse Engineering Android Apps
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+                
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Features
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tested-setups" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tested Setups
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#seconds-between-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Seconds between updates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#seconds-between-energy-data-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Seconds between energy data updates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delay-in-seconds-before-refreshing-data-after-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Delay in seconds before refreshing data after updates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-duration-in-hours-for-quick-veto" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default duration in hours for quick veto
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-duration-in-days-for-away-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default duration in days for away mode
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-temperature-setpoint-for-away-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default temperature setpoint for away mode
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temperature-controls-overwrite-time-program-instead-of-setting-quick-veto" class="md-nav__link">
+    <span class="md-ellipsis">
+      Temperature controls overwrite time program instead of setting quick veto
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fetch-real-time-statistics-not-supported-on-every-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fetch real-time statistics (not supported on every system)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fetch-real-time-power-usage-not-supported-on-every-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fetch real-time power usage (not supported on every system)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#country" class="md-nav__link">
+    <span class="md-ellipsis">
+      Country
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#brand" class="md-nav__link">
+    <span class="md-ellipsis">
+      Brand
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-brands-countries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Brands &amp; Countries
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Known Issues
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Known Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lack-of-test-data-for-different-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Lack of Test Data for Different Systems
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vaillant-api-is-occasionally-unavailable" class="md-nav__link">
+    <span class="md-ellipsis">
+      Vaillant API is occasionally unavailable
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#some-features-that-are-available-on-the-controller-or-in-the-maintenance-settings-are-not-available" class="md-nav__link">
+    <span class="md-ellipsis">
+      Some features that are available on the controller or in the maintenance settings are not available
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-modes-in-home-assistant-and-the-myvaillant-app-dont-match" class="md-nav__link">
+    <span class="md-ellipsis">
+      The modes in Home Assistant and the myVAILLANT app don't match
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#energy-efficiency-sensors-are-delayed-incomplete-behave-oddly-around-midnight" class="md-nav__link">
+    <span class="md-ellipsis">
+      Energy &amp; Efficiency Sensors are delayed / incomplete / behave oddly around midnight
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+  
+
+
+
+  
+  
+
+
+<p><a href=""><img align="right" alt="myPyllant" src="assets/logo.png" width="25%" /></a></p>
+<h1 id="getting-started">Getting Started</h1>
+<p><a href="https://github.com/signalkraft/mypyllant-component/releases"><img alt="GitHub Release" src="https://img.shields.io/github/release/signalkraft/mypyllant-component.svg" /></a>
+<a href="https://github.com/signalkraft/mypyllant-component/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/signalkraft/mypyllant-component.svg" /></a>
+<a href="https://github.com/signalkraft/mypyllant-component/actions"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/signalkraft/mypyllant-component/build-test.yaml" /></a></p>
+<p>Home Assistant component that interfaces with the myVAILLANT API
+(and branded versions of it, such as the MiGo Link app from Saunier Duval &amp; Bulex).
+Uses the <a href="https://github.com/signalkraft/mypyllant">myPyllant Python library</a>.</p>
+<h2 id="installation">Installation</h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ol>
+<li>The developers are not affiliated with Vaillant, we take no responsibility for anything that happens to your devices because of this library</li>
+<li>This integration is not compatible with systems that use sensoAPP and multiMATIC</li>
+</ol>
+</div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">HACS</label><label for="__tabbed_1_2">Manual</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li><a href="https://hacs.xyz/docs/setup/download">Install the Home Assistant Community Store (HACS)</a></li>
+<li>Search for myVAILLANT in HACS <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg></span> Integrations and download it</li>
+<li>Restart Home Assistant</li>
+<li><a href="https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant">Add myVaillant integration</a>, or go to
+   Settings <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg></span> Devices &amp; services <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg></span> Add Integration</li>
+<li>Sign in with the email &amp; password you used in the myVAILLANT app (or MiGo app for Saunier Duval)</li>
+</ol>
+<p>Having problems? <a href="https://github.com/signalkraft/mypyllant-component/issues/new/choose">Open an issue</a>.</p>
+</div>
+<div class="tabbed-block">
+<ol>
+<li>Download <a href="https://github.com/signalkraft/mypyllant-component/releases">the latest release</a></li>
+<li>Extract the <code>custom_components</code> folder to your Home Assistant's config folder, the resulting folder structure should
+   be <code>config/custom_components/mypyllant</code></li>
+<li>Restart Home Assistant</li>
+<li><a href="https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant">Add myVaillant integration</a>, or go to
+   Settings <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg></span> Devices &amp; services <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg></span> Add Integration</li>
+<li>Sign in with the email &amp; password you used in the myVAILLANT app (or MiGo app for Saunier Duval)</li>
+</ol>
+<p>Having problems? <a href="https://github.com/signalkraft/mypyllant-component/issues/new/choose">Open an issue</a>.</p>
+</div>
+</div>
+</div>
+<h2 id="features">Features</h2>
+<div class="grid cards">
+<ul>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.92 1.58-1.74 1 1.21 2.09-.59 2.18L9 7.6 7.38 6l.04-2.41H5.43v1.83H3.59l.01 2H6l1.65 1.61-.75 2.79-2.22.58-2.09-1.2-1 1.73 1.58.91-.91 1.58 1.74 1 1.19-2.09 2.23-.58.5.51 1.4-1.4-.54-.54.75-2.78 2.79-.76.53.54 1.41-1.41-.53-.54.59-2.18L16.41 4l-1-1.75-1.58.91zM20.72 4 4 20.72 5.27 22l4.89-4.89a4.99 4.99 0 0 0 7.67-2.82c.39-1.43.1-2.93-.72-4.13L22 5.27zm-1.98 5c.44.63.79 1.38 1.01 2.19s.28 1.62.21 2.42l2.69-3.2zm.58 6.95c-.32.72-.82 1.4-1.39 1.99-.59.59-1.27 1.06-1.97 1.4l4.09.72zM9 18.71l1.41 3.95 3.18-2.71c-.78.05-1.59.02-2.4-.19-.83-.22-1.57-.59-2.19-1.05"/></svg></span> Climate Controls</p>
+<hr />
+<p>Supports climate &amp; hot water controls, as well as ventilation and circulation pumps</p>
+<p><a href="2-entities/#sample-entities"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg></span> Read more</a></p>
+</li>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.4 0 .7 0 1.1-.1l2.3-6.6-.6-.6c.7-.7 1.2-1.7 1.2-2.8 0-.7-.2-1.4-.6-2l2.2-2.2C18.5 9 19 10.4 19 12h1c.3 0 .6.1.8.2 0 0 .1 0 .1.1.4.2.8.6 1 1.1.1-.5.1-.9.1-1.4 0-5.5-4.5-10-10-10m2 6.6c-.6-.4-1.3-.6-2-.6-2.2 0-4 1.8-4 4 0 1.1.4 2.1 1.2 2.8l-2.1 2.1C5.8 15.7 5 13.9 5 12c0-3.9 3.1-7 7-7 1.6 0 3 .5 4.2 1.4zm6 5.4h-2l-3.2 9h1.9l.7-2h3.2l.7 2h1.9zm-2.2 5.7L19 16l1.2 3.7z"/></svg></span> Set Modes &amp; Temperatures</p>
+<hr />
+<p>Control operating modes, target temperature, and presets such as holiday more or quick veto</p>
+<p><a href="2-entities/#climate-entities"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg></span> Read more</a></p>
+</li>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 11v1.5c3.19 0 5.09 3.55 3.33 6.21l-1.09-1.09C21.06 15.96 19.85 14 18 14v1.5l-2.25-2.25zm0 11v-1.5c-3.19 0-5.09-3.55-3.33-6.21l1.09 1.09C14.94 17.04 16.15 19 18 19v-1.5l2.25 2.25zm1-19h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9a5.9 5.9 0 0 1-1.5-2H5V8h14v2.59c.71.11 1.39.35 2 .72V5a2 2 0 0 0-2-2"/></svg></span> Change Schedules</p>
+<hr />
+<p>Set the schedule for climate zones, water heaters, and circulation pumps
+ with <a href="https://signalkraft.com/mypyllant-component/2-services/#setting-a-time-program">a custom service</a> or <a href="2-entities/#calendar-entities">in the Home Assistant calendar</a></p>
+<p><a href="2-entities/#calendar-entities"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg></span> Read more</a></p>
+</li>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m16 11.78 4.24-7.33 1.73 1-5.23 9.05-6.51-3.75L5.46 19H22v2H2V3h2v14.54L9.5 8z"/></svg></span> Track Data over Time</p>
+<hr />
+<p>Track sensor information of devices, such as temperature, humidity, operating mode, energy usage, or energy efficiency</p>
+<p><a href="2-entities/#sample-entities"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg></span> Read more</a></p>
+</li>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m16.06 13.09 5.63 5.59-3.32 3.28-5.59-5.59v-.92l2.36-2.36zm.91-2.53L16 9.6l-4.79 4.8v1.97L5.58 22 2.3 18.68l5.59-5.59h1.97l.78-.78L6.8 8.46H5.5L2.69 5.62 5.31 3l2.8 2.8v1.31L12 10.95l2.66-2.66-.96-1.01L15 5.97h-2.66l-.65-.65L15 2l.66.66v2.66L16.97 4l3.28 3.28c1.09 1.1 1.09 2.89 0 3.98l-1.97-2.01z"/></svg></span> Diagnostic Data</p>
+<hr />
+<p>See diagnostic information, such as flow temperature, firmware versions, or water pressure.
+ Even values that are not available in the app, such as the current heating curve.</p>
+<p><a href="2-entities/#extra-state-attributes"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg></span> Read more</a></p>
+</li>
+<li>
+<p><span class="twemoji lg middle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3 2 12h3v8h14v-8h3zm0 5.5c2.34 0 4.46.93 6 2.44l-1.2 1.18a6.79 6.79 0 0 0-4.8-1.95c-1.88 0-3.58.74-4.8 1.95L6 10.94a8.54 8.54 0 0 1 6-2.44m0 3.33c1.4 0 2.67.56 3.6 1.47l-1.2 1.17a3.4 3.4 0 0 0-2.4-.97c-.94 0-1.79.37-2.4.97L8.4 13.3a5.13 5.13 0 0 1 3.6-1.47m0 3.34c.94 0 1.7.74 1.7 1.66s-.76 1.67-1.7 1.67-1.7-.75-1.7-1.67.76-1.66 1.7-1.66"/></svg></span> Services &amp; Automations</p>
+<hr />
+<p>Custom services to set holiday mode or quick veto temperature overrides, and their duration</p>
+<p><a href="2-services/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg></span> Read more</a></p>
+</li>
+</ul>
+</div>
+<p><a class="glightbox" href="assets/default-dashboard.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="Default Dashboard Screenshot" src="assets/default-dashboard.png" /></a></p>
+<h2 id="tested-setups">Tested Setups</h2>
+<ul>
+<li>Vaillant aroTHERM plus heatpump + sensoCOMFORT VRC 720 + sensoNET VR 921</li>
+<li>Vaillant ECOTEC PLUS boiler + VR940F + sensoCOMFORT</li>
+<li>Vaillant ECOTEC PLUS boiler + VRT380f + sensoNET</li>
+<li>Vaillant ECOTEC PLUS VCW20/1 boiler + sensoCOMFORT VRC 720 + sensoNET VR 921</li>
+<li>Vaillant ECOTEC PLUS 296/5-5 (R6) + sensoCOMFORT VRC 720/2 + VR 70 (2 circuits) + sensoNET VR 921</li>
+<li>Vaillant ecoVIT + VIH R/6 uniSTORE + VR920</li>
+<li>Saunier Duval DUOMAX F30 90 + MISET Radio + MiLink V3</li>
+<li>Bulex Thema Condens F30/35 + Red 5 + MiPro Sense + MiLink v3</li>
+</ul>
+<h2 id="options">Options</h2>
+<p>After setting up the integration, you can configure it further in Settings <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg></span> Devices &amp; Services <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg></span> myVAILLANT <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg></span> Configure.</p>
+<h3 id="seconds-between-updates">Seconds between updates</h3>
+<dl>
+<dd>
+<p>Wait interval between updating (most) sensors. The energy data and efficiency sensors are controlled by the next option.
+Setting this too low can cause "quota exceeded" errors.</p>
+<p>You should restart Home Assistant after changing this setting.</p>
+<p><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1s.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64z"/></svg></span> Default is 60 seconds.</p>
+</dd>
+</dl>
+<h3 id="seconds-between-energy-data-updates">Seconds between energy data updates</h3>
+<dl>
+<dd>
+<p>Wait interval between updating sensors with hourly data. Default is off, because querying for energy data can get
+you blocked by Vaillant quite easily ("quota exceeded" errors).</p>
+<p>Most users seem to be OK with 7200s (2 hours) or more.</p>
+<p>You can also schedule your own updates with an automation, for example once a day just before midnight:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Update</span><span class="nv"> </span><span class="s">myVAILLANT</span><span class="nv"> </span><span class="s">energy</span><span class="nv"> </span><span class="s">data</span><span class="nv"> </span><span class="s">at</span><span class="nv"> </span><span class="s">midnight&quot;</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">single</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nt">triggers</span><span class="p">:</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">trigger</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">time</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nt">at</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;23:59:00&quot;</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="nt">actions</span><span class="p">:</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">homeassistant.update_entity</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">      </span><span class="nt">metadata</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">      </span><span class="nt">data</span><span class="p">:</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">        </span><span class="nt">entity_id</span><span class="p">:</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sensor.home_heating_energy_efficiency</span>
+</span></code></pre></div>
+<p>You only need to update one of the energy entities, all of the other ones will automatically update as well.
+To reduce API queries and avoid getting blocked, you should disable energy entities in HA that you are not interested in.</p>
+<p>You should restart Home Assistant after changing this setting.</p>
+<p><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1s.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64z"/></svg></span> Default is off.</p>
+</dd>
+</dl>
+<h3 id="delay-in-seconds-before-refreshing-data-after-updates">Delay in seconds before refreshing data after updates</h3>
+<dl>
+<dd>
+<p>How long to wait between making a request (i.e. setting target temperature) and refreshing data.
+The Vaillant API takes some time to return the updated values. Setting this too low will return the old values.</p>
+<p><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1s.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64z"/></svg></span> Default is 5 seconds.</p>
+</dd>
+</dl>
+<h3 id="default-duration-in-hours-for-quick-veto">Default duration in hours for quick veto</h3>
+<dl>
+<dd>
+<p>When setting the temperature with the climate controls, the integration uses the "quick veto" feature of the myVAILLANT
+app by default.</p>
+<p>With this option you can set for how long the temperature should stay set, before returning to the default value.</p>
+<p><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1s.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64z"/></svg></span> Default is 3 hours.</p>
+</dd>
+</dl>
+<h3 id="default-duration-in-days-for-away-mode">Default duration in days for away mode</h3>
+<dl>
+<dd>
+<p>When the away mode preset is activated, this duration is used to for the end date.</p>
+<p><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1s.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64z"/></svg></span> Default is 365 days.</p>
+</dd>
+</dl>
+<h3 id="default-temperature-setpoint-for-away-mode">Default temperature setpoint for away mode</h3>
+<dl>
+<dd>
+<p>When away mode is activated without a temperature (for example with the away mode switch), this value is set for all zones.</p>
+<p><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1s.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64z"/></svg></span> Default is 10.0°C.</p>
+</dd>
+</dl>
+<h3 id="temperature-controls-overwrite-time-program-instead-of-setting-quick-veto">Temperature controls overwrite time program instead of setting quick veto</h3>
+<dl>
+<dd>
+<p>When raising or lowering the desired temperature in the myVAILLANT app, it sets a quick veto mode for a limited time
+with that new temperature, if the zone is in time controlled mode. If you want to permanently change the desired
+temperature, you need to update the time schedule.</p>
+<p>By default, this integration has the same behavior. But when enabling this option, the Home Assistant climate controls
+instead overwrite the temperatures set in the time schedule with the new value.</p>
+<p><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1s.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64z"/></svg></span> Default is off.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If quick veto is active, the climate controls will always set the quick veto temperature.</p>
+</div>
+</dd>
+</dl>
+<h3 id="fetch-real-time-statistics-not-supported-on-every-system">Fetch real-time statistics (not supported on every system)</h3>
+<dl>
+<dd>
+<p>Fetches real-time statistics from the system. This includes on/off cycles and operation time.
+if you see 404 errors in your logs after enabling this, your system doesn't support this data.
+It's best to turn it off again.</p>
+<p><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1s.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64z"/></svg></span> Default is off.</p>
+</dd>
+</dl>
+<h3 id="fetch-real-time-power-usage-not-supported-on-every-system">Fetch real-time power usage (not supported on every system)</h3>
+<dl>
+<dd>
+<p>Fetches real-time power usage of the system.
+if you see 404 errors in your logs after enabling this, your system doesn't support this data.
+It's best to turn it off again.</p>
+<p><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1s.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64z"/></svg></span> Default is off.</p>
+</dd>
+</dl>
+<h3 id="country">Country</h3>
+<dl>
+<dd>The country you registered your myVAILLANT account in. The list of options is limited to known supported countries.</dd>
+</dl>
+<h3 id="brand">Brand</h3>
+<dl>
+<dd>Brand of your HVAC equipment and app, pick Saunier Duval if you use the MiGo Link app.</dd>
+</dl>
+<h2 id="supported-brands-countries">Supported Brands &amp; Countries</h2>
+<div class="admonition note">
+<p class="admonition-title">Missing a Country?</p>
+<p>If a country is missing, please <a href="https://github.com/signalkraft/myPyllant/issues/new/choose">open an issue</a>
+or <a href="3-contributing/#supporting-new-countries">contribute a new country to the myPyllant library</a>.</p>
+</div>
+<ul>
+<li>Vaillant<ul>
+<li>Albania</li>
+<li>Austria</li>
+<li>Belgium</li>
+<li>Bulgaria</li>
+<li>Croatia</li>
+<li>Czechia</li>
+<li>Denmark</li>
+<li>Estonia</li>
+<li>Finland</li>
+<li>France</li>
+<li>Georgia</li>
+<li>Germany</li>
+<li>Greece</li>
+<li>Hungary</li>
+<li>Italy</li>
+<li>Latvia</li>
+<li>Lithuania</li>
+<li>Luxembourg</li>
+<li>Netherlands</li>
+<li>Norway</li>
+<li>Poland</li>
+<li>Portugal</li>
+<li>Romania</li>
+<li>Serbia</li>
+<li>Slovakia</li>
+<li>Slovenia</li>
+<li>Spain</li>
+<li>Sweden</li>
+<li>Switzerland</li>
+<li>Ukraine</li>
+<li>United Kingdom</li>
+<li>Uzbekistan</li>
+</ul>
+</li>
+<li>Saunier Duval<ul>
+<li>Austria</li>
+<li>Czechia</li>
+<li>Finland</li>
+<li>France</li>
+<li>Greece</li>
+<li>Hungary</li>
+<li>Italy</li>
+<li>Lithuania</li>
+<li>Poland</li>
+<li>Portugal</li>
+<li>Romania</li>
+<li>Slovakia</li>
+<li>Spain</li>
+</ul>
+</li>
+<li>Bulex<ul>
+<li>Does not support country selection, just leave the option empty</li>
+</ul>
+</li>
+</ul>
+<h2 id="known-issues">Known Issues</h2>
+<h3 id="lack-of-test-data-for-different-systems">Lack of Test Data for Different Systems</h3>
+<p>Your HVAC system might differ from the ones in <a href="#tested-setups">Tested Setups</a> above.
+If you don't see any entities, or get an error during setup, please check <a href="3-contributing/#debugging">Debugging</a> and
+create an issue.
+With debugging enabled, there's a chance to find the culprit in the data returned by the myVAILLANT API and fix it.</p>
+<h3 id="vaillant-api-is-occasionally-unavailable">Vaillant API is occasionally unavailable</h3>
+<p>The API this integration uses sometimes goes down. Before reporting an issue, check if the myVAILLANT app works normally.
+If it doesn't, there's nothing we can do about it.</p>
+<h3 id="some-features-that-are-available-on-the-controller-or-in-the-maintenance-settings-are-not-available">Some features that are available on the controller or in the maintenance settings are not available</h3>
+<p>If you would like to request a new feature, please check that it's available in the myVAILLANT app first.
+Some data (for example quiet mode or legionella protection) are not available in the app, and therefore
+can't be supported by this integration.</p>
+<h3 id="the-modes-in-home-assistant-and-the-myvaillant-app-dont-match">The modes in Home Assistant and the myVAILLANT app don't match</h3>
+<p>Home Assistant has certain pre-defined modes, that can't be changed.
+<a href="2-entities/#climate-entities">Check the mapping of modes</a> between Home Assistant and myVAILLANT.</p>
+<h3 id="energy-efficiency-sensors-are-delayed-incomplete-behave-oddly-around-midnight">Energy &amp; Efficiency Sensors are delayed / incomplete / behave oddly around midnight</h3>
+<p>How Vaillant reports energy data, and how Home Assistant deals with sensor data is not a good match:</p>
+<ul>
+<li>Vaillant's API provides energy data in hourly increments, some time after the full hour has passed (let's say at 10:30am for the energy data from 9-10am)</li>
+<li>This integration fetches energy data every hour, for the current day, up to the current time<ul>
+<li>Depending on when your HA schedules this hourly update, it may happen right after Vaillant provides the new hourly data, or almost an hour later</li>
+<li>Home Assistant doesn't support setting a past date for a sensor reading, the value is always displayed at the time when it was saved</li>
+<li>Home Assistant also doesn't let you pick when to schedule the hourly update exactly, it depends on when the integration was initialized</li>
+<li>Data for the whole day is fetched, so that the total is correct even if the API is temporarily unavailable, or the integration misses an hour window for some other reason </li>
+</ul>
+</li>
+<li>Worst case, you end up with a 30min delay from Vaillant and a 59min delay from the integration: Your energy data from 9-10am will show up at 11:29am. Best case is probably around 10:30am.</li>
+<li>After midnight, the integration will fetch data for the new day, which will be empty until the first full hour + delay has passed<ul>
+<li>If you have new energy data between 11pm and midnight, it won't show up in your total for the previous day</li>
+</ul>
+</li>
+</ul>
+<p>Home Assistant would need to allow setting a timestamp with each new energy value, to improve this situation.
+The delay would still be there, but at least the values would be displayed at the correct time.</p>
+<p>You can lower the update interval for fetching energy data, to minimize the delay between Vaillant's updates and HA.
+See <a href="#seconds-between-energy-data-updates">Options</a>. But it's not recommended, since it's a lot of data to fetch
+and Vaillant may ban you temporarily with 'quota exceeded' errors.</p>
+<p>To fix data loss around midnight, the integration could fetch a longer period of time (for example a whole month).
+But then the sensor would no longer show a daily total, which would potentially mess with users' setups.
+The change from daily to monthly would also show up as a strange spike of energy usage when the update is done.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+  
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["content.code.annotate", "content.tabs.link", "navigation.tabs", "navigation.tabs.sticky", "search.suggest", "search.highlight", "search.share"], "search": "assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.f1b6f286.min.js"></script>
+      
+        <script src="https://unpkg.com/tablesort@5.3.0/dist/tablesort.min.js"></script>
+      
+        <script src="javascripts/tablesort.js"></script>
+      
+    
+  <script id="init-glightbox">const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});
+document$.subscribe(() => { lightbox.reload() });
+</script></body>
+</html>
