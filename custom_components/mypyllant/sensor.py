@@ -91,6 +91,10 @@ async def create_system_sensors(
             sensors.append(
                 lambda: SystemFlowTemperatureSensor(index, system_coordinator)
             )
+        if system.energy_manager_state is not None:
+            sensors.append(
+                lambda: SystemEnergyManagerStateSensor(index, system_coordinator)
+            )
         sensors.append(lambda: HomeEntity(index, system_coordinator))
 
         for device_index, device in enumerate(system.devices):
@@ -1153,3 +1157,19 @@ class SystemFlowTemperatureSensor(SystemSensor):
     @property
     def name(self):
         return f"{self.name_prefix} System Flow Temperature"
+
+
+class SystemEnergyManagerStateSensor(SystemSensor):
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    @property
+    def native_value(self):
+        return self.system.energy_manager_state
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_energy_manager_state"
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} Energy Manager State"
