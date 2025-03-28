@@ -87,6 +87,10 @@ async def create_system_sensors(
             sensors.append(
                 lambda: SystemBottomCHTemperatureSensor(index, system_coordinator)
             )
+        if system.system_flow_temperature is not None:
+            sensors.append(
+                lambda: SystemFlowTemperatureSensor(index, system_coordinator)
+            )
         sensors.append(lambda: HomeEntity(index, system_coordinator))
 
         for device_index, device in enumerate(system.devices):
@@ -1127,3 +1131,25 @@ class SystemAPIRequestCount(SensorEntity, CoordinatorEntity):
     @property
     def name(self):
         return "Vaillant API Request Count"
+
+
+class SystemFlowTemperatureSensor(SystemSensor):
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    @property
+    def native_value(self):
+        if self.system.system_flow_temperature is not None:
+            return round(self.system.system_flow_temperature, 1)
+        else:
+            return None
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_system_flow_temperature"
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} System Flow Temperature"
