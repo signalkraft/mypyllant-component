@@ -22,7 +22,7 @@ asyncio_default_fixture_loop_scope = "function"
 filterwarnings = ["ignore:Inheritance class CountingClientSession from ClientSession is discouraged:DeprecationWarning"]
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.13"
 pretty = true
 follow_imports = "silent"
 ignore_missing_imports = true
