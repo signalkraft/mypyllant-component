@@ -12,4 +12,4 @@ services:
       - ../myPyllant/src/myPyllant:/tmp/myPyllant
       - ./custom_components/mypyllant/:/tmp/mypyllant-component
       - /etc/localtime:/etc/localtime:ro
-    entrypoint: ["/init-custom"]
+    entrypoint: [ "/init-custom" ]
