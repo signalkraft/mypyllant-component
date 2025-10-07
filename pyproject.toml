@@ -1,3 +1,13 @@
+[project]
+name = "mypyllant-component"
+version = "0.9.2"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "myPyllant==0.9.3",
+    "requests>=2.32.5",
+]
+
 [tool.coverage.run]
 source = ["custom_components"]
 
@@ -19,7 +29,9 @@ addopts = """
 --cov=custom_components"""
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-filterwarnings = ["ignore:Inheritance class CountingClientSession from ClientSession is discouraged:DeprecationWarning"]
+filterwarnings = [
+    "ignore:Inheritance class CountingClientSession from ClientSession is discouraged:DeprecationWarning",
+]
 
 [tool.mypy]
 python_version = "3.13"
