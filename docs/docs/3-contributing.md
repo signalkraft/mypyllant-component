@@ -65,7 +65,8 @@ within the directory run:
 
 ```shell
 uv sync
-uv run pre-commit install
+uv tool install pre-commit --with pre-commit-uv
+pre-commit install
 # Make your changes
 git commit -m ...  # Code formatting, analysis, and tests are run automatically before the commit
 ```
@@ -111,7 +112,8 @@ Fork and clone the [myPyllant repository](https://github.com/signalkraft/myPylla
 
 ```shell
 uv sync
-uv run pre-commit install
+uv tool install pre-commit --with pre-commit-uv
+pre-commit install
 # Make your changes
 git commit -m ...  # Code formatting, analysis, and tests are run automatically before the commit
 ```

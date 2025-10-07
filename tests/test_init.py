@@ -1,4 +1,5 @@
 """Tests for pyscript config flow."""
+
 import logging
 from unittest import mock
 

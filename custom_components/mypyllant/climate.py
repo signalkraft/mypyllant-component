@@ -878,13 +878,13 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                 ][0]
             else:
                 raise ValueError(
-                    f'Invalid preset mode, use one of {", ".join(set(self.preset_mode_map.values()))}'
+                    f"Invalid preset mode, use one of {', '.join(set(self.preset_mode_map.values()))}"
                 )
             await self.set_zone_operating_mode(requested_mode)
         else:
             if preset_mode not in self.preset_mode_map:
                 raise ValueError(
-                    f'Invalid preset mode {preset_mode}, use one of {", ".join(self.preset_mode_map.keys())}'
+                    f"Invalid preset mode {preset_mode}, use one of {', '.join(self.preset_mode_map.keys())}"
                 )
             requested_mode = self.preset_mode_map[preset_mode]
             if requested_mode != self.zone.current_special_function:

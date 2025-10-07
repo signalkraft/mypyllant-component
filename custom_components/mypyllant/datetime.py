@@ -230,10 +230,13 @@ class DomesticHotWaterLegionellaProtectionDateTime(
 
     @property
     def legionella_protection_active(self):
-        return (
-            self.domestic_hot_water.current_dhw_temperature
-            > DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE
-        )
+        if self.domestic_hot_water.current_dhw_temperature is not None:
+            return (
+                self.domestic_hot_water.current_dhw_temperature
+                > DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE
+            )
+        else:
+            return None
 
     @property
     def native_value(self):

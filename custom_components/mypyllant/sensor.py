@@ -891,7 +891,10 @@ class DataSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def native_value(self):
-        return self.device_data.total_consumption_rounded
+        if self.device_data:
+            return self.device_data.total_consumption_rounded
+        else:
+            return None
 
     @callback
     def _handle_coordinator_update(self) -> None:
