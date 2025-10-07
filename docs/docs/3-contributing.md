@@ -39,8 +39,8 @@ Because the myVAILLANT API isn't documented, you can help the development of thi
 === "Shell"
 
     ```shell
-    python3 -m myPyllant.tests.generate_test_data -h
-    python3 -m myPyllant.tests.generate_test_data username password brand --country country
+    uv run -m myPyllant.tests.generate_test_data -h
+    uv run -m myPyllant.tests.generate_test_data username password brand --country country
     ```
 
 === "Docker"
@@ -58,16 +58,14 @@ and [attach it to an issue](https://github.com/signalkraft/myPyllant/issues/new/
 
 !!! warning
 
-    You need at least Python 3.10.
+    You need at least Python 3.13 and [uv installed](https://docs.astral.sh/uv/getting-started/installation/)
 
 Fork and clone the [mypyllant-component repository](https://github.com/signalkraft/mypyllant-component), then from
 within the directory run:
 
 ```shell
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r dev-requirements.txt
-pre-commit install
+uv sync
+uv run pre-commit install
 # Make your changes
 git commit -m ...  # Code formatting, analysis, and tests are run automatically before the commit
 ```
@@ -78,7 +76,7 @@ clone & install it in editable mode in `mypyllant-component`:
 ```shell
 # From within the mypyllant-component directory
 git clone https://github.com/signalkraft/myPyllant.git ../myPyllant
-pip install -e ../myPyllant
+uv pip install -e ../myPyllant
 ```
 
 Now you can modify `myPyllant/src` and directly develop against these changes in `mypyllant-component`.
@@ -107,16 +105,13 @@ The integration should be configured and show entities on the default dashboard.
 
 !!! warning
 
-    You need at least Python 3.10
+    You need at least Python 3.13 and [uv installed](https://docs.astral.sh/uv/getting-started/installation/)
 
 Fork and clone the [myPyllant repository](https://github.com/signalkraft/myPyllant), then from within the directory run:
 
 ```shell
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r dev-requirements.txt
-pip install -e .
-pre-commit install
+uv sync
+uv run pre-commit install
 # Make your changes
 git commit -m ...  # Code formatting, analysis, and tests are run automatically before the commit
 ```
@@ -127,7 +122,7 @@ The myVAILLANT app uses Keycloak and OIDC for authentication, with a realm for e
 There is a script to check which countries are supported:
 
 ```shell
-python3 -m myPyllant.tests.find_countries
+uv run -m myPyllant.tests.find_countries
 ```
 
 Copy the resulting dictionary

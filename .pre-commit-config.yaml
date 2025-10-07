@@ -1,4 +1,9 @@
 repos:
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    # uv version.
+    rev: 0.8.24
+    hooks:
+      - id: uv-lock
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.9
     hooks:
@@ -27,13 +32,20 @@ repos:
     hooks:
       - id: mypy
         name: mypy
-        entry: run_venv.sh mypy --pretty --show-error-codes --show-error-context
-        language: script
+        entry: uv run mypy
+        args:
+          - --pretty
+          - --show-error-codes
+          - --show-error-context
+          - --check-untyped-defs
+        language: system
         pass_filenames: true
         files: ^(tests|custom_components)/.+\.py$
       - id: pytest
         name: pytest
-        entry: run_venv.sh pytest --no-cov
-        language: script
+        entry: uv run pytest
+        args:
+          - --no-cov
+        language: system
         pass_filenames: false
         files: ^(tests|custom_components)/.+\.(py|json|yaml)$
