@@ -169,6 +169,8 @@ class SystemManualCoolingDays(SystemCoordinatorEntity, NumberEntity):
 
 class ZoneQuickVetoDurationNumber(ZoneCoordinatorEntity, NumberEntity):
     _attr_native_unit_of_measurement = UnitOfTime.HOURS
+    _attr_native_step = 0.5
+    _attr_native_max_value = 12.0
     _attr_icon = "mdi:rocket-launch"
 
     @property
@@ -178,7 +180,7 @@ class ZoneQuickVetoDurationNumber(ZoneCoordinatorEntity, NumberEntity):
     @property
     def native_value(self):
         return (
-            round(self.zone.quick_veto_remaining.total_seconds() / 3600)
+            round(self.zone.quick_veto_remaining.total_seconds() / 3600, 1)
             if self.zone.quick_veto_remaining
             else 0
         )
@@ -187,10 +189,10 @@ class ZoneQuickVetoDurationNumber(ZoneCoordinatorEntity, NumberEntity):
     async def async_set_native_value(self, value: float) -> None:
         if value == 0:
             await self.coordinator.api.cancel_quick_veto_zone_temperature(self.zone)
-            await self.coordinator.async_request_refresh_delayed()
+            await self.coordinator.async_request_refresh_delayed(10)
         else:
             await self.coordinator.api.quick_veto_zone_duration(self.zone, value)
-            await self.coordinator.async_request_refresh_delayed()
+            await self.coordinator.async_request_refresh_delayed(10)
 
     @property
     def unique_id(self) -> str:
