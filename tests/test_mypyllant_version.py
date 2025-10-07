@@ -7,7 +7,7 @@ async def test_mypyllant_versions():
     Make sure myPyllant library is set to the same versions in all important files
     """
     files = [
-        Path(".").parent / "dev-requirements.txt",
+        Path(".").parent / "pyproject.toml",
         Path(".").parent / "custom_components/mypyllant/manifest.json",
     ]
     p = re.compile(r"myPyllant==(.*?)[\"\n]")
