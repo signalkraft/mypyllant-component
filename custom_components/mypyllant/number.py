@@ -206,7 +206,7 @@ class ZoneQuickVetoDurationNumber(ZoneCoordinatorEntity, NumberEntity):
 class CircuitHeatingCurve(CircuitEntity, NumberEntity):
     _attr_native_min_value = 0.1
     _attr_native_max_value = 5.0
-    _attr_native_step = 0.0000001
+    _attr_native_step = 0.05
     _attr_icon = "mdi:chart-line"
 
     @property
