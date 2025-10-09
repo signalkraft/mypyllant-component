@@ -121,7 +121,15 @@ git commit -m ...  # Code formatting, analysis, and tests are run automatically 
 ### Supporting new Countries
 
 The myVAILLANT app uses Keycloak and OIDC for authentication, with a realm for each country and brand.
-There is a script to check which countries are supported:
+
+To find the correct URL for a new country:
+
+1. Log out in the myVAILLANT app
+2. Open the login page in the app. If it directly logs you in without showing a login form, you may need to log out in your mobile browser. For Vaillant in Germany on https://myvaillantweb.de/
+3. Share the login URL in a [new issue](https://github.com/signalkraft/mypyllant-component/issues/new/choose), but remove everything after `/auth`
+4. If you can't find the URL or an option to share, look for a way to open the page in your default browser and share from there
+
+There is also a script to check which countries are supported, based on a list of all country names:
 
 ```shell
 uv run -m myPyllant.tests.find_countries

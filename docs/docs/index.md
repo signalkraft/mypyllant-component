@@ -334,4 +334,4 @@ and Vaillant may ban you temporarily with 'quota exceeded' errors.
 
 To fix data loss around midnight, the integration could fetch a longer period of time (for example a whole month).
 But then the sensor would no longer show a daily total, which would potentially mess with users' setups.
-The change from daily to monthly would also show up as a strange spike of energy usage when the update is done.
+The change from daily to monthly would also show up as a strange spike of energy usage when the update is done. 
