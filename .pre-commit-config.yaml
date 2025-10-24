@@ -1,50 +1,50 @@
 repos:
-  - repo: https://github.com/astral-sh/uv-pre-commit
-    # uv version.
-    rev: 0.8.24
-    hooks:
-      - id: uv-lock
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.13.3
-    hooks:
-      - id: ruff
-        args: [ --fix ]
-        files: ^(homeassistant|script|tests|custom_components)/.+\.py$
-      - id: ruff-format
-        files: ^(homeassistant|script|tests|custom_components)/.+\.py$
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
-    hooks:
-      - id: codespell
-        args:
-          - --ignore-words-list=hass,alot,datas,dof,dur,farenheit,hist,iff,ines,ist,lightsensor,mut,nd,pres,referer,ser,serie,te,technik,ue,uint,visability,wan,wanna,withing
-          - --skip="./.*,*.csv,*.json"
-          - --quiet-level=2
-        exclude_types: [ csv, json ]
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
-    hooks:
-      - id: check-executables-have-shebangs
-        stages: [ manual ]
-      - id: check-json
-  # These hooks require the locally installed venv (for example myPyllant for mypy)
-  - repo: local
-    hooks:
-      - id: mypy
-        name: mypy
-        entry: uv run mypy
-        args:
-          - --pretty
-          - --show-error-codes
-          - --show-error-context
-        language: system
-        pass_filenames: true
-        files: ^(tests|custom_components)/.+\.py$
-      - id: pytest
-        name: pytest
-        entry: uv run pytest
-        args:
-          - --no-cov
-        language: system
-        pass_filenames: false
-        files: ^(tests|custom_components)/.+\.(py|json|yaml)$
+    -   repo: https://github.com/astral-sh/uv-pre-commit
+        # uv version.
+        rev: 0.8.24
+        hooks:
+            -   id: uv-lock
+    -   repo: https://github.com/astral-sh/ruff-pre-commit
+        rev: v0.13.3
+        hooks:
+            -   id: ruff-check
+                args: [ --fix ]
+                files: ^(homeassistant|script|tests|custom_components)/.+\.py$
+            -   id: ruff-format
+                files: ^(homeassistant|script|tests|custom_components)/.+\.py$
+    -   repo: https://github.com/codespell-project/codespell
+        rev: v2.4.1
+        hooks:
+            -   id: codespell
+                args:
+                    - --ignore-words-list=hass,alot,datas,dof,dur,farenheit,hist,iff,ines,ist,lightsensor,mut,nd,pres,referer,ser,serie,te,technik,ue,uint,visability,wan,wanna,withing
+                    - --skip="./.*,*.csv,*.json"
+                    - --quiet-level=2
+                exclude_types: [ csv, json ]
+    -   repo: https://github.com/pre-commit/pre-commit-hooks
+        rev: v6.0.0
+        hooks:
+            -   id: check-executables-have-shebangs
+                stages: [ manual ]
+            -   id: check-json
+    # These hooks require the locally installed venv (for example myPyllant for mypy)
+    -   repo: local
+        hooks:
+            -   id: mypy
+                name: mypy
+                entry: uv run mypy
+                args:
+                    - --pretty
+                    - --show-error-codes
+                    - --show-error-context
+                language: system
+                pass_filenames: true
+                files: ^(tests|custom_components)/.+\.py$
+            -   id: pytest
+                name: pytest
+                entry: uv run pytest
+                args:
+                    - --no-cov
+                language: system
+                pass_filenames: false
+                files: ^(tests|custom_components)/.+\.(py|json|yaml)$

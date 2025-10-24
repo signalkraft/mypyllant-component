@@ -1,10 +1,10 @@
 [project]
 name = "mypyllant-component"
-version = "0.9.4"
+version = "0.9.5"
 readme = "README.md"
 requires-python = ">=3.13.2"
 dependencies = [
-    "myPyllant==0.9.4",
+    "myPyllant==0.9.5",
     "requests>=2.32.0",
 ]
 
