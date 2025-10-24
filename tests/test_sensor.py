@@ -216,6 +216,8 @@ async def test_data_sensor(
     test_data,
 ):
     with mypyllant_aioresponses(test_data) as _:
+        system_coordinator = daily_data_coordinator_mock.hass_data["system_coordinator"]
+        system_coordinator.data = await system_coordinator._async_update_data()
         daily_data_coordinator_mock.data = (
             await daily_data_coordinator_mock._async_update_data()
         )

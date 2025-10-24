@@ -77,10 +77,9 @@ clone & install it in editable mode in `mypyllant-component`:
 ```shell
 # From within the mypyllant-component directory
 git clone https://github.com/signalkraft/myPyllant.git ../myPyllant
-uv pip install -e ../myPyllant
+# Make your changes in ../myPyllant/src
+uv run --with ../myPyllant pytest
 ```
-
-Now you can modify `myPyllant/src` and directly develop against these changes in `mypyllant-component`.
 
 ### VSCode Dev Container
 

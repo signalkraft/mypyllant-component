@@ -102,5 +102,13 @@ async def daily_data_coordinator_mock(hass, mocked_api) -> DailyDataCoordinator:
         new_callable=mock.PropertyMock,
         return_value="mockid",
     ) as entry:
-        hass.data = {DOMAIN: {entry.entry_id: {}}}
+        hass.data = {
+            DOMAIN: {
+                entry.entry_id: {},
+            }
+        }
+        system_coordinator = SystemCoordinator(
+            hass, mocked_api, entry, update_interval=None
+        )
+        hass.data[DOMAIN][entry.entry_id]["system_coordinator"] = system_coordinator
         return DailyDataCoordinator(hass, mocked_api, entry, timedelta(seconds=10))

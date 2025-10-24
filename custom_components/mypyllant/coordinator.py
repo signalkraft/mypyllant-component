@@ -29,10 +29,13 @@ from custom_components.mypyllant.const import (
     OPTION_FETCH_EEBUS,
     DEFAULT_FETCH_EEBUS,
 )
-from custom_components.mypyllant.utils import is_quota_exceeded_exception
+from custom_components.mypyllant.utils import (
+    is_quota_exceeded_exception,
+    extract_quota_duration,
+)
 from myPyllant.api import MyPyllantAPI
 from myPyllant.enums import DeviceDataBucketResolution
-from myPyllant.models import System, DeviceData
+from myPyllant.models import System, DeviceData, Home
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -50,7 +53,8 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         self.api = api
         self.hass = hass
         self.entry = entry
-        self._quota_time_key = f"quota_time_{self.__class__.__name__.lower()}"
+        self._quota_hit_time_key = f"quota_time_{self.__class__.__name__.lower()}"
+        self._quota_end_time_key = f"quota_end_time_{self.__class__.__name__.lower()}"
         self._quota_exc_info_key = f"quota_exc_info_{self.__class__.__name__.lower()}"
 
         super().__init__(
@@ -65,21 +69,38 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         return self.hass.data[DOMAIN][self.entry.entry_id]
 
     @property
-    def _quota_time(self) -> dt | None:
+    def _quota_hit_time(self) -> dt | None:
         """
         Get the time when the quota was hit, separately for each subclass
         """
-        if self._quota_time_key not in self.hass_data:
-            self.hass_data[self._quota_time_key] = None
-        return self.hass_data[self._quota_time_key]
+        if self._quota_hit_time_key not in self.hass_data:
+            self.hass_data[self._quota_hit_time_key] = None
+        return self.hass_data[self._quota_hit_time_key]
 
-    @_quota_time.setter
-    def _quota_time(self, value):
-        self.hass_data[self._quota_time_key] = value
+    @_quota_hit_time.setter
+    def _quota_hit_time(self, value):
+        self.hass_data[self._quota_hit_time_key] = value
 
-    @_quota_time.deleter
-    def _quota_time(self):
-        del self.hass_data[self._quota_time_key]
+    @_quota_hit_time.deleter
+    def _quota_hit_time(self):
+        del self.hass_data[self._quota_hit_time_key]
+
+    @property
+    def _quota_end_time(self) -> dt | None:
+        """
+        Get the time when the quota was hit, separately for each subclass
+        """
+        if self._quota_end_time_key not in self.hass_data:
+            self.hass_data[self._quota_end_time_key] = None
+        return self.hass_data[self._quota_end_time_key]
+
+    @_quota_end_time.setter
+    def _quota_end_time(self, value):
+        self.hass_data[self._quota_end_time_key] = value
+
+    @_quota_end_time.deleter
+    def _quota_end_time(self):
+        del self.hass_data[self._quota_end_time_key]
 
     @property
     def _quota_exc_info(self) -> BaseException | None:
@@ -138,7 +159,7 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
 
         Sets a quota time, so the API isn't queried as often while it is down
         """
-        self._quota_time = dt.now(timezone.utc)
+        self._quota_hit_time = dt.now(timezone.utc)
         self._quota_exc_info = exc_info
         raise UpdateFailed(
             f"myVAILLANT API is down, skipping update of myVAILLANT {self.__class__.__name__} "
@@ -151,7 +172,12 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         Raises UpdateFailed if a quota error is detected
         """
         if is_quota_exceeded_exception(exc_info):
-            self._quota_time = dt.now(timezone.utc)
+            duration = extract_quota_duration(exc_info)
+            self._quota_hit_time = dt.now(timezone.utc)
+            if duration:
+                self._quota_end_time = dt.now(timezone.utc) + timedelta(
+                    seconds=duration
+                )
             self._quota_exc_info = exc_info
             self._raise_if_quota_hit()
 
@@ -160,20 +186,30 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         Check if we previously hit a quota, and if the quota was hit within a certain interval
         If yes, we keep raising UpdateFailed() until after the interval to avoid spamming the API
         """
-        if not self._quota_time:
+        if not self._quota_hit_time:
             return
 
-        time_elapsed = (dt.now(timezone.utc) - self._quota_time).seconds
+        time_elapsed = (dt.now(timezone.utc) - self._quota_hit_time).seconds
 
         if is_quota_exceeded_exception(self._quota_exc_info):
             _LOGGER.debug(
                 "Quota was hit %ss ago on %s by %s",
                 time_elapsed,
-                self._quota_time,
+                self._quota_hit_time,
                 self.__class__,
                 exc_info=self._quota_exc_info,
             )
-            if time_elapsed < QUOTA_PAUSE_INTERVAL:
+            if self._quota_end_time:
+                # If the API responded with an end time, we use that instead of the default QUOTA_PAUSE_INTERVAL
+                if dt.now(timezone.utc) < self._quota_end_time:
+                    remaining = (self._quota_end_time - dt.now(timezone.utc)).seconds
+                    raise UpdateFailed(
+                        f"{self._quota_exc_info.message} on {self._quota_exc_info.request_info.real_url}, "  # type: ignore
+                        f"skipping update of myVAILLANT {self.__class__.__name__} for another"
+                        f" {remaining}s"
+                    ) from self._quota_exc_info
+            elif time_elapsed < QUOTA_PAUSE_INTERVAL:
+                # No end time provided, use default interval
                 raise UpdateFailed(
                     f"{self._quota_exc_info.message} on {self._quota_exc_info.request_info.real_url}, "  # type: ignore
                     f"skipping update of myVAILLANT {self.__class__.__name__} for another"
@@ -183,7 +219,7 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
             _LOGGER.debug(
                 "myVAILLANT API is down since %ss (%s)",
                 time_elapsed,
-                self._quota_time,
+                self._quota_hit_time,
                 exc_info=self._quota_exc_info,
             )
             if time_elapsed < API_DOWN_PAUSE_INTERVAL:
@@ -195,6 +231,7 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
 
 class SystemCoordinator(MyPyllantCoordinator):
     data: list[System]  # type: ignore
+    homes: list[Home] = []
 
     async def _async_update_data(self) -> list[System]:  # type: ignore
         self._raise_if_quota_hit()
@@ -212,6 +249,16 @@ class SystemCoordinator(MyPyllantCoordinator):
         _LOGGER.debug("Starting async update data for SystemCoordinator")
         try:
             await self._refresh_session()
+            if not self.homes:
+                _LOGGER.debug("Fetching homes for systems fetch")
+                self.homes = [
+                    h
+                    async for h in await self.hass.async_add_executor_job(
+                        self.api.get_homes
+                    )
+                ]
+            else:
+                _LOGGER.debug("Using cached homes for systems fetch")
             data = [
                 s
                 async for s in await self.hass.async_add_executor_job(
@@ -223,6 +270,7 @@ class SystemCoordinator(MyPyllantCoordinator):
                     include_ambisense_rooms,
                     include_energy_management,
                     include_eebus,
+                    self.homes,
                 )
             ]
             return data
@@ -259,9 +307,12 @@ class DailyDataCoordinator(MyPyllantCoordinator):
         try:
             await self._refresh_session()
             data: dict[str, SystemWithDeviceData] = {}
-            async for system in await self.hass.async_add_executor_job(
-                self.api.get_systems
+            if (
+                "system_coordinator" not in self.hass_data
+                or not self.hass_data["system_coordinator"].data
             ):
+                raise UpdateFailed("No systems available for daily data fetch")
+            for system in self.hass_data["system_coordinator"].data:
                 start = dt.now(system.timezone).replace(
                     microsecond=0, second=0, minute=0, hour=0
                 )

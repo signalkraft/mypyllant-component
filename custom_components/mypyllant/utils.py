@@ -217,9 +217,33 @@ def is_quota_exceeded_exception(exc_info: BaseException | None) -> bool:
     """
     return (
         isinstance(exc_info, ClientResponseError)
-        and exc_info.status == 403
-        and "quota exceeded" in exc_info.message.lower()
+        and 500 > exc_info.status >= 400
+        and (
+            "quota exceeded" in exc_info.message.lower()
+            or "out of call volume quota" in exc_info.message.lower()
+        )
     )
+
+
+def extract_quota_duration(exc_info: BaseException | None) -> int | None:
+    """
+    Extracts the time in seconds form an error message like "Quota will be replenished in 00:44:41."
+    """
+    if not isinstance(exc_info, ClientResponseError) or not is_quota_exceeded_exception(
+        exc_info
+    ):
+        return None
+    import re
+
+    match = re.search(
+        r"Quota will be replenished in (\d{2}):(\d{2}):(\d{2})", exc_info.message
+    )
+    if match:
+        hours = int(match.group(1))
+        minutes = int(match.group(2))
+        seconds = int(match.group(3))
+        return hours * 3600 + minutes * 60 + seconds
+    return None
 
 
 def is_api_down_exception(exc_info: Exception) -> bool:
