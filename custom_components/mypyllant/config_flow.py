@@ -58,6 +58,8 @@ from .const import (
     DEFAULT_FETCH_CONNECTION_STATUS,
     OPTION_FETCH_DTC,
     DEFAULT_FETCH_DTC,
+    OPTION_FETCH_AMBISENSE_CAPABILITY,
+    DEFAULT_FETCH_AMBISENSE_CAPABILITY,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -156,6 +158,10 @@ OPTIONS_SCHEMA = vol.Schema(
         vol.Required(
             OPTION_FETCH_DTC,
             default=DEFAULT_FETCH_DTC,
+        ): bool,
+        vol.Required(
+            OPTION_FETCH_AMBISENSE_CAPABILITY,
+            default=DEFAULT_FETCH_AMBISENSE_CAPABILITY,
         ): bool,
         vol.Required(
             OPTION_FETCH_AMBISENSE_ROOMS,
