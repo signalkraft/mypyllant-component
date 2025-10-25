@@ -54,6 +54,10 @@ from .const import (
     DEFAULT_MANUAL_COOLING_DURATION,
     OPTION_DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE,
     DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE,
+    OPTION_FETCH_CONNECTION_STATUS,
+    DEFAULT_FETCH_CONNECTION_STATUS,
+    OPTION_FETCH_DTC,
+    DEFAULT_FETCH_DTC,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -144,6 +148,14 @@ OPTIONS_SCHEMA = vol.Schema(
         vol.Required(
             OPTION_FETCH_MPC,
             default=DEFAULT_FETCH_MPC,
+        ): bool,
+        vol.Required(
+            OPTION_FETCH_CONNECTION_STATUS,
+            default=DEFAULT_FETCH_CONNECTION_STATUS,
+        ): bool,
+        vol.Required(
+            OPTION_FETCH_DTC,
+            default=DEFAULT_FETCH_DTC,
         ): bool,
         vol.Required(
             OPTION_FETCH_AMBISENSE_ROOMS,

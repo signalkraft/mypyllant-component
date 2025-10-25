@@ -30,6 +30,10 @@ from custom_components.mypyllant.const import (
     DEFAULT_FETCH_EEBUS,
     OPTION_FETCH_AMBISENSE_CAPABILITY,
     DEFAULT_FETCH_AMBISENSE_CAPABILITY,
+    OPTION_FETCH_CONNECTION_STATUS,
+    DEFAULT_FETCH_CONNECTION_STATUS,
+    OPTION_FETCH_DTC,
+    DEFAULT_FETCH_DTC,
 )
 from custom_components.mypyllant.utils import (
     is_quota_exceeded_exception,
@@ -237,8 +241,12 @@ class SystemCoordinator(MyPyllantCoordinator):
 
     async def _async_update_data(self) -> list[System]:  # type: ignore
         self._raise_if_quota_hit()
-        include_connection_status = True
-        include_diagnostic_trouble_codes = True
+        include_connection_status = self.entry.options.get(
+            OPTION_FETCH_CONNECTION_STATUS, DEFAULT_FETCH_CONNECTION_STATUS
+        )
+        include_diagnostic_trouble_codes = self.entry.options.get(
+            OPTION_FETCH_DTC, DEFAULT_FETCH_DTC
+        )
         include_rts = self.entry.options.get(OPTION_FETCH_RTS, DEFAULT_FETCH_RTS)
         include_mpc = self.entry.options.get(OPTION_FETCH_MPC, DEFAULT_FETCH_MPC)
         include_ambisense_rooms = self.entry.options.get(
