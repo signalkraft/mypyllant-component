@@ -28,6 +28,8 @@ from custom_components.mypyllant.const import (
     DEFAULT_FETCH_ENERGY_MANAGEMENT,
     OPTION_FETCH_EEBUS,
     DEFAULT_FETCH_EEBUS,
+    OPTION_FETCH_AMBISENSE_CAPABILITY,
+    DEFAULT_FETCH_AMBISENSE_CAPABILITY,
 )
 from custom_components.mypyllant.utils import (
     is_quota_exceeded_exception,
@@ -246,6 +248,9 @@ class SystemCoordinator(MyPyllantCoordinator):
             OPTION_FETCH_ENERGY_MANAGEMENT, DEFAULT_FETCH_ENERGY_MANAGEMENT
         )
         include_eebus = self.entry.options.get(OPTION_FETCH_EEBUS, DEFAULT_FETCH_EEBUS)
+        include_ambisense_capability = self.entry.options.get(
+            OPTION_FETCH_AMBISENSE_CAPABILITY, DEFAULT_FETCH_AMBISENSE_CAPABILITY
+        )
         _LOGGER.debug("Starting async update data for SystemCoordinator")
         try:
             await self._refresh_session()
@@ -270,6 +275,7 @@ class SystemCoordinator(MyPyllantCoordinator):
                     include_ambisense_rooms,
                     include_energy_management,
                     include_eebus,
+                    include_ambisense_capability,
                     self.homes,
                 )
             ]
