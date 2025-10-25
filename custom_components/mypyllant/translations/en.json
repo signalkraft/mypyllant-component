@@ -81,6 +81,7 @@
           "fetch_mpc": "Fetch real-time power usage (not supported on every system)",
           "fetch_connection_status": "Fetch system connection status",
           "fetch_dtc": "Fetch diagnostic trouble codes",
+          "fetch_ambisense_capability": "Fetch Ambisense Capability",
           "fetch_ambisense_rooms": "Fetch Ambisense Room Thermostats",
           "fetch_energy_management": "Fetch Energy Management Data",
           "fetch_eebus": "Fetch EEBUS Data"
