@@ -28,7 +28,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_platform, selector
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.template import as_datetime
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from myPyllant.const import DEFAULT_QUICK_VETO_DURATION
 from myPyllant.models import (
@@ -217,8 +216,8 @@ async def async_setup_entry(
         platform.async_register_entity_service(
             SERVICE_SET_HOLIDAY,
             {
-                vol.Optional("start"): vol.Coerce(as_datetime),
-                vol.Optional("end"): vol.Coerce(as_datetime),
+                vol.Optional("start"): vol.Coerce(datetime.fromisoformat),
+                vol.Optional("end"): vol.Coerce(datetime.fromisoformat),
                 vol.Optional("duration_hours"): vol.All(
                     vol.Coerce(float), vol.Clamp(min=1)
                 ),
@@ -236,8 +235,8 @@ async def async_setup_entry(
         platform.async_register_entity_service(
             SERVICE_SET_COOLING_FOR_DAYS,
             {
-                vol.Optional("start"): vol.Coerce(as_datetime),
-                vol.Optional("end"): vol.Coerce(as_datetime),
+                vol.Optional("start"): vol.Coerce(datetime.fromisoformat),
+                vol.Optional("end"): vol.Coerce(datetime.fromisoformat),
                 vol.Optional("duration_days"): vol.All(
                     vol.Coerce(int), vol.Clamp(min=1)
                 ),

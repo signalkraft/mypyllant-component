@@ -13,7 +13,6 @@ from homeassistant.core import (
 )
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import selector
-from homeassistant.helpers.template import as_datetime
 
 from myPyllant import export, report
 
@@ -181,8 +180,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                         mode=selector.SelectSelectorMode.LIST,
                     ),
                 ),
-                vol.Optional("start"): vol.Coerce(as_datetime),
-                vol.Optional("end"): vol.Coerce(as_datetime),
+                vol.Optional("start"): vol.Coerce(dt.fromisoformat),
+                vol.Optional("end"): vol.Coerce(dt.fromisoformat),
             }
         ),
         supports_response=SupportsResponse.ONLY,
