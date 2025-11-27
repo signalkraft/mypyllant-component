@@ -129,7 +129,7 @@ After setting up the integration, you can configure it further in Settings :mate
 
     You should restart Home Assistant after changing this setting.
     
-    :material-cog: Default is 60 seconds.
+    :material-cog: Default is 1800 seconds.
 
 ### Seconds between energy data updates
 
@@ -294,6 +294,16 @@ Your HVAC system might differ from the ones in [Tested Setups](#tested-setups) a
 If you don't see any entities, or get an error during setup, please check [Debugging](3-contributing.md#debugging) and
 create an issue.
 With debugging enabled, there's a chance to find the culprit in the data returned by the myVAILLANT API and fix it.
+
+### Getting Quota Exceeded Errors
+
+If you are getting "Quota Exceeded" errors, you have a few options:
+
+1. Decrease update interval in the integration options. 1800s for live data updates and 7200s for energy data seems save, based on user feedback
+2. Disable energy and efficiency sensor that you don't need. Disabled sensors are skipped in the update, and reduce API calls
+3. Invite another user in the myVAILLANT app and use that one for the integration. This way at least queries from the mobile app run on a separate account
+
+There's no clear documentation from Vaillant about which API endpoints have quotas, what these quotas are, or how to avoid them.
 
 ### Vaillant API is occasionally unavailable
 
