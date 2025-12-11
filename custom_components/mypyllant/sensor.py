@@ -807,13 +807,12 @@ class DataSensor(CoordinatorEntity, SensorEntity):
         self.system_id = system_id
         self.da_index = da_index
         self.de_index = de_index
-        if (
-            self.device_data is not None
-            and self.device_data.energy_type in DATA_UNIT_MAP
-        ):
-            self._attr_native_unit_of_measurement = DATA_UNIT_MAP[
-                self.device_data.energy_type
-            ]
+        if self.device_data is not None:
+            # some devices report value_type instead of energy_type
+            if self.device_data.energy_type is None and self.device_data.value_type is not None:
+                self.device_data.energy_type = self.device_data.value_type
+            if self.device_data.energy_type in DATA_UNIT_MAP:
+                self._attr_native_unit_of_measurement = DATA_UNIT_MAP[self.device_data.energy_type]
         self._attr_device_class = SensorDeviceClass.ENERGY
         _LOGGER.debug(
             "Finishing init of %s = %s and unique id %s",
