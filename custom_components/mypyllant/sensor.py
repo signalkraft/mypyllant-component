@@ -1106,6 +1106,7 @@ class SystemDeviceCurrentPowerSensor(SystemDeviceSensor):
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_native_unit_of_measurement = UnitOfPower.WATT
+    _attr_device_class = SensorDeviceClass.POWER
 
     @property
     def native_value(self):
