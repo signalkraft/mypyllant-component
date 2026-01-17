@@ -122,6 +122,16 @@ Uses the [myPyllant Python library](https://github.com/signalkraft/mypyllant).
 
 After setting up the integration, you can configure it further in Settings :material-arrow-right: Devices & Services :material-arrow-right: myVAILLANT :material-arrow-right: Configure.
 
+
+!!! warning
+
+    The integration fetches limited data by default, to avoid running into quota errors, or generating unnecessary
+    errors (when trying to fetch data that' not available for your system).
+
+    If you have data that's available in the myVAILLANT app, but not the integration, you probably need to modify
+    the integration options starting with `Fetch XYZ`.
+
+
 ### Seconds between updates
 
 :   Wait interval between updating (most) sensors. The energy data and efficiency sensors are controlled by the next option.
@@ -208,7 +218,7 @@ After setting up the integration, you can configure it further in Settings :mate
 ### Fetch real-time statistics (not supported on every system)
 
 :   Fetches real-time statistics from the system. This includes on/off cycles and operation time.
-    if you see 404 errors in your logs after enabling this, your system doesn't support this data.
+    If you see 404 errors in your logs after enabling this, your system doesn't support this data.
     It's best to turn it off again.
 
     :material-cog: Default is off.
@@ -216,8 +226,46 @@ After setting up the integration, you can configure it further in Settings :mate
 ### Fetch real-time power usage (not supported on every system)
 
 :   Fetches real-time power usage of the system.
-    if you see 404 errors in your logs after enabling this, your system doesn't support this data.
+    If you see 404 errors in your logs after enabling this, your system doesn't support this data.
     It's best to turn it off again.
+
+    :material-cog: Default is off.
+
+### Fetch system connection status
+
+:   Fetches connection status of the system (Connected / Offline).
+
+    :material-cog: Default is off.
+
+### Fetch diagnostic trouble codes
+
+:   Fetches diagnostic trouble codes of the system, for each connected & supported device.
+
+    :material-cog: Default is off.
+
+### Fetch Ambisense Capability
+
+:   Fetches information, whether the system has Ambisense capabilities.
+
+    :material-cog: Default is off.
+
+### Fetch Ambisense Room Thermostats (not supported on every system)
+
+:   Fetches Ambisense room thermostat data.
+    If you see 404 errors in your logs after enabling this, your system doesn't support this data.
+    It's best to turn it off again.
+
+    :material-cog: Default is off.
+
+### Fetch EEBUS Data
+
+:   Fetches information whether EEBUS is available or not.
+
+    :material-cog: Default is off.
+
+### Fetch Energy Management Data
+
+:   Fetches energy management data from EEBUS.
 
     :material-cog: Default is off.
 
