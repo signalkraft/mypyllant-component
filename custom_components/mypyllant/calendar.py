@@ -154,10 +154,13 @@ class BaseCalendarEntity(CalendarEntity, ABC):
 
     @property
     def event(self) -> CalendarEvent | None:
-        start = datetime.datetime.now(self.system.timezone)
-        end = start + datetime.timedelta(days=7)
-        for time_program_day, start, end in self.time_program.as_datetime(start, end):
-            return self.build_event(time_program_day, start, end)
+        now = datetime.datetime.now(self.system.timezone)
+        end_search = now + datetime.timedelta(days=7)
+        for time_program_day, start, end in self.time_program.as_datetime(
+            now, end_search
+        ):
+            if end > now:
+                return self.build_event(time_program_day, start, end)
         return None
 
     async def async_get_events(

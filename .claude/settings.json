@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Write(custom_components/*)",
+      "Edit(custom_components/*)"
+    ],
+    "deny": []
+  },
+  "env": {
+    "DISABLE_ERROR_REPORTING": "1",
+    "DISABLE_TELEMETRY": "1"
+  }
+}
