@@ -1,3 +1,4 @@
+import typing
 from datetime import datetime, timedelta, timezone, time
 from unittest.mock import Mock
 
@@ -185,4 +186,128 @@ async def test_ambisense_calendar(
             assert isinstance(calendar.event.end, datetime)
             assert calendar.event.end.time() == time(6, 0, 0)
             assert calendar.event.end.time() == events[1].start.time()
+    await mocked_api.aiohttp_session.close()
+
+
+@typing.no_type_check
+async def test_dhw_two_events_same_day(
+    hass,
+    mypyllant_aioresponses,
+    mocked_api: MyPyllantAPI,
+    system_coordinator_mock,
+):
+    """Test that two events on the same day are correctly returned."""
+    test_data = load_test_data(DATA_DIR / "ambisense2.yaml")
+    with mypyllant_aioresponses(test_data) as _:
+        system_coordinator_mock.data = (
+            await system_coordinator_mock._async_update_data()
+        )
+        calendar = DomesticHotWaterCalendar(0, 0, system_coordinator_mock)
+        # Monday, 2023-01-02 is a Monday, get events for that single day
+        with freezegun.freeze_time("2023-01-02T00:00:00+00:00"):
+            start_date = datetime.now(timezone.utc)
+            end_date = start_date + timedelta(days=1)
+            events = await calendar.async_get_events(
+                hass,
+                start_date,
+                end_date,
+            )
+            # Filter events that are on Monday (2023-01-02)
+            monday_events = [e for e in events if e.start.date() == start_date.date()]
+
+            # Should have exactly 2 events on Monday
+            assert len(monday_events) == 2
+
+            # First event should be from 05:30 to 07:00 (330 to 420 minutes)
+            assert monday_events[0].start.time() == time(5, 30, 0)
+            assert monday_events[0].end.time() == time(7, 0, 0)
+
+            # Second event should be from 20:00 to 20:30 (1200 to 1230 minutes)
+            assert monday_events[1].start.time() == time(20, 0, 0)
+            assert monday_events[1].end.time() == time(20, 30, 0)
+    await mocked_api.aiohttp_session.close()
+
+
+@typing.no_type_check
+async def test_zone_heating_two_events_same_day(
+    hass,
+    mypyllant_aioresponses,
+    mocked_api: MyPyllantAPI,
+    system_coordinator_mock,
+):
+    """Test that two heating events on the same day are correctly returned."""
+    test_data = load_test_data(DATA_DIR / "ambisense2.yaml")
+    with mypyllant_aioresponses(test_data) as _:
+        system_coordinator_mock.data = (
+            await system_coordinator_mock._async_update_data()
+        )
+        calendar = ZoneHeatingCalendar(0, 0, system_coordinator_mock)
+        # Monday, 2023-01-02 is a Monday, get events for that single day
+        with freezegun.freeze_time("2023-01-02T00:00:00+00:00"):
+            start_date = datetime.now(timezone.utc)
+            end_date = start_date + timedelta(days=1)
+            events = await calendar.async_get_events(
+                hass,
+                start_date,
+                end_date,
+            )
+            # Filter events that are on Monday (2023-01-02)
+            monday_events = [e for e in events if e.start.date() == start_date.date()]
+
+            # Should have exactly 2 events on Monday
+            assert len(monday_events) == 2
+
+            # First event should be from 05:00 to 10:00 (300 to 600 minutes)
+            assert monday_events[0].start.time() == time(5, 0, 0)
+            assert monday_events[0].end.time() == time(10, 0, 0)
+
+            # Second event should be from 15:00 to 00:00 (900 to 1440 minutes)
+            assert monday_events[1].start.time() == time(15, 0, 0)
+            assert monday_events[1].end.time() == time(0, 0, 0)
+    await mocked_api.aiohttp_session.close()
+
+
+@typing.no_type_check
+async def test_zone_heating_current_event_selection(
+    hass,
+    mypyllant_aioresponses,
+    mocked_api: MyPyllantAPI,
+    system_coordinator_mock,
+):
+    """Test that calendar.event returns the currently active event, not always the earliest."""
+    test_data = load_test_data(DATA_DIR / "ambisense2.yaml")
+    with mypyllant_aioresponses(test_data) as _:
+        system_coordinator_mock.data = (
+            await system_coordinator_mock._async_update_data()
+        )
+        calendar = ZoneHeatingCalendar(0, 0, system_coordinator_mock)
+
+        # Test 1: Before any events (03:00 AM) - should return first event
+        with freezegun.freeze_time("2023-01-02T03:00:00+00:00"):
+            event = calendar.event
+            assert event is not None
+            assert event.start.time() == time(5, 0, 0)
+            assert event.end.time() == time(10, 0, 0)
+
+        # Test 2: During first event (07:00 AM) - should return first event
+        with freezegun.freeze_time("2023-01-02T07:00:00+00:00"):
+            event = calendar.event
+            assert event is not None
+            assert event.start.time() == time(5, 0, 0)
+            assert event.end.time() == time(10, 0, 0)
+
+        # Test 3: Between events (12:00 PM) - should return second event
+        with freezegun.freeze_time("2023-01-02T12:00:00+00:00"):
+            event = calendar.event
+            assert event is not None
+            assert event.start.time() == time(15, 0, 0)
+            assert event.end.time() == time(0, 0, 0)
+
+        # Test 4: During second event (18:00 PM) - should return second event
+        with freezegun.freeze_time("2023-01-02T18:00:00+00:00"):
+            event = calendar.event
+            assert event is not None
+            assert event.start.time() == time(15, 0, 0)
+            assert event.end.time() == time(0, 0, 0)
+
     await mocked_api.aiohttp_session.close()
