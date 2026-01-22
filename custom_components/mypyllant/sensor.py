@@ -181,6 +181,12 @@ async def create_system_sensors(
                         index, circuit_index, system_coordinator
                     )
                 )
+            if circuit.heating_circuit_flow_setpoint is not None:
+                sensors.append(
+                    lambda: CircuitFlowTemperatureSetpointSensor(
+                        index, circuit_index, system_coordinator
+                    )
+                )
             if circuit.heating_curve is not None:
                 sensors.append(
                     lambda: CircuitHeatingCurveSensor(
@@ -658,6 +664,25 @@ class CircuitFlowTemperatureSensor(CircuitSensor):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_flow_temperature"
+
+
+class CircuitFlowTemperatureSetpointSensor(CircuitSensor):
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} Flow Temperature Setpoint"
+
+    @property
+    def native_value(self):
+        return self.circuit.heating_circuit_flow_setpoint
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_flow_temperature_setpoint"
 
 
 class CircuitStateSensor(CircuitSensor):
