@@ -1786,7 +1786,7 @@ wheels = [
 
 [[package]]
 name = "mypyllant-component"
-version = "0.9.10"
+version = "0.9.11"
 source = { virtual = "." }
 dependencies = [
     { name = "mypyllant" },
