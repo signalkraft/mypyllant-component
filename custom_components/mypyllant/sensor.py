@@ -42,15 +42,6 @@ from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-DATA_UNIT_MAP = {
-    "CONSUMED_ELECTRICAL_ENERGY": UnitOfEnergy.WATT_HOUR,
-    "EARNED_ENVIRONMENT_ENERGY": UnitOfEnergy.WATT_HOUR,
-    "HEAT_GENERATED": UnitOfEnergy.WATT_HOUR,
-    "CONSUMED_PRIMARY_ENERGY": UnitOfEnergy.WATT_HOUR,
-    "EARNED_SOLAR_ENERGY": UnitOfEnergy.WATT_HOUR,
-    "EARNED_PV_ENERGY": UnitOfEnergy.WATT_HOUR,
-}
-
 
 async def create_system_sensors(
     hass: HomeAssistant, config: ConfigEntry
@@ -808,13 +799,7 @@ class DataSensor(CoordinatorEntity, SensorEntity):
         self.system_id = system_id
         self.da_index = da_index
         self.de_index = de_index
-        if (
-            self.device_data is not None
-            and self.device_data.energy_type in DATA_UNIT_MAP
-        ):
-            self._attr_native_unit_of_measurement = DATA_UNIT_MAP[
-                self.device_data.energy_type
-            ]
+        self._attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
         self._attr_device_class = SensorDeviceClass.ENERGY
         _LOGGER.debug(
             "Finishing init of %s = %s and unique id %s",
