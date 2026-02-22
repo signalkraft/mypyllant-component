@@ -60,6 +60,11 @@ async def test_zone_heating_calendar(
         system_coordinator_mock.data = (
             await system_coordinator_mock._async_update_data()
         )
+        if not system_coordinator_mock.data[0].zones:
+            await mocked_api.aiohttp_session.close()
+            pytest.skip(
+                f"No active zones in {system_coordinator_mock.data[0]}, skipping calendar test"
+            )
         calendar = ZoneHeatingCalendar(0, 0, system_coordinator_mock)
         if not calendar.time_program.has_time_program:
             await mocked_api.aiohttp_session.close()

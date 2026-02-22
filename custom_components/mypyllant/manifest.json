@@ -13,7 +13,7 @@
     "myPyllant"
   ],
   "requirements": [
-    "myPyllant==0.9.9"
+    "myPyllant==0.9.10"
   ],
-  "version": "v0.9.11"
+  "version": "v0.9.12"
 }

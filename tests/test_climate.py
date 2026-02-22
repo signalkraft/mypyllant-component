@@ -65,6 +65,11 @@ async def test_zone_climate(
         system_coordinator_mock.data = (
             await system_coordinator_mock._async_update_data()
         )
+        if not system_coordinator_mock.data[0].zones:
+            await mocked_api.aiohttp_session.close()
+            pytest.skip(
+                f"No active zones in {system_coordinator_mock.data[0]}, skipping zone climate test"
+            )
         climate = ZoneClimate(
             0,
             0,

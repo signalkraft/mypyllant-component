@@ -104,6 +104,9 @@ parser.add_argument(
 async def main(user, password, brand, country):
     async with MyPyllantAPI(user, password, brand, country) as api:
         async for system in api.get_systems():
+            if not system.zones:
+                print(f"Skipping {system} because there are no active zones")
+                continue
             print(await api.set_set_back_temperature(system.zones[0], 18))
             print(await api.quick_veto_zone_temperature(system.zones[0], 21, 5))
             print(await api.cancel_quick_veto_zone_temperature(system.zones[0]))
