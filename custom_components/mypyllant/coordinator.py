@@ -125,6 +125,12 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
     def _quota_exc_info(self):
         del self.hass_data[self._quota_exc_info_key]
 
+    def _clear_quota_state(self) -> None:
+        """Clear all quota-related state to allow fresh retries."""
+        self._quota_hit_time = None
+        self._quota_end_time = None
+        self._quota_exc_info = None
+
     async def _refresh_session(self):
         if (
             self.api.oauth_session_expires is None
@@ -195,12 +201,12 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         if not self._quota_hit_time:
             return
 
-        time_elapsed = (dt.now(timezone.utc) - self._quota_hit_time).seconds
+        time_elapsed = (dt.now(timezone.utc) - self._quota_hit_time).total_seconds()
 
         if is_quota_exceeded_exception(self._quota_exc_info):
             _LOGGER.debug(
                 "Quota was hit %ss ago on %s by %s",
-                time_elapsed,
+                int(time_elapsed),
                 self._quota_hit_time,
                 self.__class__,
                 exc_info=self._quota_exc_info,
@@ -208,31 +214,55 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
             if self._quota_end_time:
                 # If the API responded with an end time, we use that instead of the default QUOTA_PAUSE_INTERVAL
                 if dt.now(timezone.utc) < self._quota_end_time:
-                    remaining = (self._quota_end_time - dt.now(timezone.utc)).seconds
+                    remaining = int((self._quota_end_time - dt.now(timezone.utc)).total_seconds())
                     raise UpdateFailed(
                         f"{self._quota_exc_info.message} on {self._quota_exc_info.request_info.real_url}, "  # type: ignore
                         f"skipping update of myVAILLANT {self.__class__.__name__} for another"
                         f" {remaining}s"
                     ) from self._quota_exc_info
+                else:
+                    # Quota backoff period has expired, clear state and allow retry
+                    _LOGGER.info(
+                        "Quota backoff expired for %s, clearing quota state and resuming updates",
+                        self.__class__.__name__,
+                    )
+                    self._clear_quota_state()
+                    return
             elif time_elapsed < QUOTA_PAUSE_INTERVAL:
                 # No end time provided, use default interval
                 raise UpdateFailed(
                     f"{self._quota_exc_info.message} on {self._quota_exc_info.request_info.real_url}, "  # type: ignore
                     f"skipping update of myVAILLANT {self.__class__.__name__} for another"
-                    f" {QUOTA_PAUSE_INTERVAL - time_elapsed}s"
+                    f" {int(QUOTA_PAUSE_INTERVAL - time_elapsed)}s"
                 ) from self._quota_exc_info
+            else:
+                # Default backoff period has expired, clear state and allow retry
+                _LOGGER.info(
+                    "Quota backoff expired for %s (no end time), clearing quota state and resuming updates",
+                    self.__class__.__name__,
+                )
+                self._clear_quota_state()
+                return
         else:
             _LOGGER.debug(
                 "myVAILLANT API is down since %ss (%s)",
-                time_elapsed,
+                int(time_elapsed),
                 self._quota_hit_time,
                 exc_info=self._quota_exc_info,
             )
             if time_elapsed < API_DOWN_PAUSE_INTERVAL:
                 raise UpdateFailed(
                     f"myVAILLANT API is down, skipping update of myVAILLANT {self.__class__.__name__} for another"
-                    f" {API_DOWN_PAUSE_INTERVAL - time_elapsed}s"
+                    f" {int(API_DOWN_PAUSE_INTERVAL - time_elapsed)}s"
                 ) from self._quota_exc_info
+            else:
+                # API down backoff has expired, clear state and allow retry
+                _LOGGER.info(
+                    "API down backoff expired for %s, clearing state and resuming updates",
+                    self.__class__.__name__,
+                )
+                self._clear_quota_state()
+                return
 
 
 class SystemCoordinator(MyPyllantCoordinator):
@@ -287,6 +317,8 @@ class SystemCoordinator(MyPyllantCoordinator):
                     self.homes,
                 )
             ]
+            # Clear quota state on successful fetch so future updates aren't blocked
+            self._clear_quota_state()
             return data
         except ClientResponseError as e:
             self._set_quota_and_raise(e)
@@ -352,6 +384,8 @@ class DailyDataCoordinator(MyPyllantCoordinator):
                     data[system.id]["devices_data"].append(
                         [da async for da in device_data]
                     )
+            # Clear quota state on successful fetch so future updates aren't blocked
+            self._clear_quota_state()
             return data
         except ClientResponseError as e:
             self._set_quota_and_raise(e)
