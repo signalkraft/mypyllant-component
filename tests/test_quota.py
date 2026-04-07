@@ -151,11 +151,11 @@ async def test_quota_state_cleared_after_recovery(
     """
     quota_exception = ClientResponseError(
         request_info=RequestInfo(
-            url="https://api.vaillant-group.com/service-connected-control/end-user-app-api/v1/homes",
+            url="https://api.vaillant-group.com/service-connected-control/end-user-app-api/v1/homes",  # type: ignore
             method="GET",
-            headers=None,
+            headers=None,  # type: ignore
         ),
-        history=None,
+        history=None,  # type: ignore
         status=403,
         message='{ "statusCode": 403, "message": "Out of call volume quota. Quota will be replenished in 00:30:00." }',
     )
@@ -207,19 +207,17 @@ async def test_quota_elapsed_time_uses_total_seconds(
     """
     quota_exception = ClientResponseError(
         request_info=RequestInfo(
-            url="https://api.vaillant-group.com/service-connected-control/end-user-app-api/v1/homes",
+            url="https://api.vaillant-group.com/service-connected-control/end-user-app-api/v1/homes",  # type: ignore
             method="GET",
-            headers=None,
+            headers=None,  # type: ignore
         ),
-        history=None,
+        history=None,  # type: ignore
         status=403,
         message="Quota Exceeded",
     )
 
     # Hit quota far in the past (>1 hour ago, which would wrap with .seconds)
-    with freeze_time(
-        datetime.now(timezone.utc) - timedelta(hours=2)
-    ):
+    with freeze_time(datetime.now(timezone.utc) - timedelta(hours=2)):
         with mypyllant_aioresponses(raise_exception=quota_exception) as _:
             with pytest.raises(UpdateFailed, match=r"Quota.*"):
                 await system_coordinator_mock._async_update_data()
@@ -284,11 +282,11 @@ async def test_multiple_quota_hits_then_recovery(
     """
     quota_exception = ClientResponseError(
         request_info=RequestInfo(
-            url="https://api.vaillant-group.com/service-connected-control/end-user-app-api/v1/homes",
+            url="https://api.vaillant-group.com/service-connected-control/end-user-app-api/v1/homes",  # type: ignore
             method="GET",
-            headers=None,
+            headers=None,  # type: ignore
         ),
-        history=None,
+        history=None,  # type: ignore
         status=403,
         message='{ "statusCode": 403, "message": "Out of call volume quota. Quota will be replenished in 00:10:00." }',
     )

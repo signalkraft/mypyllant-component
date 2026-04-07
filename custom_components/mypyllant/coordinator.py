@@ -214,7 +214,9 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
             if self._quota_end_time:
                 # If the API responded with an end time, we use that instead of the default QUOTA_PAUSE_INTERVAL
                 if dt.now(timezone.utc) < self._quota_end_time:
-                    remaining = int((self._quota_end_time - dt.now(timezone.utc)).total_seconds())
+                    remaining = int(
+                        (self._quota_end_time - dt.now(timezone.utc)).total_seconds()
+                    )
                     raise UpdateFailed(
                         f"{self._quota_exc_info.message} on {self._quota_exc_info.request_info.real_url}, "  # type: ignore
                         f"skipping update of myVAILLANT {self.__class__.__name__} for another"
