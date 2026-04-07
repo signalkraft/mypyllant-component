@@ -43,7 +43,7 @@ from Saunier Duval & Bulex).
 
 ### HACS
 
-1. [Install HACS](https://hacs.xyz/docs/setup/download)
+1. [Install HACS](https://hacs.xyz/docs/use/)
 2. Search for the myVAILLANT integration in HACS and install it
 3. Restart Home Assistant
 4. [Add myVaillant integration](https://my.home-assistant.io/redirect/config_flow_start/?domain=mypyllant)
