@@ -227,12 +227,27 @@ def is_quota_exceeded_exception(exc_info: BaseException | None) -> bool:
 
 def extract_quota_duration(exc_info: BaseException | None) -> int | None:
     """
-    Extracts the time in seconds form an error message like "Quota will be replenished in 00:44:41."
+    Extracts the quota backoff time in seconds.
+
+    Prefers the standard Retry-After response header (RFC 7231 §7.1.3) when
+    present, then falls back to parsing the body text for the Vaillant-specific
+    "Quota will be replenished in HH:MM:SS" message.
     """
     if not isinstance(exc_info, ClientResponseError) or not is_quota_exceeded_exception(
         exc_info
     ):
         return None
+
+    # Prefer the Retry-After header when available
+    retry_after = getattr(exc_info, "headers", None)
+    if retry_after is not None:
+        retry_after = retry_after.get("Retry-After")
+    if retry_after is not None:
+        try:
+            return int(retry_after)
+        except (ValueError, TypeError):
+            pass
+
     import re
 
     match = re.search(
