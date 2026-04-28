@@ -689,7 +689,16 @@ class CircuitStateSensor(CircuitSensor):
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
-        return prepare_field_value_for_dict(self.circuit.extra_fields)
+        # heating_circuit_flow_setpoint was previously surfaced via extra_fields
+        # but was promoted to a typed Circuit field upstream (see #422, #440).
+        # Merge it back in explicitly so existing automations/templates reading
+        # state_attr('sensor.<>_circuit_0_state', 'heating_circuit_flow_setpoint')
+        # keep working. prepare_field_value_for_dict must still run on
+        # extra_fields because it contains a zoneinfo.ZoneInfo value that is
+        # not JSON-serialisable raw.
+        return prepare_field_value_for_dict(self.circuit.extra_fields) | {
+            "heating_circuit_flow_setpoint": self.circuit.heating_circuit_flow_setpoint,
+        }
 
     @property
     def unique_id(self) -> str:
