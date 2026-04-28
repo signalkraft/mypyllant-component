@@ -146,6 +146,20 @@ async def test_circuit_sensors(
             assert (
                 "room_temperature_control_mode" in circuit_state.extra_state_attributes
             )
+        # Regression test for #422 / #440: heating_circuit_flow_setpoint was
+        # surfaced via extra_fields before upstream promoted it to a typed
+        # Circuit field. CircuitStateSensor must continue to expose it as an
+        # attribute so existing automations/templates do not break silently.
+        # Guarded against fixtures that lack the field (e.g. no_system) where
+        # the assertion would otherwise be vacuous (None == None).
+        if "heatingCircuitFlowSetpoint" in str(test_data):
+            assert (
+                "heating_circuit_flow_setpoint" in circuit_state.extra_state_attributes
+            )
+            assert (
+                circuit_state.extra_state_attributes["heating_circuit_flow_setpoint"]
+                == circuit_state.circuit.heating_circuit_flow_setpoint
+            )
         assert isinstance(
             CircuitFlowTemperatureSensor(0, 0, system_coordinator_mock).native_value,
             (int, float, complex),
