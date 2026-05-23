@@ -10,6 +10,11 @@ from Saunier Duval & Bulex).
 > [!WARNING] 
 > This integration is not affiliated with Vaillant, the developers take no responsibility for anything that happens to
 > your devices because of this library.
+> 
+> The [Vaillant API](https://health.vaillant-group.com/) has somewhat frequent incidents and strict quotas, which lead
+> to errors in the integration.
+> 
+> For a completely local alternative, check out [signalkraft/ebusd-vaillant-component](https://github.com/signalkraft/ebusd-vaillant-component).
 
 ![myPyllant](https://raw.githubusercontent.com/signalkraft/myPyllant/main/logo.png)
 
