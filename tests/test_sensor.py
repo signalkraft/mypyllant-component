@@ -1,9 +1,13 @@
 import pytest as pytest
+from datetime import datetime, timedelta, timezone
+from unittest.mock import AsyncMock, MagicMock, patch
+
+from homeassistant.components.recorder.statistics import StatisticMeanType
 from homeassistant.helpers.entity_registry import DATA_REGISTRY, EntityRegistry
 from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
 
 from myPyllant.api import MyPyllantAPI
-from myPyllant.models import DeviceData
+from myPyllant.models import DeviceData, DeviceDataBucket
 from myPyllant.enums import CircuitState
 from myPyllant.tests.generate_test_data import DATA_DIR
 from myPyllant.tests.utils import list_test_data, load_test_data
@@ -290,3 +294,153 @@ async def test_additional_system_sensors(
             float,
         )
         await mocked_api.aiohttp_session.close()
+
+
+# ---------------------------------------------------------------------------
+# Helpers for _write_hourly_statistics tests
+# ---------------------------------------------------------------------------
+
+_MIDNIGHT = datetime(2026, 5, 27, 0, 0, tzinfo=timezone.utc)
+_SYSTEM_ID = "test_system"
+
+
+def _make_buckets(values):
+    buckets = []
+    for i, value in enumerate(values):
+        start = _MIDNIGHT + timedelta(hours=i)
+        buckets.append(
+            DeviceDataBucket(
+                start_date=start,
+                end_date=start + timedelta(hours=1),
+                value=value,
+            )
+        )
+    return buckets
+
+
+def _make_sensor(hass, buckets):
+    device = MagicMock()
+    device.device_uuid = "test-uuid"
+    device.name_display = "Arotherm Plus"
+    device.brand_name = "Vaillant"
+    device.product_name_display = "aroTHERM plus"
+
+    device_data = DeviceData(
+        operation_mode="HEATING",
+        energy_type="CONSUMED_ELECTRICAL_ENERGY",
+        data_from=_MIDNIGHT,
+        total_consumption=sum(v for v in (b.value for b in buckets) if v is not None),
+        device=device,
+        data=buckets,
+    )
+    coordinator = MagicMock()
+    coordinator.data = {
+        _SYSTEM_ID: {
+            "devices_data": [[device_data]],
+            "home_name": "Test Home",
+        }
+    }
+    sensor = DataSensor(_SYSTEM_ID, 0, 0, coordinator)
+    sensor.hass = hass
+    return sensor
+
+
+# ---------------------------------------------------------------------------
+# Tests
+# ---------------------------------------------------------------------------
+
+
+async def test_write_hourly_statistics_correct_data(hass):
+    buckets = _make_buckets([100.0, 200.0, 300.0])
+    sensor = _make_sensor(hass, buckets)
+
+    with patch(
+        "custom_components.mypyllant.sensor.async_add_external_statistics"
+    ) as mock_stats:
+        sensor._write_hourly_statistics()
+
+    mock_stats.assert_called_once()
+    _, metadata, stats = mock_stats.call_args[0]
+    stats = list(stats)
+
+    assert metadata["statistic_id"].startswith(f"{DOMAIN}:")
+    assert metadata["mean_type"] == StatisticMeanType.NONE
+    assert metadata["has_sum"] is True
+    assert metadata["unit_class"] == "energy"
+
+    assert len(stats) == 3
+    assert stats[0]["start"] == buckets[0].start_date
+    assert stats[0]["state"] == 100.0
+    assert stats[0]["sum"] == 100.0
+    assert stats[1]["state"] == 200.0
+    assert stats[1]["sum"] == 300.0
+    assert stats[2]["state"] == 300.0
+    assert stats[2]["sum"] == 600.0
+
+
+async def test_write_hourly_statistics_skips_none_values(hass):
+    buckets = _make_buckets([100.0, None, 300.0])
+    sensor = _make_sensor(hass, buckets)
+
+    with patch(
+        "custom_components.mypyllant.sensor.async_add_external_statistics"
+    ) as mock_stats:
+        sensor._write_hourly_statistics()
+
+    mock_stats.assert_called_once()
+    _, _, stats = mock_stats.call_args[0]
+    stats = list(stats)
+
+    assert len(stats) == 2
+    assert stats[0]["state"] == 100.0
+    assert stats[0]["sum"] == 100.0
+    assert stats[1]["state"] == 300.0
+    assert stats[1]["sum"] == 400.0
+
+
+async def test_write_hourly_statistics_no_data(hass):
+    sensor = _make_sensor(hass, [])
+
+    with patch(
+        "custom_components.mypyllant.sensor.async_add_external_statistics"
+    ) as mock_stats:
+        sensor._write_hourly_statistics()
+
+    mock_stats.assert_not_called()
+
+
+async def test_write_hourly_statistics_no_device_data(hass):
+    coordinator = MagicMock()
+    coordinator.data = {
+        _SYSTEM_ID: {
+            "devices_data": [],
+            "home_name": "Test Home",
+        }
+    }
+    sensor = DataSensor(_SYSTEM_ID, 0, 0, coordinator)
+    sensor.hass = hass
+
+    with patch(
+        "custom_components.mypyllant.sensor.async_add_external_statistics"
+    ) as mock_stats:
+        sensor._write_hourly_statistics()
+
+    mock_stats.assert_not_called()
+
+
+async def test_async_added_to_hass_writes_statistics(hass):
+    buckets = _make_buckets([100.0, 200.0, 300.0])
+    sensor = _make_sensor(hass, buckets)
+
+    with (
+        patch(
+            "custom_components.mypyllant.sensor.async_add_external_statistics"
+        ) as mock_stats,
+        patch(
+            "homeassistant.helpers.update_coordinator.CoordinatorEntity.async_added_to_hass",
+            new_callable=AsyncMock,
+        ),
+    ):
+        await sensor.async_added_to_hass()
+
+    mock_stats.assert_called_once()
