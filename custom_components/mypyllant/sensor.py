@@ -839,6 +839,11 @@ class DataSensor(CoordinatorEntity, SensorEntity):
             self.unique_id,
         )
 
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        if self.coordinator.data:
+            self._write_hourly_statistics()
+
     @property
     def name(self):
         if self.device_data is None:
