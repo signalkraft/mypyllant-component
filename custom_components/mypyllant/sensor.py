@@ -4,6 +4,12 @@ import logging
 from collections.abc import Mapping
 from typing import Any
 
+from homeassistant.components.recorder.statistics import (
+    StatisticData,
+    StatisticMeanType,
+    StatisticMetaData,
+    async_add_external_statistics,
+)
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -916,6 +922,42 @@ class DataSensor(CoordinatorEntity, SensorEntity):
             self.native_value,
             self.last_reset,
             self.device_data.data if self.device_data is not None else None,
+        )
+        self._write_hourly_statistics()
+
+    def _write_hourly_statistics(self) -> None:
+        if self.unique_id is None or self.device_data is None or not self.device_data.data:
+            return
+        statistic_id = f"{DOMAIN}:{self.unique_id}".lower().replace("-", "_")
+        day_start = self.device_data.data_from
+        running_sum = 0.0
+        stats: list[StatisticData] = []
+        for bucket in self.device_data.data:
+            if bucket.value is None:
+                continue
+            running_sum += bucket.value
+            stats.append(
+                StatisticData(
+                    start=bucket.start_date,
+                    last_reset=day_start,
+                    sum=running_sum,
+                    state=bucket.value,
+                )
+            )
+        if not stats:
+            return
+        async_add_external_statistics(
+            self.hass,
+            StatisticMetaData(
+                mean_type=StatisticMeanType.NONE,
+                has_sum=True,
+                name=self.name,
+                source=DOMAIN,
+                statistic_id=statistic_id,
+                unit_class="energy",
+                unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+            ),
+            stats,
         )
 
 
