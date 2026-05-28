@@ -56,7 +56,7 @@ async def create_system_sensors(
         "system_coordinator"
     ]
     if not system_coordinator.data:
-        _LOGGER.warning("No system data, skipping sensors")
+        _LOGGER.debug("No system data, skipping sensors")
         return EntityList()
 
     sensors: EntityList[SensorEntity] = EntityList()
