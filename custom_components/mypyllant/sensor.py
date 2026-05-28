@@ -931,7 +931,11 @@ class DataSensor(CoordinatorEntity, SensorEntity):
         self._write_hourly_statistics()
 
     def _write_hourly_statistics(self) -> None:
-        if self.unique_id is None or self.device_data is None or not self.device_data.data:
+        if (
+            self.unique_id is None
+            or self.device_data is None
+            or not self.device_data.data
+        ):
             return
         statistic_id = f"{DOMAIN}:{self.unique_id}".lower().replace("-", "_")
         day_start = self.device_data.data_from
