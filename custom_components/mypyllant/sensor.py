@@ -951,7 +951,7 @@ class DataSensor(CoordinatorEntity, SensorEntity):
         last_stats = await get_instance(self.hass).async_add_executor_job(
             statistics_during_period,
             self.hass,
-            day_start - timedelta(hours=3),
+            day_start - timedelta(days=7),
             day_start,
             {statistic_id},
             "hour",
