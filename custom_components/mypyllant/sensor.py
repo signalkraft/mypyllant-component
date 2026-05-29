@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Mapping
+from datetime import timedelta
 from typing import Any
 
+from homeassistant.components.recorder import get_instance
 from homeassistant.components.recorder.statistics import (
     StatisticData,
     StatisticMeanType,
     StatisticMetaData,
     async_add_external_statistics,
+    statistics_during_period,
 )
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -842,7 +845,7 @@ class DataSensor(CoordinatorEntity, SensorEntity):
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
         if self.coordinator.data:
-            self._write_hourly_statistics()
+            await self._write_hourly_statistics()
 
     @property
     def name(self):
@@ -928,18 +931,40 @@ class DataSensor(CoordinatorEntity, SensorEntity):
             self.last_reset,
             self.device_data.data if self.device_data is not None else None,
         )
-        self._write_hourly_statistics()
+        self.hass.async_create_task(self._write_hourly_statistics())
 
-    def _write_hourly_statistics(self) -> None:
+    async def _write_hourly_statistics(self) -> None:
         if (
             self.unique_id is None
             or self.device_data is None
             or not self.device_data.data
+            or self.device_data.data_from is None
         ):
             return
         statistic_id = f"{DOMAIN}:{self.unique_id}".lower().replace("-", "_")
         day_start = self.device_data.data_from
-        running_sum = 0.0
+
+        # Carry forward the previous running total so statistics are always
+        # monotonically increasing across day boundaries.  Without this, sum
+        # resets to 0 each day and HA computes sum(T) - sum(T-1) = -3804 Wh at
+        # the BST midnight boundary.  Mirrors octopus_energy's async_get_last_sum.
+        last_stats = await get_instance(self.hass).async_add_executor_job(
+            statistics_during_period,
+            self.hass,
+            day_start - timedelta(hours=3),
+            day_start,
+            {statistic_id},
+            "hour",
+            None,
+            {"sum"},
+        )
+        baseline_sum = (
+            last_stats[statistic_id][-1]["sum"]
+            if statistic_id in last_stats and last_stats[statistic_id]
+            else 0.0
+        )
+
+        running_sum = baseline_sum
         stats: list[StatisticData] = []
         for bucket in self.device_data.data:
             if bucket.value is None:

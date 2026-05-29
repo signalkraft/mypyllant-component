@@ -354,10 +354,14 @@ async def test_write_hourly_statistics_correct_data(hass):
     buckets = _make_buckets([100.0, 200.0, 300.0])
     sensor = _make_sensor(hass, buckets)
 
-    with patch(
-        "custom_components.mypyllant.sensor.async_add_external_statistics"
-    ) as mock_stats:
-        sensor._write_hourly_statistics()
+    with (
+        patch("custom_components.mypyllant.sensor.get_instance") as mock_recorder,
+        patch(
+            "custom_components.mypyllant.sensor.async_add_external_statistics"
+        ) as mock_stats,
+    ):
+        mock_recorder.return_value.async_add_executor_job = AsyncMock(return_value={})
+        await sensor._write_hourly_statistics()
 
     mock_stats.assert_called_once()
     _, metadata, stats = mock_stats.call_args[0]
@@ -382,10 +386,14 @@ async def test_write_hourly_statistics_skips_none_values(hass):
     buckets = _make_buckets([100.0, None, 300.0])
     sensor = _make_sensor(hass, buckets)
 
-    with patch(
-        "custom_components.mypyllant.sensor.async_add_external_statistics"
-    ) as mock_stats:
-        sensor._write_hourly_statistics()
+    with (
+        patch("custom_components.mypyllant.sensor.get_instance") as mock_recorder,
+        patch(
+            "custom_components.mypyllant.sensor.async_add_external_statistics"
+        ) as mock_stats,
+    ):
+        mock_recorder.return_value.async_add_executor_job = AsyncMock(return_value={})
+        await sensor._write_hourly_statistics()
 
     mock_stats.assert_called_once()
     _, _, stats = mock_stats.call_args[0]
@@ -401,10 +409,14 @@ async def test_write_hourly_statistics_skips_none_values(hass):
 async def test_write_hourly_statistics_no_data(hass):
     sensor = _make_sensor(hass, [])
 
-    with patch(
-        "custom_components.mypyllant.sensor.async_add_external_statistics"
-    ) as mock_stats:
-        sensor._write_hourly_statistics()
+    with (
+        patch("custom_components.mypyllant.sensor.get_instance") as mock_recorder,
+        patch(
+            "custom_components.mypyllant.sensor.async_add_external_statistics"
+        ) as mock_stats,
+    ):
+        mock_recorder.return_value.async_add_executor_job = AsyncMock(return_value={})
+        await sensor._write_hourly_statistics()
 
     mock_stats.assert_not_called()
 
@@ -423,7 +435,7 @@ async def test_write_hourly_statistics_no_device_data(hass):
     with patch(
         "custom_components.mypyllant.sensor.async_add_external_statistics"
     ) as mock_stats:
-        sensor._write_hourly_statistics()
+        await sensor._write_hourly_statistics()
 
     mock_stats.assert_not_called()
 
@@ -433,6 +445,7 @@ async def test_async_added_to_hass_writes_statistics(hass):
     sensor = _make_sensor(hass, buckets)
 
     with (
+        patch("custom_components.mypyllant.sensor.get_instance") as mock_recorder,
         patch(
             "custom_components.mypyllant.sensor.async_add_external_statistics"
         ) as mock_stats,
@@ -441,6 +454,35 @@ async def test_async_added_to_hass_writes_statistics(hass):
             new_callable=AsyncMock,
         ),
     ):
+        mock_recorder.return_value.async_add_executor_job = AsyncMock(return_value={})
         await sensor.async_added_to_hass()
 
     mock_stats.assert_called_once()
+
+
+async def test_write_hourly_statistics_carries_forward_previous_sum(hass):
+    """Yesterday's final sum is the baseline so statistics are always monotonically
+    increasing across day boundaries, preventing a negative delta at BST midnight."""
+    buckets = _make_buckets([100.0, 200.0])
+    sensor = _make_sensor(hass, buckets)
+    stat_id = f"{DOMAIN}:{sensor.unique_id}".lower().replace("-", "_")
+
+    with (
+        patch("custom_components.mypyllant.sensor.get_instance") as mock_recorder,
+        patch(
+            "custom_components.mypyllant.sensor.async_add_external_statistics"
+        ) as mock_stats,
+    ):
+        mock_recorder.return_value.async_add_executor_job = AsyncMock(
+            return_value={stat_id: [{"sum": 3804.0}]}
+        )
+        await sensor._write_hourly_statistics()
+
+    mock_stats.assert_called_once()
+    _, _, stats = mock_stats.call_args[0]
+    stats = list(stats)
+
+    assert stats[0]["sum"] == 3904.0  # 3804 baseline + 100
+    assert stats[1]["sum"] == 4104.0  # 3804 baseline + 100 + 200
+    assert stats[0]["state"] == 100.0
+    assert stats[1]["state"] == 200.0
