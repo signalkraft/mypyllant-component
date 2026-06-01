@@ -869,7 +869,11 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     @property
     def preset_mode(self) -> str:
         if self.zone.control_identifier.is_vrc700:
-            return self.preset_mode_map[self.zone.active_operation_mode]  # type: ignore
+            if self.zone.cooling and self.zone.desired_room_temperature_setpoint_cooling is not None:
+                mode = self.zone.cooling.operation_mode_cooling
+            else:
+                mode = self.zone.heating.operation_mode_heating
+            return self.preset_mode_map.get(mode, PRESET_NONE)  # type: ignore
         else:
             if self.zone.is_eco_mode:
                 return PRESET_ECO
@@ -900,7 +904,10 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                 raise ValueError(
                     f"Invalid preset mode, use one of {', '.join(set(self.preset_mode_map.values()))}"
                 )
-            await self.set_zone_operating_mode(requested_mode)
+            if self.zone.cooling and self.zone.desired_room_temperature_setpoint_cooling is not None:
+                await self.set_zone_operating_mode(requested_mode, operating_type=ZoneOperatingType.COOLING)
+            else:
+                await self.set_zone_operating_mode(requested_mode, operating_type=ZoneOperatingType.HEATING)
         else:
             if preset_mode not in self.preset_mode_map:
                 raise ValueError(
