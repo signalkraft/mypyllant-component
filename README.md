@@ -322,6 +322,66 @@ arrears:
   mode: single
 ```
 
+### Visualising with Plotly Graph
+
+The long-term statistics can be displayed as hourly bar charts using the
+[Plotly Graph Card](https://github.com/dbuezas/lovelace-plotly-graph-card).
+
+> [!NOTE]
+> **Why not ApexCharts?** The popular ApexCharts card requires a standard entity ID for every
+> series. It cannot query external statistics directly, which means you cannot mix a
+> `mypyllant:` statistic (energy bars) with a normal temperature sensor in the same chart. Plotly
+> Graph Card supports both in a single card via its `statistic:` option.
+
+Because the statistics are external, each energy series must use `statistic: sum` with
+`period: hour` and a `delta` filter to convert the cumulative sum into per-hour consumption
+values. Find your statistic ID in **Developer Tools → Statistics** (filter by `mypyllant:`).
+
+**Example — Domestic Hot Water energy vs tank temperature:**
+
+```yaml
+type: custom:plotly-graph
+title: Hot Water ℃ vs Energy Usage
+hours_to_show: 168
+refresh_interval: auto
+entities:
+  - entity: sensor.home_domestic_hot_water_0_tank_temperature
+    name: Tank Temperature
+    line:
+      color: "#e74c3c"
+      width: 2
+  - entity: mypyllant:mypyllant_<your_statistic_id>
+    name: DHW Energy (Wh/h)
+    unit_of_measurement: Wh
+    statistic: sum
+    period: hour
+    type: bar
+    yaxis: y2
+    marker:
+      color: rgba(52, 152, 219, 0.6)
+    filters:
+      - delta
+      - map_y_numbers: Math.max(0, y)
+layout:
+  yaxis:
+    title: Temperature (°C)
+  yaxis2:
+    title: Energy (Wh)
+    overlaying: "y"
+    side: right
+    rangemode: tozero
+    hoverformat: ".0f"
+```
+
+Key options:
+- `statistic: sum` — reads from long-term statistics rather than entity state history.
+- `delta` filter — converts the monotonically increasing `sum` into per-hour consumption.
+- `map_y_numbers: Math.max(0, y)` — suppresses the rare small negative value that can appear at
+  day boundaries while the baseline is being established.
+- `unit_of_measurement: Wh` — required for the correct unit in the hover tooltip; external
+  statistics don't expose their unit automatically to the card.
+- `hoverformat: ".0f"` on `yaxis2` — displays whole-number Wh values in the tooltip.
+
 ## Services
 
 There are custom services for almost every functionality of the myVAILLANT app:
