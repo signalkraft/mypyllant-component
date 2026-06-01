@@ -318,7 +318,7 @@ def _make_buckets(values):
     return buckets
 
 
-def _make_sensor(hass, buckets):
+def _make_sensor(hass, buckets, data_from=_MIDNIGHT):
     device = MagicMock()
     device.device_uuid = "test-uuid"
     device.name_display = "Arotherm Plus"
@@ -328,7 +328,7 @@ def _make_sensor(hass, buckets):
     device_data = DeviceData(
         operation_mode="HEATING",
         energy_type="CONSUMED_ELECTRICAL_ENERGY",
-        data_from=_MIDNIGHT,
+        data_from=data_from,
         total_consumption=sum(v for v in (b.value for b in buckets) if v is not None),
         device=device,
         data=buckets,
@@ -374,11 +374,12 @@ async def test_write_hourly_statistics_correct_data(hass):
 
     assert len(stats) == 3
     assert stats[0]["start"] == buckets[0].start_date
+    # state is day-cumulative (mirrors octopus_energy), equal to sum when baseline is 0
     assert stats[0]["state"] == 100.0
     assert stats[0]["sum"] == 100.0
-    assert stats[1]["state"] == 200.0
+    assert stats[1]["state"] == 300.0
     assert stats[1]["sum"] == 300.0
-    assert stats[2]["state"] == 300.0
+    assert stats[2]["state"] == 600.0
     assert stats[2]["sum"] == 600.0
 
 
@@ -402,7 +403,7 @@ async def test_write_hourly_statistics_skips_none_values(hass):
     assert len(stats) == 2
     assert stats[0]["state"] == 100.0
     assert stats[0]["sum"] == 100.0
-    assert stats[1]["state"] == 300.0
+    assert stats[1]["state"] == 400.0  # day-cumulative: 100 + 300
     assert stats[1]["sum"] == 400.0
 
 
@@ -484,5 +485,105 @@ async def test_write_hourly_statistics_carries_forward_previous_sum(hass):
 
     assert stats[0]["sum"] == 3904.0  # 3804 baseline + 100
     assert stats[1]["sum"] == 4104.0  # 3804 baseline + 100 + 200
-    assert stats[0]["state"] == 100.0
-    assert stats[1]["state"] == 200.0
+    assert (
+        stats[0]["state"] == 100.0
+    )  # day-cumulative resets daily, independent of baseline
+    assert stats[1]["state"] == 300.0
+
+
+async def test_write_hourly_statistics_without_data_from(hass):
+    """The myVAILLANT API does not always return `from`. Statistics must still be written,
+    with day_start derived from the first bucket's timestamp (mirrors octopus_energy)."""
+    buckets = _make_buckets([100.0, 200.0])
+    sensor = _make_sensor(hass, buckets, data_from=None)
+
+    with (
+        patch("custom_components.mypyllant.sensor.get_instance") as mock_recorder,
+        patch(
+            "custom_components.mypyllant.sensor.async_add_external_statistics"
+        ) as mock_stats,
+    ):
+        mock_recorder.return_value.async_add_executor_job = AsyncMock(return_value={})
+        await sensor._write_hourly_statistics()
+
+    mock_stats.assert_called_once()
+    _, _, stats = mock_stats.call_args[0]
+    stats = list(stats)
+    assert len(stats) == 2
+    assert stats[0]["sum"] == 100.0
+    assert stats[1]["sum"] == 300.0
+    # last_reset derived from first bucket floored to midnight
+    assert stats[0]["last_reset"] == _MIDNIGHT
+
+
+async def test_async_added_to_hass_survives_statistics_failure(hass):
+    """A failure writing statistics must not prevent the entity from loading."""
+    buckets = _make_buckets([100.0, 200.0, 300.0])
+    sensor = _make_sensor(hass, buckets)
+
+    with (
+        patch(
+            "custom_components.mypyllant.sensor.DataSensor._write_hourly_statistics",
+            new_callable=AsyncMock,
+            side_effect=RuntimeError("recorder not ready"),
+        ),
+        patch(
+            "homeassistant.helpers.update_coordinator.CoordinatorEntity.async_added_to_hass",
+            new_callable=AsyncMock,
+        ),
+    ):
+        # Should not raise
+        await sensor.async_added_to_hass()
+
+
+async def test_write_hourly_statistics_resets_state_across_day_boundary(hass):
+    """The coordinator fetches a 2-day window (yesterday + today). sum must stay
+    monotonically increasing across the midnight boundary, while state and last_reset
+    reset at the start of each day (mirrors octopus_energy's day-cumulative state)."""
+    day1 = datetime(2026, 5, 27, 0, 0, tzinfo=timezone.utc)
+    day2 = datetime(2026, 5, 28, 0, 0, tzinfo=timezone.utc)
+    buckets = [
+        DeviceDataBucket(
+            start_date=day1 + timedelta(hours=22),
+            end_date=day1 + timedelta(hours=23),
+            value=100.0,
+        ),
+        DeviceDataBucket(
+            start_date=day1 + timedelta(hours=23),
+            end_date=day2,
+            value=200.0,
+        ),
+        DeviceDataBucket(
+            start_date=day2,
+            end_date=day2 + timedelta(hours=1),
+            value=300.0,
+        ),
+        DeviceDataBucket(
+            start_date=day2 + timedelta(hours=1),
+            end_date=day2 + timedelta(hours=2),
+            value=400.0,
+        ),
+    ]
+    sensor = _make_sensor(hass, buckets, data_from=day1)
+
+    with (
+        patch("custom_components.mypyllant.sensor.get_instance") as mock_recorder,
+        patch(
+            "custom_components.mypyllant.sensor.async_add_external_statistics"
+        ) as mock_stats,
+    ):
+        mock_recorder.return_value.async_add_executor_job = AsyncMock(return_value={})
+        await sensor._write_hourly_statistics()
+
+    _, _, stats = mock_stats.call_args[0]
+    stats = list(stats)
+    assert len(stats) == 4
+    # sum is cumulative across both days (monotonic)
+    assert [s["sum"] for s in stats] == [100.0, 300.0, 600.0, 1000.0]
+    # state resets at the day-2 boundary
+    assert [s["state"] for s in stats] == [100.0, 300.0, 300.0, 700.0]
+    # last_reset is the midnight of each bucket's own day
+    assert stats[0]["last_reset"] == day1
+    assert stats[1]["last_reset"] == day1
+    assert stats[2]["last_reset"] == day2
+    assert stats[3]["last_reset"] == day2

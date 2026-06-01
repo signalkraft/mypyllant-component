@@ -361,10 +361,21 @@ class DailyDataCoordinator(MyPyllantCoordinator):
             ):
                 raise UpdateFailed("No systems available for daily data fetch")
             for system in self.hass_data["system_coordinator"].data:
-                start = dt.now(system.timezone).replace(
+                today = dt.now(system.timezone).replace(
                     microsecond=0, second=0, minute=0, hour=0
                 )
-                end = start + timedelta(days=1)
+                # Fetch yesterday + today so the previous day's final hour (23:00-00:00)
+                # is backfilled once it finalises after midnight. Date-based construction
+                # keeps the start on local midnight across DST transitions (a raw
+                # `today - timedelta(days=1)` is off by an hour on DST-change days).
+                yesterday = (today - timedelta(days=1)).date()
+                start = dt(
+                    yesterday.year,
+                    yesterday.month,
+                    yesterday.day,
+                    tzinfo=system.timezone,
+                )
+                end = today + timedelta(days=1)
                 _LOGGER.debug(
                     "Getting daily data for %s from %s to %s", system.id, start, end
                 )

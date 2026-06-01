@@ -187,6 +187,141 @@ or the naming of your heating zones (in this case "Zone 1"):
 | Home Zone 1 (Circuit 0) Ventilation Boost                                     |        |              | off                       |
 | Home Domestic Hot Water 0                                                     |        |              | Time Controlled           |
 
+## Energy Statistics
+
+In addition to the energy sensors listed above (which show *today's running total* for each
+device and operation mode), the integration imports the myVAILLANT **hourly** energy data into
+Home Assistant's long-term statistics. This is what powers correct per-hour attribution in the
+**Energy Dashboard** — each hour's heat-pump consumption is recorded against the hour it
+actually happened, not the time it was retrieved.
+
+These statistics appear under external IDs of the form
+`mypyllant:mypyllant_<system>_<device>_<operation>_<index>` (Developer Tools → Statistics), one
+per energy sensor (e.g. *Consumed Electrical Energy Domestic Hot Water*, *... Heating*).
+
+### How it works
+
+* On each refresh, the daily-data coordinator fetches **two days** of hourly buckets
+  (yesterday + today) from the myVAILLANT API and writes them as external statistics.
+* `sum` is **cumulative and monotonically increasing** (it carries the previous day's running
+  total forward), so the Energy Dashboard never shows a negative spike at midnight.
+* `state` and `last_reset` reset at the start of **each** day, mirroring how other energy
+  integrations (e.g. `octopus_energy`) model day-cumulative statistics.
+
+### Why two days are fetched
+
+The myVAILLANT API only returns a value for **completed** hours — the hour currently in
+progress comes back as `null`. That includes the **final hour of the day** (23:00–00:00): at
+23:55 it is still in progress, so it cannot be captured before midnight. Because the coordinator
+re-fetches *yesterday* as well as today, a refresh shortly **after** midnight backfills that
+final hour once it has finalised. Re-writing yesterday is idempotent (identical `sum` values),
+so the only new row added is the previously-missing hour.
+
+### Keeping the data up to date
+
+> [!IMPORTANT]
+> To avoid hitting the myVAILLANT API quota, the **daily energy data is *not* refreshed
+> automatically** — it is only fetched once when the integration loads. You therefore need to
+> trigger a refresh yourself to keep the hourly statistics current. There are two recommended
+> approaches depending on whether you have hourly electricity metering in Home Assistant.
+
+A refresh is triggered by calling `homeassistant.update_entity` on **any** of the integration's
+energy / efficiency sensors (e.g. `sensor.home_device_0_arotherm_plus_heating_energy_efficiency`).
+You can also set the **"Seconds between energy data updates"** option (`update_interval_daily`,
+left empty by default) to poll on a fixed interval, but an automation gives you more control over
+timing and quota.
+
+Note that the myVAILLANT API finalises a completed hour a few minutes after it ends, so trigger
+the refresh a little **past** the hour (`:15` works well) rather than exactly on the hour.
+
+#### Option A — you have hourly electricity metering (recommended)
+
+If Home Assistant knows your grid consumption (e.g. from a smart-meter / DNO integration), only
+poll myVAILLANT when the heat pump has actually drawn power in the previous hour. This keeps API
+usage low while capturing every active hour within ~1 hour.
+
+First create a **helper** that reports your grid consumption over a rolling ~hour, using the
+built-in [`statistics`](https://www.home-assistant.io/integrations/statistics/) platform. Point
+it at an accumulative (monotonically increasing) consumption sensor in kWh:
+
+```yaml
+# configuration.yaml
+sensor:
+  - platform: statistics
+    name: "Grid consumption rolling hour"
+    unique_id: grid_consumption_rolling_hour
+    entity_id: sensor.electricity_meter_accumulative_consumption  # your smart-meter kWh total
+    state_characteristic: change      # net change over the buffered window
+    max_age:
+      minutes: 55
+    sampling_size: 250
+```
+
+> If your consumption sensor resets at midnight, `change` may briefly read negative around the
+> reset; the `above: 1` condition below simply won't fire then, which is harmless — the 00:30
+> snapshot covers that boundary.
+
+Then add an automation that refreshes at `:15` when the previous hour's consumption exceeded a
+threshold (1 kWh is a good default — high enough to ignore base load, low enough to catch any
+real heat-pump cycle), plus an **unconditional 00:30 snapshot** that backfills the previous day
+in full:
+
+```yaml
+# automations.yaml
+- id: mypyllant_energy_refresh
+  alias: myVAILLANT - Refresh energy data
+  description: >
+    Refresh hourly energy at :15 when the previous hour's grid usage exceeded 1 kWh (so we
+    only poll when the heat pump likely ran), plus an unconditional 00:30 daily snapshot that
+    backfills the previous day's final hour.
+  triggers:
+    - trigger: time_pattern
+      minutes: "15"
+      id: hourly
+    - trigger: time
+      at: "00:30:00"
+      id: snapshot
+  conditions:
+    - condition: or
+      conditions:
+        - condition: numeric_state
+          entity_id: sensor.grid_consumption_rolling_hour
+          above: 1
+        - condition: trigger
+          id: snapshot
+  actions:
+    - action: homeassistant.update_entity
+      target:
+        entity_id: sensor.home_device_0_arotherm_plus_heating_energy_efficiency
+  mode: single
+```
+
+Because the daily snapshot reprocesses the whole previous day, any hour missed intraday (for
+example a short cycle that didn't cross the 1 kWh threshold) is recovered automatically by the
+next morning — daily totals are always correct.
+
+#### Option B — no hourly metering
+
+If you don't have an hourly grid-consumption sensor to gate on, simply refresh **once per day at
+00:30**. Thanks to the two-day fetch, this pulls the *entire* previous day (now complete,
+including its final hour) plus the current day so far. You get accurate per-hour data one day in
+arrears:
+
+```yaml
+# automations.yaml
+- id: mypyllant_energy_daily_refresh
+  alias: myVAILLANT - Daily energy refresh
+  description: Pull the full previous day's hourly energy at 00:30 (data lands one day in arrears).
+  triggers:
+    - trigger: time
+      at: "00:30:00"
+  actions:
+    - action: homeassistant.update_entity
+      target:
+        entity_id: sensor.home_device_0_arotherm_plus_heating_energy_efficiency
+  mode: single
+```
+
 ## Services
 
 There are custom services for almost every functionality of the myVAILLANT app:

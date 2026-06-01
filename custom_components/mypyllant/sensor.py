@@ -845,7 +845,15 @@ class DataSensor(CoordinatorEntity, SensorEntity):
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
         if self.coordinator.data:
-            await self._write_hourly_statistics()
+            try:
+                await self._write_hourly_statistics()
+            except Exception:  # noqa: BLE001
+                _LOGGER.warning(
+                    "Failed to write initial hourly statistics for %s; entity still "
+                    "loads, statistics retry on next coordinator update",
+                    self.unique_id,
+                    exc_info=True,
+                )
 
     @property
     def name(self):
@@ -938,11 +946,25 @@ class DataSensor(CoordinatorEntity, SensorEntity):
             self.unique_id is None
             or self.device_data is None
             or not self.device_data.data
-            or self.device_data.data_from is None
         ):
             return
         statistic_id = f"{DOMAIN}:{self.unique_id}".lower().replace("-", "_")
-        day_start = self.device_data.data_from
+
+        # Derive the day start from the API's data_from when available, otherwise from the
+        # first bucket's own timestamp floored to midnight. The myVAILLANT API does not
+        # always return `from`, and depending on it caused statistics to silently stop
+        # writing. Mirrors octopus_energy, which derives the period start from
+        # consumptions[0]["start"].replace(minute=0, second=0, microsecond=0).
+        day_start = self.device_data.data_from or self.device_data.data[
+            0
+        ].start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        _LOGGER.debug(
+            "Writing hourly statistics for %s: %d buckets, data_from=%s, day_start=%s",
+            self.unique_id,
+            len(self.device_data.data),
+            self.device_data.data_from,
+            day_start,
+        )
 
         # Carry forward the previous running total so statistics are always
         # monotonically increasing across day boundaries.  Without this, sum
@@ -964,18 +986,32 @@ class DataSensor(CoordinatorEntity, SensorEntity):
             else 0.0
         )
 
+        # The coordinator fetches a 2-day window (yesterday + today) so the previous
+        # day's final hour is backfilled once it finalises after midnight. The buckets
+        # therefore span day boundaries: sum stays monotonic (cumulative since baseline),
+        # while state and last_reset reset to the start of each day, mirroring
+        # octopus_energy's day-cumulative state.
         running_sum = baseline_sum
+        running_state = 0.0
+        current_day = None
         stats: list[StatisticData] = []
         for bucket in self.device_data.data:
             if bucket.value is None:
                 continue
+            bucket_midnight = bucket.start_date.replace(
+                hour=0, minute=0, second=0, microsecond=0
+            )
+            if current_day != bucket_midnight:
+                running_state = 0.0
+                current_day = bucket_midnight
             running_sum += bucket.value
+            running_state += bucket.value
             stats.append(
                 StatisticData(
                     start=bucket.start_date,
-                    last_reset=day_start,
+                    last_reset=bucket_midnight,
                     sum=running_sum,
-                    state=bucket.value,
+                    state=running_state,
                 )
             )
         if not stats:
