@@ -771,7 +771,10 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             # If only one temperature is passed in, set it on the active operating type.
             # Fall back to heating when there is no cooling config or the desired setpoints
             # are both None (None == None would otherwise incorrectly resolve to COOLING).
-            if self.zone.active_operating_type == ZoneOperatingType.HEATING or not self.zone.cooling:
+            if (
+                self.zone.active_operating_type == ZoneOperatingType.HEATING
+                or not self.zone.cooling
+            ):
                 target_temp_low = temperature
             elif self.zone.cooling:
                 target_temp_high = temperature
@@ -843,8 +846,7 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                     temperature=target_temp_high
                 )
             elif (
-                self.zone.cooling.operation_mode_cooling
-                == ZoneOperatingModeVRC700.DAY
+                self.zone.cooling.operation_mode_cooling == ZoneOperatingModeVRC700.DAY
             ):
                 _LOGGER.debug(
                     "Setting VRC700 cooling setpoint on %s to %s",
@@ -869,7 +871,10 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     @property
     def preset_mode(self) -> str:
         if self.zone.control_identifier.is_vrc700:
-            if self.zone.cooling and self.zone.desired_room_temperature_setpoint_cooling is not None:
+            if (
+                self.zone.cooling
+                and self.zone.desired_room_temperature_setpoint_cooling is not None
+            ):
                 mode = self.zone.cooling.operation_mode_cooling
             else:
                 mode = self.zone.heating.operation_mode_heating
@@ -904,10 +909,17 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                 raise ValueError(
                     f"Invalid preset mode, use one of {', '.join(set(self.preset_mode_map.values()))}"
                 )
-            if self.zone.cooling and self.zone.desired_room_temperature_setpoint_cooling is not None:
-                await self.set_zone_operating_mode(requested_mode, operating_type=ZoneOperatingType.COOLING)
+            if (
+                self.zone.cooling
+                and self.zone.desired_room_temperature_setpoint_cooling is not None
+            ):
+                await self.set_zone_operating_mode(
+                    requested_mode, operating_type=ZoneOperatingType.COOLING
+                )
             else:
-                await self.set_zone_operating_mode(requested_mode, operating_type=ZoneOperatingType.HEATING)
+                await self.set_zone_operating_mode(
+                    requested_mode, operating_type=ZoneOperatingType.HEATING
+                )
         else:
             if preset_mode not in self.preset_mode_map:
                 raise ValueError(
