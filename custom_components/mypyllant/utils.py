@@ -133,7 +133,7 @@ class HolidayEntity(SystemCoordinatorEntity):
             if self.zone
             else False,
             "holiday_remaining_seconds": self.zone.general.holiday_remaining.total_seconds()
-            if self.zone.general.holiday_remaining
+            if self.zone and self.zone.general.holiday_remaining
             else None,
             "holiday_start_date_time": self.holiday_start,
             "holiday_end_date_time": self.holiday_end,
