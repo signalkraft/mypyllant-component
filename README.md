@@ -337,16 +337,24 @@ Because the statistics are external, each energy series must use `statistic: sum
 `period: hour` and a `delta` filter to convert the cumulative sum into per-hour consumption
 values. Find your statistic ID in **Developer Tools → Statistics** (filter by `mypyllant:`).
 
+Temperature sensors (tank, zone, outdoor) are also recorded as long-term statistics by HA's
+recorder. Using `statistic: mean` with `period: hour` on temperature series aligns them to the
+same hourly bucket as the energy bars, which gives accurate correlation across 7- and 14-day
+views.
+
 **Example — Domestic Hot Water energy vs tank temperature:**
 
 ```yaml
 type: custom:plotly-graph
 title: Hot Water ℃ vs Energy Usage
-hours_to_show: 168
+hours_to_show: 24
 refresh_interval: auto
+autorange_after_scroll: true
 entities:
   - entity: sensor.home_domestic_hot_water_0_tank_temperature
     name: Tank Temperature
+    statistic: mean
+    period: hour
     line:
       color: "#e74c3c"
       width: 2
@@ -363,24 +371,42 @@ entities:
       - delta
       - map_y_numbers: Math.max(0, y)
 layout:
+  xaxis:
+    rangeselector:
+      y: 1.1
+      buttons:
+        - count: 1
+          step: day
+          label: 1 Day
+        - count: 7
+          step: day
+          label: 7 Days
+        - count: 14
+          step: day
+          label: 14 Days
   yaxis:
     title: Temperature (°C)
   yaxis2:
     title: Energy (Wh)
-    overlaying: "y"
+    overlaying: y
     side: right
     rangemode: tozero
-    hoverformat: ".0f"
+    hoverformat: .0f
 ```
 
 Key options:
-- `statistic: sum` — reads from long-term statistics rather than entity state history.
+- `statistic: mean` on temperature — reads hourly mean from HA's recorder statistics, aligning
+  the temperature line to the same hourly buckets as the energy bars.
+- `statistic: sum` on energy — reads from the external long-term statistics written by this
+  integration rather than entity state history.
 - `delta` filter — converts the monotonically increasing `sum` into per-hour consumption.
 - `map_y_numbers: Math.max(0, y)` — suppresses the rare small negative value that can appear at
   day boundaries while the baseline is being established.
 - `unit_of_measurement: Wh` — required for the correct unit in the hover tooltip; external
   statistics don't expose their unit automatically to the card.
-- `hoverformat: ".0f"` on `yaxis2` — displays whole-number Wh values in the tooltip.
+- `hoverformat: .0f` on `yaxis2` — displays whole-number Wh values in the tooltip.
+- `autorange_after_scroll: true` — keeps axes scaled correctly when switching between time ranges.
+- `rangeselector` buttons — add 1 Day / 7 Days / 14 Days quick-select buttons above the chart.
 
 ## Services
 
