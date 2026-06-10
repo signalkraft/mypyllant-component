@@ -783,16 +783,28 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             and target_temp_low != self.zone.desired_room_temperature_setpoint_heating
         ):
             # Heating temperature
-            if self.zone.heating.operation_mode_heating in (
-                ZoneOperatingMode.MANUAL,
-                ZoneOperatingModeVRC700.DAY,
-            ):
+            if self.zone.heating.operation_mode_heating == ZoneOperatingMode.MANUAL:
                 _LOGGER.debug(
                     "Setting heating manual temperature on %s to %s",
                     self.zone.name,
-                    target_temp_high,
+                    target_temp_low,
                 )
                 await self.set_manual_mode_setpoint(temperature=target_temp_low)
+            elif (
+                self.zone.heating.operation_mode_heating == ZoneOperatingModeVRC700.DAY
+            ):
+                _LOGGER.debug(
+                    "Setting VRC700 comfort room temperature on %s to %s",
+                    self.zone.name,
+                    target_temp_low,
+                )
+                await self.coordinator.api.aiohttp_session.patch(
+                    f"{await self.coordinator.api.get_system_api_base(self.zone.system_id)}"
+                    f"/zone/{self.zone.index}/heating/comfort-room-temperature",
+                    json={"comfortRoomTemperature": target_temp_low},
+                    headers=self.coordinator.api.get_authorized_headers(),
+                )
+                await self.coordinator.async_request_refresh_delayed()
             else:
                 if self.time_program_overwrite and not self.preset_mode == PRESET_BOOST:
                     _LOGGER.debug(
