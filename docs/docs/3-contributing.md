@@ -100,6 +100,16 @@ password `test`.
 
 The integration should be configured and show entities on the default dashboard.
 
+### Updating Documentation
+
+In the component repository, run:
+
+```shell
+docker build -t mkdocs -f docs/Dockerfile .
+docker run -v $(pwd)/docs:/docs -ti mkdocs build
+```
+
+
 ![Default Dashboard Screenshot](assets/default-dashboard.png)
 
 ## Contributing to the underlying myPyllant library

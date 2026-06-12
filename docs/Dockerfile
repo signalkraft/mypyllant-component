@@ -8,5 +8,7 @@ RUN pip install --no-cache-dir \
 
 WORKDIR /docs
 
+ENV NO_MKDOCS_2_WARNING=1
+
 COPY .git .
 COPY docs/ .
