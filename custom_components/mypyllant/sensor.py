@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Mapping
-from datetime import timedelta
 from typing import Any
 
 from homeassistant.components.recorder import get_instance
@@ -11,7 +10,7 @@ from homeassistant.components.recorder.statistics import (
     StatisticMeanType,
     StatisticMetaData,
     async_add_external_statistics,
-    statistics_during_period,
+    get_last_statistics,
 )
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -845,15 +844,7 @@ class DataSensor(CoordinatorEntity, SensorEntity):
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
         if self.coordinator.data:
-            try:
-                await self._write_hourly_statistics()
-            except Exception:  # noqa: BLE001
-                _LOGGER.warning(
-                    "Failed to write initial hourly statistics for %s; entity still "
-                    "loads, statistics retry on next coordinator update",
-                    self.unique_id,
-                    exc_info=True,
-                )
+            await self._safe_write_hourly_statistics()
 
     @property
     def name(self):
@@ -939,7 +930,17 @@ class DataSensor(CoordinatorEntity, SensorEntity):
             self.last_reset,
             self.device_data.data if self.device_data is not None else None,
         )
-        self.hass.async_create_task(self._write_hourly_statistics())
+        self.hass.async_create_task(self._safe_write_hourly_statistics())
+
+    async def _safe_write_hourly_statistics(self) -> None:
+        try:
+            await self._write_hourly_statistics()
+        except Exception:  # noqa: BLE001
+            _LOGGER.warning(
+                "Failed to write hourly statistics for %s; will retry on next update",
+                self.unique_id,
+                exc_info=True,
+            )
 
     async def _write_hourly_statistics(self) -> None:
         if (
@@ -969,19 +970,19 @@ class DataSensor(CoordinatorEntity, SensorEntity):
         # Carry forward the previous running total so statistics are always
         # monotonically increasing across day boundaries.  Without this, sum
         # resets to 0 each day and HA computes sum(T) - sum(T-1) = -3804 Wh at
-        # the BST midnight boundary.  Mirrors octopus_energy's async_get_last_sum.
+        # the BST midnight boundary.  Uses get_last_statistics (1 row, no time
+        # window) so the baseline is always found regardless of how long the
+        # integration has been inactive.
         last_stats = await get_instance(self.hass).async_add_executor_job(
-            statistics_during_period,
+            get_last_statistics,
             self.hass,
-            day_start - timedelta(days=7),
-            day_start,
-            {statistic_id},
-            "hour",
-            None,
+            1,
+            statistic_id,
+            False,
             {"sum"},
         )
         baseline_sum = (
-            last_stats[statistic_id][-1]["sum"]
+            last_stats[statistic_id][-1]["sum"] or 0.0
             if statistic_id in last_stats and last_stats[statistic_id]
             else 0.0
         )
