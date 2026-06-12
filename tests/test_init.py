@@ -8,6 +8,7 @@ from homeassistant.config_entries import SOURCE_USER
 from homeassistant.core import HomeAssistant
 
 from myPyllant.api import MyPyllantAPI
+from myPyllant.http_client import AuthenticationFailed
 from myPyllant.tests.generate_test_data import DATA_DIR
 from myPyllant.tests.utils import load_test_data
 
@@ -48,10 +49,14 @@ async def test_user_flow_minimum_fields(hass: HomeAssistant):
     assert result["type"] == data_entry_flow.FlowResultType.FORM
     assert result["step_id"] == "user"
 
-    result = await hass.config_entries.flow.async_configure(
-        result["flow_id"],
-        user_input=test_user_input,
-    )
+    with mock.patch(
+        "custom_components.mypyllant.config_flow.validate_input",
+        side_effect=AuthenticationFailed,
+    ):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            user_input=test_user_input,
+        )
 
     assert result["type"] == data_entry_flow.FlowResultType.FORM
 

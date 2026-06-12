@@ -41,7 +41,7 @@ from custom_components.mypyllant.const import DOMAIN
 from tests.utils import get_config_entry
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
+@pytest.mark.parametrize("test_data", list_test_data(only_with_systems=True))
 async def test_create_system_sensors(
     hass,
     mypyllant_aioresponses,
@@ -66,7 +66,7 @@ async def test_create_system_sensors(
         await mocked_api.aiohttp_session.close()
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
+@pytest.mark.parametrize("test_data", list_test_data(only_with_systems=True))
 async def test_system_sensors(
     mypyllant_aioresponses, mocked_api: MyPyllantAPI, system_coordinator_mock, test_data
 ):
@@ -135,7 +135,7 @@ async def test_zone_sensors(
         await mocked_api.aiohttp_session.close()
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
+@pytest.mark.parametrize("test_data", list_test_data(only_with_systems=True))
 async def test_circuit_sensors(
     mypyllant_aioresponses, mocked_api: MyPyllantAPI, system_coordinator_mock, test_data
 ):
@@ -169,7 +169,9 @@ async def test_circuit_sensors(
         await mocked_api.aiohttp_session.close()
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
+@pytest.mark.parametrize(
+    "test_data", list_test_data(only_with_systems=True, only_with_dhw=True)
+)
 async def test_domestic_hot_water_sensor(
     hass,
     mypyllant_aioresponses,
@@ -181,11 +183,6 @@ async def test_domestic_hot_water_sensor(
         system_coordinator_mock.data = (
             await system_coordinator_mock._async_update_data()
         )
-        if not system_coordinator_mock.data[0].domestic_hot_water:
-            await mocked_api.aiohttp_session.close()
-            pytest.skip(
-                f"No DHW in system {system_coordinator_mock.data[0]}, skipping DHW sensors"
-            )
         assert isinstance(
             DomesticHotWaterOperationModeSensor(
                 0, 0, system_coordinator_mock
@@ -212,7 +209,7 @@ async def test_domestic_hot_water_sensor(
         await mocked_api.aiohttp_session.close()
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
+@pytest.mark.parametrize("test_data", list_test_data(only_with_systems=True))
 async def test_data_sensor(
     mypyllant_aioresponses,
     mocked_api: MyPyllantAPI,

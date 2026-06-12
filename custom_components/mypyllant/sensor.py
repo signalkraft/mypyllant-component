@@ -411,6 +411,7 @@ class SystemWaterPressureSensor(SystemSensor):
 
 class HomeEntity(CoordinatorEntity, SensorEntity):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    coordinator: SystemCoordinator
 
     def __init__(
         self,

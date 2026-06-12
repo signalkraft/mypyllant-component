@@ -24,7 +24,7 @@ from custom_components.mypyllant.ventilation_climate import VentilationClimate
 from tests.utils import get_config_entry
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
+@pytest.mark.parametrize("test_data", list_test_data(only_with_systems=True))
 async def test_async_setup_climate(
     hass,
     mypyllant_aioresponses,
@@ -54,7 +54,9 @@ async def test_async_setup_climate(
     await mocked_api.aiohttp_session.close()
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
+@pytest.mark.parametrize(
+    "test_data", list_test_data(only_with_systems=True, only_with_active_zones=True)
+)
 async def test_zone_climate(
     mypyllant_aioresponses,
     mocked_api: MyPyllantAPI,
@@ -65,11 +67,6 @@ async def test_zone_climate(
         system_coordinator_mock.data = (
             await system_coordinator_mock._async_update_data()
         )
-        if not system_coordinator_mock.data[0].zones:
-            await mocked_api.aiohttp_session.close()
-            pytest.skip(
-                f"No active zones in {system_coordinator_mock.data[0]}, skipping zone climate test"
-            )
         climate = ZoneClimate(
             0,
             0,

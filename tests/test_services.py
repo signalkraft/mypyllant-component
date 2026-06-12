@@ -39,7 +39,7 @@ def setup_hass_for_service_test(hass):
     return hass
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
+@pytest.mark.parametrize("test_data", list_test_data(only_with_systems=True))
 async def test_service_generate_test_data(
     hass,
     mypyllant_aioresponses,
@@ -68,7 +68,7 @@ async def test_service_generate_test_data(
     await mocked_api.aiohttp_session.close()
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
+@pytest.mark.parametrize("test_data", list_test_data(only_with_systems=True))
 async def test_service_export(
     hass,
     mypyllant_aioresponses,

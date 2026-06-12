@@ -22,7 +22,7 @@ from custom_components.mypyllant.calendar import (
 from tests.utils import get_config_entry
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
+@pytest.mark.parametrize("test_data", list_test_data(only_with_systems=True))
 async def test_async_setup_calendar(
     hass,
     mypyllant_aioresponses,
@@ -48,7 +48,9 @@ async def test_async_setup_calendar(
     await mocked_api.aiohttp_session.close()
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
+@pytest.mark.parametrize(
+    "test_data", list_test_data(only_with_systems=True, only_with_active_zones=True)
+)
 async def test_zone_heating_calendar(
     hass,
     mypyllant_aioresponses,
@@ -60,11 +62,6 @@ async def test_zone_heating_calendar(
         system_coordinator_mock.data = (
             await system_coordinator_mock._async_update_data()
         )
-        if not system_coordinator_mock.data[0].zones:
-            await mocked_api.aiohttp_session.close()
-            pytest.skip(
-                f"No active zones in {system_coordinator_mock.data[0]}, skipping calendar test"
-            )
         calendar = ZoneHeatingCalendar(0, 0, system_coordinator_mock)
         if not calendar.time_program.has_time_program:
             await mocked_api.aiohttp_session.close()
@@ -82,7 +79,9 @@ async def test_zone_heating_calendar(
     await mocked_api.aiohttp_session.close()
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
+@pytest.mark.parametrize(
+    "test_data", list_test_data(only_with_systems=True, only_with_dhw=True)
+)
 async def test_dhw_calendar(
     hass,
     mypyllant_aioresponses,
@@ -94,11 +93,6 @@ async def test_dhw_calendar(
         system_coordinator_mock.data = (
             await system_coordinator_mock._async_update_data()
         )
-        if not system_coordinator_mock.data[0].domestic_hot_water:
-            await mocked_api.aiohttp_session.close()
-            pytest.skip(
-                f"No DHW in system {system_coordinator_mock.data[0]}, skipping calendar test"
-            )
         if (
             not system_coordinator_mock.data[0]
             .domestic_hot_water[0]
