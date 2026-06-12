@@ -17,7 +17,9 @@ from custom_components.mypyllant.water_heater import (
 from tests.utils import get_config_entry
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
+@pytest.mark.parametrize(
+    "test_data", list_test_data(only_with_systems=True, only_with_dhw=True)
+)
 async def test_async_setup_water_heater(
     hass,
     mypyllant_aioresponses,
@@ -33,11 +35,6 @@ async def test_async_setup_water_heater(
         system_coordinator_mock.data = (
             await system_coordinator_mock._async_update_data()
         )
-        if not system_coordinator_mock.data[0].domestic_hot_water:
-            await mocked_api.aiohttp_session.close()
-            pytest.skip(
-                f"No DHW in system {system_coordinator_mock.data[0]}, skipping water heater tests"
-            )
         hass.data[DOMAIN] = {
             config_entry.entry_id: {"system_coordinator": system_coordinator_mock}
         }
@@ -53,7 +50,9 @@ async def test_async_setup_water_heater(
     await mocked_api.aiohttp_session.close()
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
+@pytest.mark.parametrize(
+    "test_data", list_test_data(only_with_systems=True, only_with_dhw=True)
+)
 async def test_water_heater(
     mypyllant_aioresponses, mocked_api: MyPyllantAPI, system_coordinator_mock, test_data
 ):
@@ -62,11 +61,6 @@ async def test_water_heater(
             await system_coordinator_mock._async_update_data()
         )
 
-        if not system_coordinator_mock.data[0].domestic_hot_water:
-            await mocked_api.aiohttp_session.close()
-            pytest.skip(
-                f"No DHW in system {system_coordinator_mock.data[0]}, skipping water heater tests"
-            )
         dhw = DomesticHotWaterEntity(0, 0, system_coordinator_mock, {})
         assert isinstance(dhw.device_info, dict)
         assert isinstance(dhw.min_temp, (int, float, complex))

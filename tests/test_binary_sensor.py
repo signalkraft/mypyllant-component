@@ -23,7 +23,7 @@ from custom_components.mypyllant.const import DOMAIN
 from tests.utils import get_config_entry
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
+@pytest.mark.parametrize("test_data", list_test_data(only_with_systems=True))
 async def test_async_setup_binary_sensors(
     hass,
     mypyllant_aioresponses,
@@ -50,7 +50,7 @@ async def test_async_setup_binary_sensors(
         await mocked_api.aiohttp_session.close()
 
 
-@pytest.mark.parametrize("test_data", list_test_data())
+@pytest.mark.parametrize("test_data", list_test_data(only_with_systems=True))
 async def test_system_binary_sensors(
     mypyllant_aioresponses, mocked_api: MyPyllantAPI, system_coordinator_mock, test_data
 ):
