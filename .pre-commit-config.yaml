@@ -32,13 +32,12 @@ repos:
         hooks:
             -   id: mypy
                 name: mypy
-                entry: uv run --no-sync mypy
+                entry: bash -c 'exec uv run --no-sync mypy ${GITHUB_ACTIONS:+--no-sqlite-cache} "$@"' --
                 args:
                     - --pretty
                     - --show-error-codes
                     - --show-error-context
                     - --show-traceback
-                    - --no-sqlite-cache
                 language: system
                 pass_filenames: true
                 files: ^(tests|custom_components)/.+\.py$
