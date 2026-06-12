@@ -76,6 +76,8 @@ async def async_setup_entry(
 
 
 class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):
+    coordinator: SystemCoordinator
+
     def __init__(
         self,
         system_index: int,

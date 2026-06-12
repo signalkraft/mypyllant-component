@@ -346,7 +346,7 @@ class DailyDataCoordinator(MyPyllantCoordinator):
         entity_id = entity_registry.async_get_entity_id("sensor", DOMAIN, unique_id)
         if entity_id:
             entity_entry = entity_registry.async_get(entity_id)
-            return entity_entry and entity_entry.disabled
+            return entity_entry is not None and bool(entity_entry.disabled)
         return False
 
     async def _async_update_data(self) -> dict[str, SystemWithDeviceData]:

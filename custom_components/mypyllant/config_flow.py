@@ -6,7 +6,8 @@ from typing import Any
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.data_entry_flow import FlowResult, AbortFlow
+from homeassistant.config_entries import ConfigFlowResult
+from homeassistant.data_entry_flow import AbortFlow
 from homeassistant.helpers import selector
 from homeassistant.helpers.config_validation import positive_int
 from myPyllant.api import (
@@ -188,7 +189,7 @@ async def validate_input(hass: HomeAssistant, data: dict) -> str:
 class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Manage the options."""
         if user_input is not None:
             return self.async_create_entry(data=user_input)
@@ -274,6 +275,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignore
             config_entry = self.hass.config_entries.async_get_entry(
                 self.context["entry_id"]
             )
+            if config_entry is None:
+                return self.async_abort(reason="unknown_entry")
             user_input = dict(config_entry.data)
 
         if "password" in user_input:
