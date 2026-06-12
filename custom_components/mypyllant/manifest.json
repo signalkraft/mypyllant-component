@@ -1,6 +1,9 @@
 {
   "domain": "mypyllant",
   "name": "myVAILLANT",
+  "after_dependencies": [
+    "recorder"
+  ],
   "codeowners": [
     "@signalkraft"
   ],
@@ -15,6 +18,5 @@
   "requirements": [
     "myPyllant==0.9.10"
   ],
-  "after_dependencies": ["recorder"],
   "version": "v0.9.13"
 }
