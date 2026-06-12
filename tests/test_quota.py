@@ -74,6 +74,73 @@ async def test_quota_time_extraction(
     assert extract_quota_duration(quota_exception) == 30 * 60 + 2
 
 
+async def test_quota_duration_from_retry_after_header():
+    """Retry-After header should be preferred over parsing the body text.
+
+    See https://github.com/signalkraft/mypyllant-component/issues/366
+    """
+    exc = ClientResponseError(
+        request_info=RequestInfo(
+            url="https://api.vaillant-group.com/service-connected-control/end-user-app-api/v1/homes",  # type: ignore
+            method="GET",
+            headers=None,  # type: ignore
+        ),
+        history=None,  # type: ignore
+        status=403,
+        message="Quota Exceeded",
+        headers={"Retry-After": "1800"},  # type: ignore
+    )
+    assert extract_quota_duration(exc) == 1800
+
+
+async def test_quota_duration_retry_after_takes_precedence_over_body():
+    """When both Retry-After header and body text are present, header wins."""
+    exc = ClientResponseError(
+        request_info=RequestInfo(
+            url="https://api.vaillant-group.com/service-connected-control/end-user-app-api/v1/homes",  # type: ignore
+            method="GET",
+            headers=None,  # type: ignore
+        ),
+        history=None,  # type: ignore
+        status=403,
+        message='{ "statusCode": 403, "message": "Out of call volume quota. Quota will be replenished in 00:30:02." }',
+        headers={"Retry-After": "900"},  # type: ignore
+    )
+    # Header value (900) should win over body text (1802)
+    assert extract_quota_duration(exc) == 900
+
+
+async def test_quota_duration_falls_back_to_body_without_header():
+    """Without Retry-After header, body text parsing is still used."""
+    exc = ClientResponseError(
+        request_info=RequestInfo(
+            url="https://api.vaillant-group.com/service-connected-control/end-user-app-api/v1/homes",  # type: ignore
+            method="GET",
+            headers=None,  # type: ignore
+        ),
+        history=None,  # type: ignore
+        status=403,
+        message='{ "statusCode": 403, "message": "Out of call volume quota. Quota will be replenished in 01:00:00." }',
+    )
+    assert extract_quota_duration(exc) == 3600
+
+
+async def test_quota_duration_invalid_retry_after_falls_back_to_body():
+    """Non-integer Retry-After should fall back to body text parsing."""
+    exc = ClientResponseError(
+        request_info=RequestInfo(
+            url="https://api.vaillant-group.com/service-connected-control/end-user-app-api/v1/homes",  # type: ignore
+            method="GET",
+            headers=None,  # type: ignore
+        ),
+        history=None,  # type: ignore
+        status=403,
+        message='{ "statusCode": 403, "message": "Out of call volume quota. Quota will be replenished in 00:45:00." }',
+        headers={"Retry-After": "not-a-number"},  # type: ignore
+    )
+    assert extract_quota_duration(exc) == 45 * 60
+
+
 async def test_quota_end_time(
     mypyllant_aioresponses, mocked_api: MyPyllantAPI, system_coordinator_mock
 ):

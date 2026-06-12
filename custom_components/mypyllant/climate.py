@@ -768,8 +768,13 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             )
 
         if temperature:
-            # If only one temperature is passed in, set it on the active operating type
-            if self.zone.active_operating_type == ZoneOperatingType.HEATING:
+            # If only one temperature is passed in, set it on the active operating type.
+            # Fall back to heating when there is no cooling config or the desired setpoints
+            # are both None (None == None would otherwise incorrectly resolve to COOLING).
+            if (
+                self.zone.active_operating_type == ZoneOperatingType.HEATING
+                or not self.zone.cooling
+            ):
                 target_temp_low = temperature
             elif self.zone.cooling:
                 target_temp_high = temperature
@@ -781,7 +786,10 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
             and target_temp_low != self.zone.desired_room_temperature_setpoint_heating
         ):
             # Heating temperature
-            if self.zone.heating.operation_mode_heating == ZoneOperatingMode.MANUAL:
+            if self.zone.heating.operation_mode_heating in (
+                ZoneOperatingMode.MANUAL,
+                ZoneOperatingModeVRC700.DAY,
+            ):
                 _LOGGER.debug(
                     "Setting heating manual temperature on %s to %s",
                     self.zone.name,
@@ -837,6 +845,21 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                 await self.set_time_controlled_cooling_setpoint(
                     temperature=target_temp_high
                 )
+            elif (
+                self.zone.cooling.operation_mode_cooling == ZoneOperatingModeVRC700.DAY
+            ):
+                _LOGGER.debug(
+                    "Setting VRC700 cooling setpoint on %s to %s",
+                    self.zone.name,
+                    target_temp_high,
+                )
+                await self.coordinator.api.aiohttp_session.patch(
+                    f"{await self.coordinator.api.get_system_api_base(self.zone.system_id)}"
+                    f"/zone/{self.zone.index}/cooling/setpoint",
+                    json={"setpoint": target_temp_high},
+                    headers=self.coordinator.api.get_authorized_headers(),
+                )
+                await self.coordinator.async_request_refresh_delayed()
 
     @property
     def preset_modes(self) -> list[str]:
@@ -848,7 +871,14 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     @property
     def preset_mode(self) -> str:
         if self.zone.control_identifier.is_vrc700:
-            return self.preset_mode_map[self.zone.active_operation_mode]  # type: ignore
+            if (
+                self.zone.cooling
+                and self.zone.desired_room_temperature_setpoint_cooling is not None
+            ):
+                mode = self.zone.cooling.operation_mode_cooling
+            else:
+                mode = self.zone.heating.operation_mode_heating
+            return self.preset_mode_map.get(mode, PRESET_NONE)  # type: ignore
         else:
             if self.zone.is_eco_mode:
                 return PRESET_ECO
@@ -879,7 +909,17 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
                 raise ValueError(
                     f"Invalid preset mode, use one of {', '.join(set(self.preset_mode_map.values()))}"
                 )
-            await self.set_zone_operating_mode(requested_mode)
+            if (
+                self.zone.cooling
+                and self.zone.desired_room_temperature_setpoint_cooling is not None
+            ):
+                await self.set_zone_operating_mode(
+                    requested_mode, operating_type=ZoneOperatingType.COOLING
+                )
+            else:
+                await self.set_zone_operating_mode(
+                    requested_mode, operating_type=ZoneOperatingType.HEATING
+                )
         else:
             if preset_mode not in self.preset_mode_map:
                 raise ValueError(
