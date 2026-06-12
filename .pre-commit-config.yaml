@@ -38,6 +38,7 @@ repos:
                     - --show-error-codes
                     - --show-error-context
                     - --show-traceback
+                    - --no-sqlite-cache
                 language: system
                 pass_filenames: true
                 files: ^(tests|custom_components)/.+\.py$
