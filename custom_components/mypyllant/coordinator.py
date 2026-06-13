@@ -39,7 +39,7 @@ from custom_components.mypyllant.utils import (
     is_quota_exceeded_exception,
     extract_quota_duration,
 )
-from myPyllant.api import MyPyllantAPI
+from myPyllant.api import AmbisenseNoFacilityError, MyPyllantAPI
 from myPyllant.enums import DeviceDataBucketResolution
 from myPyllant.models import System, DeviceData, Home
 
@@ -322,6 +322,13 @@ class SystemCoordinator(MyPyllantCoordinator):
             # Clear quota state on successful fetch so future updates aren't blocked
             self._clear_quota_state()
             return data
+        except AmbisenseNoFacilityError as e:
+            _LOGGER.warning(
+                "Ambisense rooms not available for one or more systems, "
+                "consider disabling the Ambisense rooms option: %s",
+                e,
+            )
+            return []
         except ClientResponseError as e:
             self._set_quota_and_raise(e)
             raise UpdateFailed(str(e)) from e
