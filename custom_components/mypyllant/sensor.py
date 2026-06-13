@@ -157,6 +157,12 @@ async def create_system_sensors(
                     index, zone_index, system_coordinator
                 )
             )
+            if zone.cooling is not None:
+                sensors.append(
+                    lambda: ZoneCoolingOperatingModeSensor(
+                        index, zone_index, system_coordinator
+                    )
+                )
             if zone.heating_state is not None:
                 sensors.append(
                     lambda: ZoneHeatingStateSensor(
@@ -579,6 +585,25 @@ class ZoneHeatingOperatingModeSensor(ZoneCoordinatorEntity, SensorEntity):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_heating_operating_mode"
+
+
+class ZoneCoolingOperatingModeSensor(ZoneCoordinatorEntity, SensorEntity):
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    @property
+    def name(self):
+        return f"{self.name_prefix} Cooling Operating Mode"
+
+    @property
+    def native_value(self):
+        if self.zone.cooling is not None:
+            return self.zone.cooling.operation_mode_cooling.display_value
+        else:
+            return None
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_cooling_operating_mode"
 
 
 class ZoneHeatingStateSensor(ZoneCoordinatorEntity, SensorEntity):
