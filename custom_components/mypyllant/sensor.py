@@ -991,23 +991,34 @@ class DataSensor(CoordinatorEntity, SensorEntity):
             False,
             {"sum"},
         )
-        baseline_sum = (
-            last_stats[statistic_id][-1]["sum"] or 0.0
-            if statistic_id in last_stats and last_stats[statistic_id]
-            else 0.0
-        )
+        baseline_sum = 0.0
+        last_stat_start: float | None = None
+        if statistic_id in last_stats and last_stats[statistic_id]:
+            last_stat_entry = last_stats[statistic_id][-1]
+            baseline_sum = last_stat_entry["sum"] or 0.0
+            last_stat_start = last_stat_entry["start"]
 
         # The coordinator fetches a 2-day window (yesterday + today) so the previous
         # day's final hour is backfilled once it finalises after midnight. The buckets
         # therefore span day boundaries: sum stays monotonic (cumulative since baseline),
         # while state and last_reset reset to the start of each day, mirroring
         # octopus_energy's day-cumulative state.
+        #
+        # Only write buckets that come after the last recorded stat. Re-writing earlier
+        # buckets with a baseline anchored to the current running total inflates their
+        # sum values, creating a phantom spike at the window boundary on every mid-day
+        # coordinator run (e.g. after an HA restart).
         running_sum = baseline_sum
         running_state = 0.0
         current_day = None
         stats: list[StatisticData] = []
         for bucket in self.device_data.data:
             if bucket.value is None:
+                continue
+            if (
+                last_stat_start is not None
+                and bucket.start_date.timestamp() <= last_stat_start
+            ):
                 continue
             bucket_midnight = bucket.start_date.replace(
                 hour=0, minute=0, second=0, microsecond=0
