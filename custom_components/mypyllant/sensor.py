@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Mapping
+from datetime import timedelta
 from typing import Any
 
 from homeassistant.components.recorder import get_instance
@@ -10,7 +11,7 @@ from homeassistant.components.recorder.statistics import (
     StatisticMeanType,
     StatisticMetaData,
     async_add_external_statistics,
-    get_last_statistics,
+    statistics_during_period,
 )
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -977,48 +978,42 @@ class DataSensor(CoordinatorEntity, SensorEntity):
             day_start,
         )
 
-        # Carry forward the previous running total so statistics are always
-        # monotonically increasing across day boundaries.  Without this, sum
-        # resets to 0 each day and HA computes sum(T) - sum(T-1) = -3804 Wh at
-        # the BST midnight boundary.  Uses get_last_statistics (1 row, no time
-        # window) so the baseline is always found regardless of how long the
-        # integration has been inactive.
+        # Carry forward the running total from just before the data window so that
+        # statistics are always monotonically increasing across day boundaries and
+        # across HA restarts. Mirrors octopus_energy's async_get_last_sum pattern:
+        # query statistics_during_period with end=window_start so the baseline is
+        # always the last recorded stat BEFORE the current window, never a stat
+        # inside it. This means the window can be freely rewritten on every run
+        # (correcting late API updates) without creating a phantom spike at the
+        # window boundary.
+        window_start = self.device_data.data[0].start_date
         last_stats = await get_instance(self.hass).async_add_executor_job(
-            get_last_statistics,
+            statistics_during_period,
             self.hass,
-            1,
-            statistic_id,
-            False,
+            window_start - timedelta(days=7),
+            window_start,
+            {statistic_id},
+            "hour",
+            None,
             {"sum"},
         )
-        baseline_sum = 0.0
-        last_stat_start: float | None = None
-        if statistic_id in last_stats and last_stats[statistic_id]:
-            last_stat_entry = last_stats[statistic_id][-1]
-            baseline_sum = last_stat_entry["sum"] or 0.0
-            last_stat_start = last_stat_entry["start"]
+        baseline_sum = (
+            last_stats[statistic_id][-1]["sum"] or 0.0
+            if statistic_id in last_stats and last_stats[statistic_id]
+            else 0.0
+        )
 
         # The coordinator fetches a 2-day window (yesterday + today) so the previous
         # day's final hour is backfilled once it finalises after midnight. The buckets
         # therefore span day boundaries: sum stays monotonic (cumulative since baseline),
         # while state and last_reset reset to the start of each day, mirroring
         # octopus_energy's day-cumulative state.
-        #
-        # Only write buckets that come after the last recorded stat. Re-writing earlier
-        # buckets with a baseline anchored to the current running total inflates their
-        # sum values, creating a phantom spike at the window boundary on every mid-day
-        # coordinator run (e.g. after an HA restart).
         running_sum = baseline_sum
         running_state = 0.0
         current_day = None
         stats: list[StatisticData] = []
         for bucket in self.device_data.data:
             if bucket.value is None:
-                continue
-            if (
-                last_stat_start is not None
-                and bucket.start_date.timestamp() <= last_stat_start
-            ):
                 continue
             bucket_midnight = bucket.start_date.replace(
                 hour=0, minute=0, second=0, microsecond=0
