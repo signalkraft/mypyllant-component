@@ -2,13 +2,20 @@ from unittest import mock
 
 import pytest as pytest
 from homeassistant.components.climate import HVACMode, PRESET_NONE
-from homeassistant.components.climate.const import FAN_OFF, PRESET_BOOST
+from homeassistant.components.climate.const import (
+    FAN_AUTO,
+    FAN_LOW,
+    FAN_OFF,
+    FAN_ON,
+    PRESET_BOOST,
+)
 from homeassistant.const import ATTR_TEMPERATURE
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers.entity_registry import DATA_REGISTRY, EntityRegistry
 from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
 
 from myPyllant.api import MyPyllantAPI
+from myPyllant.enums import VentilationOperationModeVRC700
 from myPyllant.tests.generate_test_data import DATA_DIR
 from myPyllant.tests.utils import list_test_data, load_test_data
 
@@ -125,7 +132,21 @@ async def test_ventilation_climate(
         assert isinstance(ventilation.hvac_mode, HVACMode)
         assert isinstance(ventilation.fan_mode, str)
 
-        await ventilation.async_set_fan_mode(FAN_OFF)
+        if ventilation.ventilation.control_identifier.is_vrc700:
+            # VRC700 only accepts DAY / SET_BACK / AUTO on the operation-mode
+            # endpoint; OFF / NORMAL / REDUCED are rejected by the API, so they
+            # must neither be advertised nor sent.
+            assert ventilation.fan_modes == [FAN_ON, FAN_LOW, FAN_AUTO]
+            with mock.patch.object(
+                system_coordinator_mock.api, "set_ventilation_operation_mode"
+            ) as mock_set:
+                await ventilation.async_set_fan_mode(FAN_ON)
+                assert (
+                    mock_set.await_args.args[1] == VentilationOperationModeVRC700.DAY
+                )
+        else:
+            await ventilation.async_set_fan_mode(FAN_OFF)
+
         system_coordinator_mock._debounced_refresh.async_cancel()
     await mocked_api.aiohttp_session.close()
 
