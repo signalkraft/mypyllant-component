@@ -35,6 +35,18 @@ _FAN_STAGE_TYPE_OPTIONS = [
     for v in VentilationFanStageType
 ]
 
+# VRC700 ventilation only accepts DAY / SET_BACK / AUTO on the operation-mode
+# endpoint; OFF / NORMAL / REDUCED are rejected with HTTP 400
+# (MalformedRequestParameters / G003). The read-side ``fan_mode_map`` keeps the
+# full set so the displayed ``fan_mode`` stays correct whatever the device
+# reports, while writes must use this VRC700-specific mapping.
+# Verified against the myVAILLANT API on a recoVAIR VAR 260/4 (VRC700).
+VRC700_FAN_MODE_WRITE_MAP = {
+    FAN_ON: VentilationOperationModeVRC700.DAY,
+    FAN_LOW: VentilationOperationModeVRC700.SET_BACK,
+    FAN_AUTO: VentilationOperationModeVRC700.AUTO,
+}
+
 
 class VentilationClimate(CoordinatorEntity, ClimateEntity):
     """
@@ -137,6 +149,8 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def fan_modes(self) -> list[str]:
+        if self.ventilation.control_identifier.is_vrc700:
+            return list(VRC700_FAN_MODE_WRITE_MAP.keys())
         return [str(k) for k in self.fan_mode_map.values()]
 
     @ensure_token_refresh
@@ -153,7 +167,10 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
 
     @ensure_token_refresh
     async def async_set_fan_mode(self, fan_mode: str) -> None:
-        mode = [k for k, v in self.fan_mode_map.items() if v == fan_mode][0]
+        if self.ventilation.control_identifier.is_vrc700:
+            mode = VRC700_FAN_MODE_WRITE_MAP[fan_mode]
+        else:
+            mode = [k for k, v in self.fan_mode_map.items() if v == fan_mode][0]
         await self.coordinator.api.set_ventilation_operation_mode(
             self.ventilation,
             mode,
