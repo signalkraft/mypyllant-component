@@ -11,7 +11,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     { include-group = "lint" },
-    { include-group = "test" }
+    { include-group = "test" },
 ]
 
 test = [
@@ -59,6 +59,7 @@ asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 filterwarnings = [
     "ignore:Inheritance class CountingClientSession from ClientSession is discouraged:DeprecationWarning",
+    "ignore:'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16:DeprecationWarning",
 ]
 
 [tool.mypy]

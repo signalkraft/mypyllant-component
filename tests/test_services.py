@@ -2,7 +2,7 @@ import json
 from dataclasses import asdict
 
 import pytest
-from homeassistant.helpers.condition import CONDITIONS
+from homeassistant.helpers.condition import CONDITIONS, CONDITION_PLATFORM_SUBSCRIPTIONS
 from homeassistant.helpers.entity_registry import DATA_REGISTRY, EntityRegistry
 from homeassistant.helpers.trigger import TRIGGERS, TRIGGER_PLATFORM_SUBSCRIPTIONS
 from homeassistant.loader import (
@@ -34,6 +34,7 @@ def setup_hass_for_service_test(hass):
     hass.data[DATA_MISSING_PLATFORMS] = {}
     hass.data[TRIGGERS] = {}
     hass.data[TRIGGER_PLATFORM_SUBSCRIPTIONS] = {}
+    hass.data[CONDITION_PLATFORM_SUBSCRIPTIONS] = {}
     hass.data[CONDITIONS] = {}
     hass.data[DATA_REGISTRY] = EntityRegistry(hass)
     return hass
