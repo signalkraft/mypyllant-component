@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Mapping
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Any
 
 from homeassistant.components.recorder import get_instance
@@ -27,9 +27,10 @@ from homeassistant.const import (
     UnitOfTime,
     UnitOfPower,
 )
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.event import async_track_time_change
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from myPyllant.models import (
     Circuit,
@@ -870,6 +871,7 @@ class DataSensor(CoordinatorEntity, SensorEntity):
         self.de_index = de_index
         self._attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
         self._attr_device_class = SensorDeviceClass.ENERGY
+        self._unsub_midnight: CALLBACK_TYPE | None = None
         _LOGGER.debug(
             "Finishing init of %s = %s and unique id %s",
             self.name,
@@ -881,6 +883,17 @@ class DataSensor(CoordinatorEntity, SensorEntity):
         await super().async_added_to_hass()
         if self.coordinator.data:
             await self._safe_write_hourly_statistics()
+        self._unsub_midnight = async_track_time_change(
+            self.hass, self._handle_midnight, hour=0, minute=0, second=1
+        )
+
+    async def async_will_remove_from_hass(self) -> None:
+        if self._unsub_midnight:
+            self._unsub_midnight()
+
+    @callback
+    def _handle_midnight(self, now: datetime) -> None:
+        self.async_write_ha_state()
 
     @property
     def name(self):
@@ -924,6 +937,34 @@ class DataSensor(CoordinatorEntity, SensorEntity):
         return self.device_data.total_consumption_rounded
 
     @property
+    def today_total_consumption(self) -> float:
+        # The coordinator fetches a 2-day window (yesterday + today) so
+        # _write_hourly_statistics can backfill yesterday's last hour after
+        # midnight (see coordinator.py). device_data.total_consumption is the
+        # API's own aggregate for that whole 2-day range, so it can't be used
+        # here - it would never reset to 0 at midnight. Sum only today's own
+        # buckets instead, using the same bucket-midnight comparison
+        # _write_hourly_statistics already uses, so the two stay consistent.
+        #
+        # "Today" is anchored to the actual current time in the device's own
+        # timezone, not to the last fetched bucket's date: right after
+        # midnight the API can briefly lag behind and not yet have a bucket
+        # for the new day, so data[-1] would still be yesterday, causing this
+        # to sum yesterday's total again instead of resetting to 0.
+        if self.device_data is None or not self.device_data.data:
+            return 0.0
+        tzinfo = self.device_data.data[-1].start_date.tzinfo
+        today = datetime.now(tzinfo).replace(hour=0, minute=0, second=0, microsecond=0)
+        total = sum(
+            bucket.value
+            for bucket in self.device_data.data
+            if bucket.value is not None
+            and bucket.start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            == today
+        )
+        return round(total / 1000, 1) * 1000 if total else 0.0
+
+    @property
     def unique_id(self) -> str | None:
         if self.device is None:
             return None
@@ -952,7 +993,7 @@ class DataSensor(CoordinatorEntity, SensorEntity):
     @property
     def native_value(self):
         if self.device_data:
-            return self.device_data.total_consumption_rounded
+            return self.today_total_consumption
         else:
             return None
 
@@ -987,31 +1028,18 @@ class DataSensor(CoordinatorEntity, SensorEntity):
             return
         statistic_id = f"{DOMAIN}:{self.unique_id}".lower().replace("-", "_")
 
-        # Derive the day start from the API's data_from when available, otherwise from the
-        # first bucket's own timestamp floored to midnight. The myVAILLANT API does not
-        # always return `from`, and depending on it caused statistics to silently stop
-        # writing. Mirrors octopus_energy, which derives the period start from
-        # consumptions[0]["start"].replace(minute=0, second=0, microsecond=0).
-        day_start = self.device_data.data_from or self.device_data.data[
-            0
-        ].start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-        _LOGGER.debug(
-            "Writing hourly statistics for %s: %d buckets, data_from=%s, day_start=%s",
-            self.unique_id,
-            len(self.device_data.data),
-            self.device_data.data_from,
-            day_start,
-        )
-
-        # Carry forward the running total from just before the data window so that
-        # statistics are always monotonically increasing across day boundaries and
-        # across HA restarts. Mirrors octopus_energy's async_get_last_sum pattern:
-        # query statistics_during_period with end=window_start so the baseline is
-        # always the last recorded stat BEFORE the current window, never a stat
-        # inside it. This means the window can be freely rewritten on every run
-        # (correcting late API updates) without creating a phantom spike at the
-        # window boundary.
         window_start = self.device_data.data[0].start_date
+        window_end = self.device_data.data[-1].start_date + timedelta(hours=1)
+
+        # Baseline is the last-published sum strictly BEFORE this window, never the
+        # single most-recent stat ever recorded. get_last_statistics(1, ...) is
+        # unbounded - once any later window has been written, it returns a value
+        # that already includes this window's own buckets, so recomputing
+        # baseline + sum(this window's buckets) double-counts them and the sum
+        # grows on every single poll forever. Bounding the lookup to end at
+        # window_start keeps the baseline stable across repeated polls of the
+        # same window, so the existing-buckets dedup guard below can actually
+        # recognize unchanged buckets instead of rewriting everything every time.
         last_stats = await get_instance(self.hass).async_add_executor_job(
             statistics_during_period,
             self.hass,
@@ -1028,11 +1056,32 @@ class DataSensor(CoordinatorEntity, SensorEntity):
             else 0.0
         )
 
+        # Buckets already published for this window, keyed by start timestamp, so we
+        # only (re)write buckets that are new or whose value actually changed (a
+        # late API correction) - not every bucket on every run. Rewriting the whole
+        # window unconditionally re-anchors already-published, stable history to
+        # whatever baseline happens to be current, which breaks the daily reset.
+        existing_stats = await get_instance(self.hass).async_add_executor_job(
+            statistics_during_period,
+            self.hass,
+            window_start,
+            window_end,
+            {statistic_id},
+            "hour",
+            None,
+            {"sum"},
+        )
+        existing_sums = {
+            row["start"]: row["sum"]
+            for row in existing_stats.get(statistic_id, [])
+            if "start" in row
+        }
+
         # The coordinator fetches a 2-day window (yesterday + today) so the previous
-        # day's final hour is backfilled once it finalises after midnight. The buckets
-        # therefore span day boundaries: sum stays monotonic (cumulative since baseline),
-        # while state and last_reset reset to the start of each day, mirroring
-        # octopus_energy's day-cumulative state.
+        # day's final hour can still be backfilled once it finalises after midnight.
+        # sum stays monotonic (cumulative since baseline), while state and last_reset
+        # reset to the start of each day, mirroring octopus_energy's day-cumulative
+        # state.
         running_sum = baseline_sum
         running_state = 0.0
         current_day = None
@@ -1048,6 +1097,9 @@ class DataSensor(CoordinatorEntity, SensorEntity):
                 current_day = bucket_midnight
             running_sum += bucket.value
             running_state += bucket.value
+            existing_sum = existing_sums.get(bucket.start_date.timestamp())
+            if existing_sum is not None and existing_sum == running_sum:
+                continue
             stats.append(
                 StatisticData(
                     start=bucket.start_date,

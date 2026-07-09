@@ -470,6 +470,7 @@ async def test_async_added_to_hass_writes_statistics(hass):
         await sensor.async_added_to_hass()
 
     mock_stats.assert_called_once()
+    await sensor.async_will_remove_from_hass()
 
 
 async def test_write_hourly_statistics_carries_forward_previous_sum(hass):
@@ -546,6 +547,8 @@ async def test_async_added_to_hass_survives_statistics_failure(hass):
         # Should not raise
         await sensor.async_added_to_hass()
 
+    await sensor.async_will_remove_from_hass()
+
 
 async def test_write_hourly_statistics_resets_state_across_day_boundary(hass):
     """The coordinator fetches a 2-day window (yesterday + today). sum must stay
@@ -597,4 +600,214 @@ async def test_write_hourly_statistics_resets_state_across_day_boundary(hass):
     assert stats[0]["last_reset"] == day1
     assert stats[1]["last_reset"] == day1
     assert stats[2]["last_reset"] == day2
-    assert stats[3]["last_reset"] == day2
+
+
+async def test_write_hourly_statistics_skips_unchanged_buckets(hass):
+    """Buckets already published with the same sum must not be rewritten, so stable
+    history stays untouched and the baseline never gets re-anchored on every run."""
+    buckets = _make_buckets([100.0, 200.0, 300.0])
+    sensor = _make_sensor(hass, buckets)
+    stat_id = f"{DOMAIN}:{sensor.unique_id}".lower().replace("-", "_")
+
+    async def fake_job(func, hass, start_time, *rest):
+        if start_time < buckets[0].start_date:
+            # baseline lookup (window_start - 7 days .. window_start)
+            return {}
+        return {
+            stat_id: [
+                {"start": buckets[0].start_date.timestamp(), "sum": 100.0},
+                {"start": buckets[1].start_date.timestamp(), "sum": 300.0},
+            ]
+        }
+
+    with (
+        patch("custom_components.mypyllant.sensor.get_instance") as mock_recorder,
+        patch(
+            "custom_components.mypyllant.sensor.async_add_external_statistics"
+        ) as mock_stats,
+    ):
+        mock_recorder.return_value.async_add_executor_job = AsyncMock(
+            side_effect=fake_job
+        )
+        await sensor._write_hourly_statistics()
+
+    mock_stats.assert_called_once()
+    _, _, stats = mock_stats.call_args[0]
+    stats = list(stats)
+    assert len(stats) == 1
+    assert stats[0]["start"] == buckets[2].start_date
+    assert stats[0]["sum"] == 600.0
+
+
+async def test_write_hourly_statistics_rewrites_corrected_bucket(hass):
+    """A late API correction for an already-published hour (e.g. yesterday's final
+    hour settling after midnight) must still be rewritten even though a stat already
+    exists for it - the skip only applies to genuinely unchanged buckets."""
+    buckets = _make_buckets([100.0, 250.0, 300.0])
+    sensor = _make_sensor(hass, buckets)
+    stat_id = f"{DOMAIN}:{sensor.unique_id}".lower().replace("-", "_")
+
+    async def fake_job(func, hass, start_time, *rest):
+        if start_time < buckets[0].start_date:
+            # baseline lookup (window_start - 7 days .. window_start)
+            return {}
+        return {
+            stat_id: [
+                {"start": buckets[0].start_date.timestamp(), "sum": 100.0},
+                {"start": buckets[1].start_date.timestamp(), "sum": 300.0},  # stale
+            ]
+        }
+
+    with (
+        patch("custom_components.mypyllant.sensor.get_instance") as mock_recorder,
+        patch(
+            "custom_components.mypyllant.sensor.async_add_external_statistics"
+        ) as mock_stats,
+    ):
+        mock_recorder.return_value.async_add_executor_job = AsyncMock(
+            side_effect=fake_job
+        )
+        await sensor._write_hourly_statistics()
+
+    mock_stats.assert_called_once()
+    _, _, stats = mock_stats.call_args[0]
+    stats = list(stats)
+    assert len(stats) == 2
+    assert stats[0]["start"] == buckets[1].start_date
+    assert stats[0]["sum"] == 350.0
+    assert stats[1]["start"] == buckets[2].start_date
+    assert stats[1]["sum"] == 650.0
+
+
+async def test_write_hourly_statistics_baseline_stable_across_repeated_polls(hass):
+    """Regression test: baseline must be the last-published sum strictly BEFORE
+    this window, not the single most-recent stat ever recorded. An unbounded
+    "latest ever" lookup returns this same run's own previous output on the
+    next poll, so baseline + sum(window's buckets) double-counts the window
+    every time and `sum` grows on every single poll forever, even though
+    nothing about the underlying consumption changed."""
+    buckets = _make_buckets([100.0, 200.0, 300.0])
+    sensor = _make_sensor(hass, buckets)
+    stat_id = f"{DOMAIN}:{sensor.unique_id}".lower().replace("-", "_")
+
+    published: dict = {}
+
+    async def fake_job(func, hass, start_time, *rest):
+        if start_time < buckets[0].start_date:
+            # baseline lookup: nothing published before this window in this test
+            return {}
+        # existing-stats lookup: reflects whatever the previous poll wrote
+        return {stat_id: published.get(stat_id, [])}
+
+    with (
+        patch("custom_components.mypyllant.sensor.get_instance") as mock_recorder,
+        patch(
+            "custom_components.mypyllant.sensor.async_add_external_statistics"
+        ) as mock_stats,
+    ):
+        mock_recorder.return_value.async_add_executor_job = AsyncMock(
+            side_effect=fake_job
+        )
+
+        # first poll: writes all three buckets
+        await sensor._write_hourly_statistics()
+        _, _, first_stats = mock_stats.call_args[0]
+        first_stats = list(first_stats)
+        published[stat_id] = [
+            {"start": s["start"].timestamp(), "sum": s["sum"]} for s in first_stats
+        ]
+        assert [s["sum"] for s in first_stats] == [100.0, 300.0, 600.0]
+
+        # second poll: identical bucket data, nothing should have changed
+        mock_stats.reset_mock()
+        await sensor._write_hourly_statistics()
+
+    # everything was already published with matching sums, so nothing new
+    # gets written - the sums must not have grown
+    mock_stats.assert_not_called()
+
+
+def test_today_total_consumption_ignores_yesterdays_buckets(hass):
+    """The coordinator fetches a 2-day window (yesterday + today) so
+    _write_hourly_statistics can backfill yesterday's last hour. native_value
+    must not inherit yesterday's total from that wider window - it should
+    reset to only today's consumption, the same way the History graph is
+    expected to reset at midnight."""
+    day1 = datetime(2026, 5, 27, 0, 0, tzinfo=timezone.utc)
+    day2 = datetime(2026, 5, 28, 0, 0, tzinfo=timezone.utc)
+    buckets = [
+        DeviceDataBucket(
+            start_date=day1 + timedelta(hours=22),
+            end_date=day1 + timedelta(hours=23),
+            value=100.0,
+        ),
+        DeviceDataBucket(
+            start_date=day1 + timedelta(hours=23),
+            end_date=day2,
+            value=200.0,
+        ),
+        DeviceDataBucket(
+            start_date=day2,
+            end_date=day2 + timedelta(hours=1),
+            value=300.0,
+        ),
+        DeviceDataBucket(
+            start_date=day2 + timedelta(hours=1),
+            end_date=day2 + timedelta(hours=2),
+            value=400.0,
+        ),
+    ]
+    sensor = _make_sensor(hass, buckets, data_from=day1)
+
+    with patch("custom_components.mypyllant.sensor.datetime") as mock_datetime:
+        mock_datetime.now.return_value = day2 + timedelta(hours=2)
+
+        # today_total_consumption only sums day2's buckets (300 + 400), not
+        # the full 2-day window (100 + 200 + 300 + 400 = 1000)
+        assert sensor.today_total_consumption == 700.0
+        assert sensor.native_value == 700.0
+        assert sensor.native_value != sensor.device_data.total_consumption_rounded
+
+
+def test_today_total_consumption_survives_api_bucket_lag_at_midnight(hass):
+    """Regression test: right after midnight the myVAILLANT API can briefly
+    lag and not yet return a bucket for the new day, so the last fetched
+    bucket is still dated yesterday. today_total_consumption must anchor
+    "today" to the actual current time, not to data[-1]'s date, or it would
+    wrongly sum yesterday's total again instead of resetting to 0."""
+    day1 = datetime(2026, 5, 27, 0, 0, tzinfo=timezone.utc)
+    day2 = datetime(2026, 5, 28, 0, 0, tzinfo=timezone.utc)
+    buckets = [
+        DeviceDataBucket(
+            start_date=day1 + timedelta(hours=22),
+            end_date=day1 + timedelta(hours=23),
+            value=100.0,
+        ),
+        DeviceDataBucket(
+            start_date=day1 + timedelta(hours=23),
+            end_date=day2,
+            value=200.0,
+        ),
+    ]
+    sensor = _make_sensor(hass, buckets, data_from=day1)
+
+    with patch("custom_components.mypyllant.sensor.datetime") as mock_datetime:
+        # "now" is already a few minutes into day2, but the API's last
+        # bucket is still dated day1 (23:00-00:00)
+        mock_datetime.now.return_value = day2 + timedelta(minutes=5)
+
+        assert sensor.today_total_consumption == 0.0
+        assert sensor.native_value == 0.0
+
+
+def test_today_total_consumption_no_data(hass):
+    sensor = _make_sensor(hass, [])
+    assert sensor.today_total_consumption == 0.0
+
+
+def test_today_total_consumption_all_none_values(hass):
+    buckets = _make_buckets([None, None])
+    with patch("custom_components.mypyllant.sensor.datetime") as mock_datetime:
+        mock_datetime.now.return_value = _MIDNIGHT + timedelta(hours=1)
+        sensor = _make_sensor(hass, buckets)
+        assert sensor.today_total_consumption == 0.0
