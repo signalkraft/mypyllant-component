@@ -13,12 +13,14 @@ from myPyllant.tests.generate_test_data import DATA_DIR
 from myPyllant.tests.utils import list_test_data, load_test_data
 
 from custom_components.mypyllant.calendar import (
+    BaseCalendarEntity,
     ZoneHeatingCalendar,
     DomesticHotWaterCalendar,
     async_setup_entry,
     DomesticHotWaterCirculationCalendar,
     AmbisenseCalendar,
 )
+from homeassistant.exceptions import HomeAssistantError
 from tests.utils import get_config_entry
 
 
@@ -310,3 +312,10 @@ async def test_zone_heating_current_event_selection(
             assert event.end.time() == time(0, 0, 0)
 
     await mocked_api.aiohttp_session.close()
+
+
+def test_get_setpoint_from_summary():
+    assert BaseCalendarEntity.get_setpoint_from_summary("Heating to 21.0°C") == 21.0
+    assert BaseCalendarEntity.get_setpoint_from_summary("Heating to 20,5°C") == 20.5
+    with pytest.raises(HomeAssistantError):
+        BaseCalendarEntity.get_setpoint_from_summary("no temperature here")

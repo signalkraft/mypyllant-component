@@ -127,7 +127,7 @@ class BaseCalendarEntity(CalendarEntity, ABC):
         match = re.search(r"([0-9.,]+)°?C?", summary)
         try:
             return float(match.group(1).replace(",", "."))  # type: ignore
-        except ValueError, AttributeError:
+        except (ValueError, AttributeError):
             raise HomeAssistantError("Invalid setpoint, use format '21.5°C' in Summary")
 
     def _check_overlap(self):
