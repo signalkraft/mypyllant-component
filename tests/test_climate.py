@@ -141,9 +141,8 @@ async def test_ventilation_climate(
                 system_coordinator_mock.api, "set_ventilation_operation_mode"
             ) as mock_set:
                 await ventilation.async_set_fan_mode(FAN_ON)
-                assert (
-                    mock_set.await_args.args[1] == VentilationOperationModeVRC700.DAY
-                )
+                assert mock_set.await_args is not None
+                assert mock_set.await_args.args[1] == VentilationOperationModeVRC700.DAY
         else:
             await ventilation.async_set_fan_mode(FAN_OFF)
 
