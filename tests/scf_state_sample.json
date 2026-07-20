@@ -1,0 +1,94 @@
+{
+  "data": {
+    "systemParameters": {
+      "systemFlowTemperature": {
+        "value": 51.13,
+        "metadata": {"writable": false, "enabled": true, "type": "FLOAT"}
+      },
+      "systemWaterPressure": {
+        "value": 1.77,
+        "metadata": {"writable": false, "enabled": true, "type": "FLOAT"}
+      },
+      "isFrostProtectionActive": {
+        "value": false,
+        "metadata": {"writable": false, "enabled": true, "type": "BOOL"}
+      },
+      "currentRoomTemperature": {
+        "value": null,
+        "metadata": {"writable": false, "enabled": true, "type": "FLOAT"}
+      }
+    },
+    "zoneSettings": {
+      "1": {
+        "general": {
+          "operationMode": {
+            "value": "MANUAL",
+            "metadata": {
+              "writable": true, "enabled": true, "type": "ENUM",
+              "allowedValues": ["MANUAL", "OFF", "TIME_CONTROLLED"]
+            }
+          }
+        },
+        "heating": {
+          "manualModeTemperatureSetpoint": {
+            "value": 21.0,
+            "metadata": {
+              "writable": true, "enabled": true, "type": "FLOAT",
+              "minimum": 5, "maximum": 30, "stepSize": 0.5
+            }
+          },
+          "timePeriods": {
+            "value": {
+              "monday": [{"startTime": 330, "endTime": 360, "setpoint": 21.0}],
+              "tuesday": [{"startTime": 330, "endTime": 360, "setpoint": 21.0}]
+            },
+            "metadata": {"writable": true, "enabled": true, "type": "TIME_PERIODS"}
+          }
+        }
+      }
+    },
+    "circuitSettings": {
+      "1": {
+        "configuration": {
+          "heatingCurve": {
+            "value": 0.3,
+            "metadata": {
+              "writable": true, "enabled": true, "type": "FLOAT",
+              "minimum": 0.1, "maximum": 2.0, "stepSize": 0.05
+            }
+          },
+          "minFlowTemperatureSetpoint": {
+            "value": 30.0,
+            "metadata": {"writable": true, "enabled": true, "type": "FLOAT"}
+          }
+        }
+      }
+    },
+    "domesticHotWaterSettings": {
+      "1": {
+        "configuration": {
+          "cylinderTemperatureSetpoint": {
+            "value": 51.0,
+            "metadata": {
+              "writable": true, "enabled": true, "type": "FLOAT",
+              "minimum": 35, "maximum": 70, "stepSize": 1
+            }
+          },
+          "operationMode": {
+            "value": "TIME_CONTROLLED",
+            "metadata": {
+              "writable": true, "enabled": true, "type": "ENUM",
+              "allowedValues": ["MANUAL", "OFF", "TIME_CONTROLLED"]
+            }
+          },
+          "circulationPumpTimePeriods": {
+            "value": {
+              "monday": [{"startTime": 300, "endTime": 330, "setpoint": null}]
+            },
+            "metadata": {"writable": true, "enabled": true, "type": "TIME_PERIODS"}
+          }
+        }
+      }
+    }
+  }
+}

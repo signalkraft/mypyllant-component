@@ -412,3 +412,33 @@ report:
         number:
           step: 1
           mode: box
+
+scf_set_schedule:
+  name: Set scf Schedule (iQconnect)
+  description: >
+    Writes a complete weekly time program to an scf/iQconnect schedule sensor
+    (zone heating times, DHW charging times, or DHW circulation pump). Target the
+    schedule sensor; the endpoint, system and index are derived from the entity.
+  target:
+    entity:
+      integration: mypyllant
+      domain: sensor
+  fields:
+    schedule:
+      name: Schedule
+      description: >
+        Dict of weekdays (monday..sunday) with a list of slots. Times as "HH:MM" or as
+        minutes since midnight. "setpoint" (5-30 °C) is required only for zone heating
+        times and ignored for the DHW/circulation schedules.
+      required: true
+      example: >
+        monday:
+          - start_time: "05:30"
+            end_time: "06:00"
+          - start_time: 1050
+            end_time: 1080
+        saturday:
+          - start_time: "08:00"
+            end_time: "08:30"
+      selector:
+        object:
