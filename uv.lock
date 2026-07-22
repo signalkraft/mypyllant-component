@@ -1460,20 +1460,20 @@ wheels = [
 
 [[package]]
 name = "mypyllant"
-version = "0.9.17"
+version = "0.9.18"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6a/09/70f2ab6d435af35f2d046769dcfd592e93dea45dcb473e3b66f982dec2f5/mypyllant-0.9.17.tar.gz", hash = "sha256:8b33867a96c81ec74bfa30260811ba86609ec461bde2c077cf773456857fe3ca", size = 271699, upload-time = "2026-07-19T12:58:23.898Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/82/04/48d2f0c2a7dc2683e55ae5f017b78e4265c8d1c41cfe64084c4ce88aa4e3/mypyllant-0.9.18.tar.gz", hash = "sha256:278effee74c06b4aa1c576ef7bbf77f1f2ae0f59b5cd2dad5f36aafd61e04741", size = 273102, upload-time = "2026-07-22T17:27:50.282Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bc/d1/2df62ee7be2252a19d1848598fa655c7c781acd76e255b34d5119e84ce01/mypyllant-0.9.17-py3-none-any.whl", hash = "sha256:1a5465ef5d9479f539b3f6bee04f5ded4eb82e49e2906d936d9d0b314616940f", size = 174166, upload-time = "2026-07-19T12:58:22.371Z" },
+    { url = "https://files.pythonhosted.org/packages/83/50/276dea78e50d9cbe4d8659e9a72a772084f4cec86c64bc811cd72e42d942/mypyllant-0.9.18-py3-none-any.whl", hash = "sha256:0b836d16fec37cb05654fff12f12c093fd9f038bdeb1dc816a304a8800beb85b", size = 175543, upload-time = "2026-07-22T17:27:48.746Z" },
 ]
 
 [[package]]
 name = "mypyllant-component"
-version = "0.9.18"
+version = "0.9.19"
 source = { virtual = "." }
 dependencies = [
     { name = "mypyllant" },
@@ -1516,7 +1516,7 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "mypyllant", specifier = "==0.9.17" },
+    { name = "mypyllant", specifier = "==0.9.18" },
     { name = "requests", specifier = ">=2.32.0" },
 ]
 
