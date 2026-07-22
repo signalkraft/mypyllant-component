@@ -1,0 +1,28 @@
+.md-header__button.md-logo {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg {
+    height: 80px;
+    width: auto;
+    position: absolute;
+    margin-top: -10px;
+}
+
+.md-header__title {
+    padding-left: 70px;
+}
+
+.md-tabs {
+    padding-left: 210px;
+}
+
+@media screen and (max-width: 76.2344em) {
+    .md-header__title {
+        padding-left: 0;
+    }
+}
