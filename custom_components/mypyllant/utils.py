@@ -245,7 +245,7 @@ def extract_quota_duration(exc_info: BaseException | None) -> int | None:
     if retry_after is not None:
         try:
             return int(retry_after)
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             pass
 
     import re
