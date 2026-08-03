@@ -43,6 +43,8 @@ from myPyllant.api import AmbisenseNoFacilityError, MyPyllantAPI
 from myPyllant.enums import DeviceDataBucketResolution
 from myPyllant.models import System, DeviceData, Home
 
+from custom_components.mypyllant.scf import ScfSystem, fetch_scf_state, walk_state
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -270,6 +272,9 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
 class SystemCoordinator(MyPyllantCoordinator):
     data: list[System]  # type: ignore
     homes: list[Home] = []
+    # scf/iQconnect systems bypass myPyllant's System model (different backend, different
+    # schema) and are kept separately here. Empty list = no scf devices.
+    scf_systems: list[ScfSystem] = []
 
     async def _async_update_data(self) -> list[System]:  # type: ignore
         self._raise_if_quota_hit()
@@ -304,21 +309,39 @@ class SystemCoordinator(MyPyllantCoordinator):
                 ]
             else:
                 _LOGGER.debug("Using cached homes for systems fetch")
-            data = [
-                s
-                async for s in await self.hass.async_add_executor_job(
-                    self.api.get_systems,
-                    include_connection_status,
-                    include_diagnostic_trouble_codes,
-                    include_rts,
-                    include_mpc,
-                    include_ambisense_rooms,
-                    include_energy_management,
-                    include_eebus,
-                    include_ambisense_capability,
-                    self.homes,
+            # Split homes by control identifier: scf/iQconnect is served by its own
+            # state endpoint (system-control/v1), everything else (tli/vrc700) by
+            # get_systems.
+            scf_homes: list[Home] = []
+            other_homes: list[Home] = []
+            for home in self.homes:
+                control_identifier = await self.api.get_control_identifier(
+                    home.system_id
                 )
-            ]
+                if control_identifier.is_scf:
+                    scf_homes.append(home)
+                else:
+                    other_homes.append(home)
+
+            data: list[System] = []
+            if other_homes:
+                data = [
+                    s
+                    async for s in await self.hass.async_add_executor_job(
+                        self.api.get_systems,
+                        include_connection_status,
+                        include_diagnostic_trouble_codes,
+                        include_rts,
+                        include_mpc,
+                        include_ambisense_rooms,
+                        include_energy_management,
+                        include_eebus,
+                        include_ambisense_capability,
+                        other_homes,
+                    )
+                ]
+
+            self.scf_systems = await self._fetch_scf_systems(scf_homes)
             # Clear quota state on successful fetch so future updates aren't blocked
             self._clear_quota_state()
             return data
@@ -335,6 +358,48 @@ class SystemCoordinator(MyPyllantCoordinator):
         except (CancelledError, TimeoutError) as e:
             self._raise_api_down(e)
             return []  # mypy
+
+    _scf_snapshot_logged: set[str] = set()
+
+    def _log_scf_snapshot_once(self, system_id: str, points) -> None:
+        """Log ALL writable fields with their current value once per HA process — as a
+        restore point before write tests. Marker SCF-SNAPSHOT."""
+        if system_id in self._scf_snapshot_logged:
+            return
+        self._scf_snapshot_logged.add(system_id)
+        writable = [p for p in points if p.writable]
+        # Compact and at DEBUG level, so normal operation does not flood the log with
+        # dozens of lines on every restart.
+        snapshot = {"/".join(p.path): p.value for p in writable}
+        _LOGGER.debug("SCF-SNAPSHOT %s: %s", system_id, snapshot)
+
+    async def _fetch_scf_systems(self, scf_homes: list[Home]) -> list[ScfSystem]:
+        """Fetch each scf system's state and translate it into HA-ready points.
+
+        A failure on ONE scf home must not take the other systems down — hence each home
+        is isolated. Quota errors are re-raised (the outer handler sets the backoff)."""
+        result: list[ScfSystem] = []
+        for home in scf_homes:
+            try:
+                state = await fetch_scf_state(self.api, home.system_id)
+            except ClientResponseError:
+                raise  # quota/auth → outer handler
+            except Exception as e:  # noqa: BLE001
+                _LOGGER.warning(
+                    "Could not fetch scf state for %s: %s", home.system_id, e
+                )
+                continue
+            points = walk_state(home.system_id, state)
+            self._log_scf_snapshot_once(home.system_id, points)
+            result.append(
+                ScfSystem(
+                    system_id=home.system_id,
+                    home_name=getattr(home, "home_name", None) or home.name,
+                    nomenclature=getattr(home, "nomenclature", "iQconnect"),
+                    points=points,
+                )
+            )
+        return result
 
 
 class SystemWithDeviceData(TypedDict):

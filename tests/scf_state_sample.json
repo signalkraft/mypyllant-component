@@ -1,0 +1,1768 @@
+{
+  "controlIdentifier": "SCF",
+  "data": {
+    "systemParameters": {
+      "state": {
+        "outdoorTemperature": {
+          "value": 20.132467,
+          "metadata": null,
+          "lastUpdated": 1785702253587
+        },
+        "outdoorTemperatureAverage": {
+          "value": 22.173624,
+          "metadata": null,
+          "lastUpdated": 1785702307238
+        },
+        "outdoorTemperatureAverage24h": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "currentFlowTemperature": {
+          "value": 25.776588,
+          "metadata": null,
+          "lastUpdated": 1785702307816
+        },
+        "targetFlowTemperature": {
+          "value": 0.0,
+          "metadata": null,
+          "lastUpdated": 1785207527880
+        },
+        "waterPressure": {
+          "value": 1.738749,
+          "metadata": null,
+          "lastUpdated": 1785701565585
+        },
+        "heatingCylinderBottomTemperature": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "domesticHotWaterCylinderBottomTemperature": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "heatingCylinderTopTemperature": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "domesticHotWaterCylinderTopTemperature": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "isLegionellaProtectionEnabled": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "energyManagerState": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "systemOff": {
+          "value": true,
+          "metadata": {
+            "type": "BOOL",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527884
+          },
+          "lastUpdated": 1785207527880
+        },
+        "isAbsencePeriodActive": {
+          "value": false,
+          "metadata": null,
+          "lastUpdated": 1785207527886
+        },
+        "systemModeReleased": {
+          "value": "STANDBY",
+          "metadata": null,
+          "lastUpdated": 1785207527877
+        },
+        "seasonState": {
+          "value": "STANDBY",
+          "metadata": null,
+          "lastUpdated": 1785687248295
+        },
+        "isDomesticHotWaterMaximumLoadingEnabled": {
+          "value": true,
+          "metadata": null,
+          "lastUpdated": 1785207527875
+        },
+        "isFrostProtectionActive": {
+          "value": false,
+          "metadata": null,
+          "lastUpdated": 1785207527880
+        },
+        "cylinderTemperatureSensorBottomCentralHeating": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "cylinderTemperatureSensorBottomDomesticHotWater": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "cylinderTemperatureSensorTopCentralHeating": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "cylinderTemperatureSensorTopDomesticHotWater": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "systemFlowTemperature": {
+          "value": 25.776588,
+          "metadata": null,
+          "lastUpdated": 1785702307816
+        },
+        "systemWaterPressure": {
+          "value": 1.738749,
+          "metadata": null,
+          "lastUpdated": 1785701565585
+        }
+      },
+      "configuration": {
+        "isSystemOff": {
+          "value": true,
+          "metadata": {
+            "type": "BOOL",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527884
+          },
+          "lastUpdated": 1785207527880
+        },
+        "emmCommissioningState": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "coolingStartTemperatureSetpoint": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "absencePeriodTemperatureSetpoint": {
+          "value": 15.0,
+          "metadata": {
+            "type": "FLOAT",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527880,
+            "minimum": 5.0,
+            "maximum": 30.0,
+            "defaultValue": 15.0,
+            "stepSize": 0.5
+          },
+          "lastUpdated": 1785207527880
+        },
+        "continuousHeatingStartTemperatureSetpoint": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "heatingAlternativePoint": {
+          "value": null,
+          "metadata": {
+            "type": "FLOAT",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527875,
+            "minimum": -20.0,
+            "maximum": 40.0,
+            "defaultValue": null,
+            "stepSize": 1.0
+          },
+          "lastUpdated": 1785207527875
+        },
+        "heatingBivalencePoint": {
+          "value": -15.0,
+          "metadata": {
+            "type": "FLOAT",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527875,
+            "minimum": -30.0,
+            "maximum": 20.0,
+            "defaultValue": 0.0,
+            "stepSize": 1.0
+          },
+          "lastUpdated": 1785207527875
+        },
+        "domesticHotWaterBivalencePoint": {
+          "value": -17.0,
+          "metadata": {
+            "type": "FLOAT",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527869,
+            "minimum": -20.0,
+            "maximum": 50.0,
+            "defaultValue": -7.0,
+            "stepSize": 1.0
+          },
+          "lastUpdated": 1785207527869
+        },
+        "isAutomaticCoolingEnabled": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "isAdaptiveHeatingCurveEnabled": {
+          "value": false,
+          "metadata": {
+            "type": "BOOL",
+            "writable": false,
+            "enabled": false,
+            "lastUpdated": 1785207527873
+          },
+          "lastUpdated": 1785207527872
+        },
+        "domesticHotWaterMaximumLoadingTime": {
+          "value": 90,
+          "metadata": {
+            "type": "LONG",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527875,
+            "minimum": 30,
+            "maximum": 180,
+            "defaultValue": 90,
+            "stepSize": 1
+          },
+          "lastUpdated": 1785207527875
+        },
+        "domesticHotWaterHysteresis": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "domesticHotWaterFlowTemperatureSetpointOffset": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "continuousHeatingRoomTemperatureSetpoint": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "legionellaProtectionDay": {
+          "value": "MONDAY",
+          "metadata": {
+            "type": "ENUM",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527886,
+            "allowedValues": [
+              "WEDNESDAY",
+              "MONDAY",
+              "THURSDAY",
+              "SUNDAY",
+              "TUESDAY",
+              "FRIDAY",
+              "SATURDAY"
+            ]
+          },
+          "lastUpdated": 1785207527886
+        },
+        "legionellaProtectionStartTime": {
+          "value": 240,
+          "metadata": {
+            "type": "DEFAULT",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527881
+          },
+          "lastUpdated": 1785207527886
+        },
+        "legionellaProtectionSchedule": {
+          "value": "OFF",
+          "metadata": {
+            "type": "ENUM",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527886,
+            "allowedValues": [
+              "WEEKLY",
+              "DAILY",
+              "OFF"
+            ]
+          },
+          "lastUpdated": 1785207527886
+        },
+        "coolingForXDaysStartTimestamp": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "coolingForXDaysEndTimestamp": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "maximumAllowedFlowTemperatureOnHeatPumpError": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "domesticHotWaterMaximumTemperature": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "maximumPreheatingTimeOffset": {
+          "value": 0,
+          "metadata": {
+            "type": "LONG",
+            "writable": false,
+            "enabled": false,
+            "lastUpdated": 1785207527875,
+            "minimum": 0,
+            "maximum": 0,
+            "defaultValue": 0,
+            "stepSize": 0
+          },
+          "lastUpdated": 1785207527875
+        },
+        "hybridControlStrategy": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "isDomesticHotWaterParallelTankLoadingAllowed": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "coolingForXDays": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "absencePeriod": {
+          "value": {
+            "startTime": 0,
+            "endTime": 0
+          },
+          "metadata": {
+            "type": "DEFAULT",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527881
+          },
+          "lastUpdated": 1785207527886
+        },
+        "domesticHotWaterAlternativePoint": {
+          "value": null,
+          "metadata": {
+            "type": "FLOAT",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527872,
+            "minimum": -20.0,
+            "maximum": 40.0,
+            "defaultValue": null,
+            "stepSize": 1.0
+          },
+          "lastUpdated": 1785207527869
+        },
+        "externalBackupHeaterEmergencyModeMaximumFlowTemperature": {
+          "value": 25.0,
+          "metadata": {
+            "type": "FLOAT",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527875,
+            "minimum": 15.0,
+            "maximum": 60.0,
+            "defaultValue": 20.0,
+            "stepSize": 1.0
+          },
+          "lastUpdated": 1785207527875
+        },
+        "isExternalBackupHeaterEmergencyModeUnrestrictedEnabled": {
+          "value": false,
+          "metadata": {
+            "type": "BOOL",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527876
+          },
+          "lastUpdated": 1785207527876
+        },
+        "energySupplierContactSmartGridConfiguration": {
+          "value": "DISABLE_HEAT_PUMP",
+          "metadata": {
+            "type": "ENUM",
+            "writable": true,
+            "enabled": false,
+            "lastUpdated": 1785207527878,
+            "allowedValues": [
+              "DISABLE_HEAT_PUMP",
+              "DISABLE_BACKUP_HEATER",
+              "DISABLE_HEAT_PUMP_AND_BACKUP_HEATER"
+            ]
+          },
+          "lastUpdated": 1785207527877
+        },
+        "stopHeatingAtOutsideTemperature": {
+          "value": 21.0,
+          "metadata": {
+            "type": "FLOAT",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527878,
+            "minimum": 5.0,
+            "maximum": 50.0,
+            "defaultValue": 15.0,
+            "stepSize": 1.0
+          },
+          "lastUpdated": 1785207527878
+        },
+        "domesticHotWaterTappingBlockingTime": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "adaptiveHeatingCurve": {
+          "value": false,
+          "metadata": {
+            "type": "BOOL",
+            "writable": false,
+            "enabled": false,
+            "lastUpdated": 1785207527873
+          },
+          "lastUpdated": 1785207527872
+        },
+        "alternativePoint": {
+          "value": null,
+          "metadata": {
+            "type": "FLOAT",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527875,
+            "minimum": -20.0,
+            "maximum": 40.0,
+            "defaultValue": null,
+            "stepSize": 1.0
+          },
+          "lastUpdated": 1785207527875
+        },
+        "automaticCoolingOnOff": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "continuousHeatingRoomSetpoint": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "continuousHeatingStartSetpoint": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "coolingForXDaysEndDateTime": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "coolingForXDaysStartDateTime": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "coolingStartTemperature": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "domesticHotWaterFlowSetpointOffset": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "externalBackupHeaterEmergencyMaximumFlowTemperature": {
+          "value": 25.0,
+          "metadata": {
+            "type": "FLOAT",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527875,
+            "minimum": 15.0,
+            "maximum": 60.0,
+            "defaultValue": 20.0,
+            "stepSize": 1.0
+          },
+          "lastUpdated": 1785207527875
+        },
+        "heatDemandLimitedByOutsideTemperature": {
+          "value": 21.0,
+          "metadata": {
+            "type": "FLOAT",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527878,
+            "minimum": 5.0,
+            "maximum": 50.0,
+            "defaultValue": 15.0,
+            "stepSize": 1.0
+          },
+          "lastUpdated": 1785207527878
+        },
+        "heatingCircuitBivalencePoint": {
+          "value": -15.0,
+          "metadata": {
+            "type": "FLOAT",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527875,
+            "minimum": -30.0,
+            "maximum": 20.0,
+            "defaultValue": 0.0,
+            "stepSize": 1.0
+          },
+          "lastUpdated": 1785207527875
+        },
+        "holidaySetpointSystem": {
+          "value": 15.0,
+          "metadata": {
+            "type": "FLOAT",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527880,
+            "minimum": 5.0,
+            "maximum": 30.0,
+            "defaultValue": 15.0,
+            "stepSize": 0.5
+          },
+          "lastUpdated": 1785207527880
+        },
+        "legionellaProtectionStartWeekday": {
+          "value": "MONDAY",
+          "metadata": {
+            "type": "ENUM",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527886,
+            "allowedValues": [
+              "WEDNESDAY",
+              "MONDAY",
+              "THURSDAY",
+              "SUNDAY",
+              "TUESDAY",
+              "FRIDAY",
+              "SATURDAY"
+            ]
+          },
+          "lastUpdated": 1785207527886
+        },
+        "legionellaProtectionTimeOfDay": {
+          "value": 240,
+          "metadata": {
+            "type": "DEFAULT",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527881
+          },
+          "lastUpdated": 1785207527886
+        },
+        "maxFlowSetpointHeatpumpError": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "maximumPreheatingTime": {
+          "value": 0,
+          "metadata": {
+            "type": "LONG",
+            "writable": false,
+            "enabled": false,
+            "lastUpdated": 1785207527875,
+            "minimum": 0,
+            "maximum": 0,
+            "defaultValue": 0,
+            "stepSize": 0
+          },
+          "lastUpdated": 1785207527875
+        },
+        "parallelTankLoadingAllowed": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        }
+      },
+      "properties": {
+        "controllerType": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "controllerRevision": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "systemScheme": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "backupHeaterType": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "backupHeaterAllowedFor": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "externalBackupHeaterType": {
+          "value": "NEEXT_BACKUP_HEATER",
+          "metadata": null,
+          "lastUpdated": 1785207527869
+        },
+        "externalBackupHeaterAllowedMode": {
+          "value": "DHW_CH",
+          "metadata": {
+            "type": "ENUM",
+            "writable": true,
+            "enabled": true,
+            "lastUpdated": 1785207527869,
+            "allowedValues": [
+              "DHW",
+              "CH",
+              "DHW_CH",
+              "NONE"
+            ]
+          },
+          "lastUpdated": 1785207527869
+        },
+        "temporaryAllowBackupHeater": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "moduleConfigurationVR71": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "moduleConfigurationVR70": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "energyProvidePowerCutBehavior": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "smartPhotovoltaicBufferOffset": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "isExternalEnergyManagementActivated": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "operationModeEffect": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "domesticHotWaterHysteresisMinimum": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "domesticHotWaterHysteresisMaximum": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "roomTemperatureControlStrategyType": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "relayFunctionInstallationType": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "installedCylinder": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        },
+        "externalEnergyManagementActivation": {
+          "value": null,
+          "metadata": null,
+          "lastUpdated": null
+        }
+      }
+    },
+    "zoneSettings": {
+      "1": {
+        "state": {
+          "operationState": {
+            "value": "OFF",
+            "metadata": null,
+            "lastUpdated": 1785207527890
+          },
+          "activeOperation": {
+            "value": "ZONE_MODE_OFF",
+            "metadata": null,
+            "lastUpdated": 1785207527892
+          },
+          "desiredRoomTemperatureSetpoint": {
+            "value": 5.0,
+            "metadata": null,
+            "lastUpdated": 1785207527890
+          },
+          "desiredRoomTemperatureSetpointHeating": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "desiredRoomTemperatureSetpointCooling": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "currentRoomTemperature": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": 1785207527890
+          },
+          "currentRoomHumidity": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": 1785207527890
+          },
+          "currentSpecialFunction": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "isQuickVetoPossible": {
+            "value": false,
+            "metadata": null,
+            "lastUpdated": 1785207527901
+          },
+          "quickVetoTemperatureSetpoint": {
+            "value": 18.0,
+            "metadata": {
+              "type": "FLOAT",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527901,
+              "minimum": 5.0,
+              "maximum": 30.0,
+              "defaultValue": 21.0,
+              "stepSize": 0.5
+            },
+            "lastUpdated": 1785207527898
+          },
+          "quickVetoStartTimestamp": {
+            "value": 0,
+            "metadata": null,
+            "lastUpdated": 1785207527901
+          },
+          "quickVetoEndTimestamp": {
+            "value": 0,
+            "metadata": null,
+            "lastUpdated": 1785207527901
+          },
+          "isManualCoolingActive": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "isSummerCutOffActive": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "isFrostProtectionActive": {
+            "value": false,
+            "metadata": null,
+            "lastUpdated": 1785207527892
+          },
+          "setbackMode": {
+            "value": "FROSTPROTECTION",
+            "metadata": {
+              "type": "ENUM",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527901,
+              "allowedValues": [
+                "FROSTPROTECTION",
+                "SETBACK"
+              ]
+            },
+            "lastUpdated": 1785207527901
+          },
+          "operationStatus": {
+            "value": "OFF",
+            "metadata": null,
+            "lastUpdated": 1785207527890
+          },
+          "quickVetoEndDateTime": {
+            "value": 0,
+            "metadata": null,
+            "lastUpdated": 1785207527901
+          },
+          "quickVetoSetpoint": {
+            "value": 18.0,
+            "metadata": {
+              "type": "FLOAT",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527901,
+              "minimum": 5.0,
+              "maximum": 30.0,
+              "defaultValue": 21.0,
+              "stepSize": 0.5
+            },
+            "lastUpdated": 1785207527898
+          },
+          "quickVetoStartDateTime": {
+            "value": 0,
+            "metadata": null,
+            "lastUpdated": 1785207527901
+          },
+          "summerCutOffActive": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          }
+        },
+        "general": {
+          "name": {
+            "value": "Zone 1",
+            "metadata": {
+              "type": "DEFAULT",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527891
+            },
+            "lastUpdated": 1785207527892
+          },
+          "operationMode": {
+            "value": "OFF",
+            "metadata": {
+              "type": "ENUM",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527893,
+              "allowedValues": [
+                "MANUAL",
+                "OFF",
+                "TIME_CONTROLLED"
+              ]
+            },
+            "lastUpdated": 1785207527893
+          },
+          "absencePeriodStartTimestamp": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "absencePeriodEndTimestamp": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "absencePeriodTemperatureSetpoint": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "holidayEndDateTime": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "holidaySetpoint": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "holidayStartDateTime": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          }
+        },
+        "heating": {
+          "operationMode": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "setbackTemperatureSetpoint": {
+            "value": 15.0,
+            "metadata": {
+              "type": "FLOAT",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527895,
+              "minimum": 5.0,
+              "maximum": 30.0,
+              "defaultValue": 15.0,
+              "stepSize": 0.5
+            },
+            "lastUpdated": 1785207527894
+          },
+          "manualModeTemperatureSetpoint": {
+            "value": 20.0,
+            "metadata": {
+              "type": "FLOAT",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527895,
+              "minimum": 5.0,
+              "maximum": 30.0,
+              "defaultValue": 21.0,
+              "stepSize": 0.5
+            },
+            "lastUpdated": 1785207527895
+          },
+          "continuousHeatingTemperatureSetpoint": {
+            "value": 0.0,
+            "metadata": {
+              "type": "FLOAT",
+              "writable": false,
+              "enabled": false,
+              "lastUpdated": 1785207527896,
+              "minimum": 0.0,
+              "maximum": 0.0,
+              "defaultValue": 0.0,
+              "stepSize": 0.0
+            },
+            "lastUpdated": 1785207527896
+          },
+          "dayTemperatureSetpoint": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "timePeriods": {
+            "value": {
+              "MONDAY": [
+                {
+                  "startTime": 360,
+                  "endTime": 1320,
+                  "setpoint": 20.0
+                }
+              ],
+              "TUESDAY": [
+                {
+                  "startTime": 360,
+                  "endTime": 1320,
+                  "setpoint": 20.0
+                }
+              ],
+              "WEDNESDAY": [
+                {
+                  "startTime": 360,
+                  "endTime": 1320,
+                  "setpoint": 20.0
+                }
+              ],
+              "THURSDAY": [
+                {
+                  "startTime": 360,
+                  "endTime": 1320,
+                  "setpoint": 20.0
+                }
+              ],
+              "FRIDAY": [
+                {
+                  "startTime": 360,
+                  "endTime": 1320,
+                  "setpoint": 20.0
+                }
+              ],
+              "SATURDAY": [
+                {
+                  "startTime": 450,
+                  "endTime": 1410,
+                  "setpoint": 20.0
+                }
+              ],
+              "SUNDAY": [
+                {
+                  "startTime": 450,
+                  "endTime": 1320,
+                  "setpoint": 20.0
+                }
+              ]
+            },
+            "metadata": {
+              "type": "TIME_PERIODS",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527896,
+              "minSlotsPerDay": 0,
+              "maxSlotsPerDay": 12,
+              "setpointRequiredPerSlot": true,
+              "setpointMinimum": 5.0,
+              "setpointMaximum": 30.0,
+              "setpointStepSize": 0.5,
+              "setpointDefaultValue": 20.0
+            },
+            "lastUpdated": 1785207527896
+          },
+          "continuousHeatingSetpoint": {
+            "value": 0.0,
+            "metadata": {
+              "type": "FLOAT",
+              "writable": false,
+              "enabled": false,
+              "lastUpdated": 1785207527896,
+              "minimum": 0.0,
+              "maximum": 0.0,
+              "defaultValue": 0.0,
+              "stepSize": 0.0
+            },
+            "lastUpdated": 1785207527896
+          },
+          "dayTemperatureHeating": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "manualModeSetpoint": {
+            "value": 20.0,
+            "metadata": {
+              "type": "FLOAT",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527895,
+              "minimum": 5.0,
+              "maximum": 30.0,
+              "defaultValue": 21.0,
+              "stepSize": 0.5
+            },
+            "lastUpdated": 1785207527895
+          },
+          "setbackTemperature": {
+            "value": 15.0,
+            "metadata": {
+              "type": "FLOAT",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527895,
+              "minimum": 5.0,
+              "maximum": 30.0,
+              "defaultValue": 15.0,
+              "stepSize": 0.5
+            },
+            "lastUpdated": 1785207527894
+          }
+        },
+        "cooling": {
+          "operationMode": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "temperatureSetpoint": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "manualModeTemperatureSetpoint": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "timePeriods": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "manualModeSetpoint": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "setpoint": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          }
+        },
+        "properties": {
+          "isActive": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "zoneBinding": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "isCoolingAllowed": {
+            "value": false,
+            "metadata": null,
+            "lastUpdated": 1785207527897
+          },
+          "associatedCircuitIndex": {
+            "value": 1,
+            "metadata": null,
+            "lastUpdated": 1785207527897
+          },
+          "roomInfluenceConfiguration": {
+            "value": "NONE",
+            "metadata": {
+              "type": "ENUM",
+              "writable": false,
+              "enabled": false,
+              "lastUpdated": 1785207527892,
+              "allowedValues": [
+                "THERMOSTAT",
+                "NONE",
+                "SWITCH_ON"
+              ]
+            },
+            "lastUpdated": 1785207527892
+          },
+          "associatedThermostatIdentifier": {
+            "value": "",
+            "metadata": {
+              "type": "DEFAULT",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527900
+            },
+            "lastUpdated": null
+          }
+        }
+      }
+    },
+    "circuitSettings": {
+      "1": {
+        "state": {
+          "circuitState": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "activeOperation": {
+            "value": "STANDBY",
+            "metadata": null,
+            "lastUpdated": 1785207527890
+          },
+          "currentFlowTemperature": {
+            "value": 25.776588,
+            "metadata": null,
+            "lastUpdated": 1785702307818
+          },
+          "currentFlowTemperatureSetpoint": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": 1785207527889
+          },
+          "frostProtectionStatus": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "adaptiveHeatingCurveOffset": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "isFrostProtectionActive": {
+            "value": false,
+            "metadata": null,
+            "lastUpdated": 1785207527889
+          },
+          "currentCircuitFlowTemperature": {
+            "value": 25.776588,
+            "metadata": null,
+            "lastUpdated": 1785702307818
+          },
+          "heatingCircuitFlowSetpoint": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": 1785207527889
+          }
+        },
+        "configuration": {
+          "heatingCurve": {
+            "value": 0.3,
+            "metadata": {
+              "type": "FLOAT",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527889,
+              "minimum": 0.1,
+              "maximum": 2.0,
+              "defaultValue": 0.6,
+              "stepSize": 0.05
+            },
+            "lastUpdated": 1785207527886
+          },
+          "heatingFlowTemperatureMinimumSetpoint": {
+            "value": 20.0,
+            "metadata": {
+              "type": "FLOAT",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527889,
+              "minimum": 15.0,
+              "maximum": 90.0,
+              "defaultValue": 15.0,
+              "stepSize": 1.0
+            },
+            "lastUpdated": 1785207527889
+          },
+          "heatingFlowTemperatureMaximumSetpoint": {
+            "value": 40.0,
+            "metadata": {
+              "type": "FLOAT",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527889,
+              "minimum": 15.0,
+              "maximum": 90.0,
+              "defaultValue": 90.0,
+              "stepSize": 1.0
+            },
+            "lastUpdated": 1785207527889
+          },
+          "stopHeatingAtOutsideTemperature": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "startCoolingAtMinimumOutsideTemperature": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "heatingFlowTemperatureSetpointOffset": {
+            "value": 0.0,
+            "metadata": {
+              "type": "FLOAT",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527890,
+              "minimum": 0.0,
+              "maximum": 30.0,
+              "defaultValue": 0.0,
+              "stepSize": 1.0
+            },
+            "lastUpdated": 1785207527889
+          },
+          "coolingFlowTemperatureMinimumSetpoint": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "isSetbackModeEnabled": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "roomTemperatureControlMode": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "epsilon": {
+            "value": 2.0,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "heatDemandLimitedByOutsideTemperature": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "heatingCircuitFlowSetpointExcessOffset": {
+            "value": 0.0,
+            "metadata": {
+              "type": "FLOAT",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527890,
+              "minimum": 0.0,
+              "maximum": 30.0,
+              "defaultValue": 0.0,
+              "stepSize": 1.0
+            },
+            "lastUpdated": 1785207527889
+          },
+          "minimumOutsideTemperatureCooling": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "setbackModeEnabled": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          }
+        },
+        "properties": {
+          "mixerCircuitTypeExternal": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "type": {
+            "value": "DIRECT",
+            "metadata": null,
+            "lastUpdated": 1785207527889
+          },
+          "isCoolingAllowed": {
+            "value": false,
+            "metadata": {
+              "type": "BOOL",
+              "writable": false,
+              "enabled": false,
+              "lastUpdated": 1785207527889
+            },
+            "lastUpdated": 1785207527889
+          },
+          "isHeatingAllowed": {
+            "value": true,
+            "metadata": {
+              "type": "BOOL",
+              "writable": false,
+              "enabled": true,
+              "lastUpdated": 1785207527890
+            },
+            "lastUpdated": 1785207527890
+          },
+          "heatingCircuitMixerSpeed": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "isCondensateSensitiveEmitterEnabled": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "heatingCircuitType": {
+            "value": "DIRECT",
+            "metadata": null,
+            "lastUpdated": 1785207527889
+          }
+        }
+      }
+    },
+    "domesticHotWaterSettings": {
+      "1": {
+        "state": {
+          "currentSpecialFunction": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "currentCircuitTemperature": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "circuitFlowTemperatureSetpoint": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "currentCylinderTemperature": {
+            "value": 32.440292,
+            "metadata": null,
+            "lastUpdated": 1785702305694
+          },
+          "activeOperation": {
+            "value": "CIRCUIT_MODE_OFF",
+            "metadata": null,
+            "lastUpdated": 1785207527910
+          },
+          "currentCircuitTemperatureSetpoint": {
+            "value": 12.0,
+            "metadata": null,
+            "lastUpdated": 1785207527910
+          },
+          "operationState": {
+            "value": "OFF",
+            "metadata": null,
+            "lastUpdated": 1785207527909
+          },
+          "isBoostPossible": {
+            "value": false,
+            "metadata": null,
+            "lastUpdated": 1785207527910
+          },
+          "loadingEfficiencyState": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "cylinderLoadingBoostEndTimestamp": {
+            "value": 0,
+            "metadata": null,
+            "lastUpdated": 1785207527912
+          },
+          "circulationPumpState": {
+            "value": "INACTIVE",
+            "metadata": null,
+            "lastUpdated": 1785207527912
+          },
+          "activeTemperatureSetpoint": {
+            "value": 12.0,
+            "metadata": null,
+            "lastUpdated": 1785207527910
+          },
+          "circuitFlowSetpoint": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "circuitTemperature": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "cylinderTemperature": {
+            "value": 32.440292,
+            "metadata": null,
+            "lastUpdated": 1785702305694
+          },
+          "operatingState": {
+            "value": "OFF",
+            "metadata": null,
+            "lastUpdated": 1785207527909
+          },
+          "tankLoadingBoostPossible": {
+            "value": false,
+            "metadata": null,
+            "lastUpdated": 1785207527910
+          }
+        },
+        "configuration": {
+          "operationMode": {
+            "value": "OFF",
+            "metadata": {
+              "type": "ENUM",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527910,
+              "allowedValues": [
+                "MANUAL",
+                "OFF",
+                "TIME_CONTROLLED"
+              ]
+            },
+            "lastUpdated": 1785207527910
+          },
+          "tappingSetpoint": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "absencePeriodStartTimestamp": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "absencePeriodEndTimestamp": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "cylinderTemperatureSetpoint": {
+            "value": 50.0,
+            "metadata": {
+              "type": "FLOAT",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527911,
+              "minimum": 35.0,
+              "maximum": 70.0,
+              "defaultValue": 55.0,
+              "stepSize": 1.0
+            },
+            "lastUpdated": 1785207527910
+          },
+          "cylinderTemperatureLowerHysteresis": {
+            "value": 7.0,
+            "metadata": {
+              "type": "FLOAT",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527911,
+              "minimum": 3.0,
+              "maximum": 20.0,
+              "defaultValue": 7.0,
+              "stepSize": 0.5
+            },
+            "lastUpdated": 1785207527911
+          },
+          "cylinderLoadingBoostTemperatureSetpoint": {
+            "value": 50.0,
+            "metadata": {
+              "type": "FLOAT",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527912,
+              "minimum": 35.0,
+              "maximum": 70.0,
+              "defaultValue": 55.0,
+              "stepSize": 1.0
+            },
+            "lastUpdated": 1785207527912
+          },
+          "circuitTimePeriods": {
+            "value": {
+              "MONDAY": [
+                {
+                  "startTime": 330,
+                  "endTime": 1320,
+                  "setpoint": null
+                }
+              ],
+              "TUESDAY": [
+                {
+                  "startTime": 330,
+                  "endTime": 1320,
+                  "setpoint": null
+                }
+              ],
+              "WEDNESDAY": [
+                {
+                  "startTime": 330,
+                  "endTime": 1320,
+                  "setpoint": null
+                }
+              ],
+              "THURSDAY": [
+                {
+                  "startTime": 330,
+                  "endTime": 1320,
+                  "setpoint": null
+                }
+              ],
+              "FRIDAY": [
+                {
+                  "startTime": 330,
+                  "endTime": 1320,
+                  "setpoint": null
+                }
+              ],
+              "SATURDAY": [
+                {
+                  "startTime": 420,
+                  "endTime": 1320,
+                  "setpoint": null
+                }
+              ],
+              "SUNDAY": [
+                {
+                  "startTime": 420,
+                  "endTime": 1320,
+                  "setpoint": null
+                }
+              ]
+            },
+            "metadata": {
+              "type": "TIME_PERIODS",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527906,
+              "minSlotsPerDay": 0,
+              "maxSlotsPerDay": 12,
+              "setpointRequiredPerSlot": false,
+              "setpointMinimum": null,
+              "setpointMaximum": null,
+              "setpointStepSize": null,
+              "setpointDefaultValue": null
+            },
+            "lastUpdated": 1785207527912
+          },
+          "circulationPumpTimePeriods": {
+            "value": {
+              "MONDAY": [
+                {
+                  "startTime": 330,
+                  "endTime": 360,
+                  "setpoint": null
+                },
+                {
+                  "startTime": 1050,
+                  "endTime": 1080,
+                  "setpoint": null
+                }
+              ],
+              "TUESDAY": [
+                {
+                  "startTime": 330,
+                  "endTime": 360,
+                  "setpoint": null
+                },
+                {
+                  "startTime": 1050,
+                  "endTime": 1080,
+                  "setpoint": null
+                }
+              ],
+              "WEDNESDAY": [
+                {
+                  "startTime": 330,
+                  "endTime": 360,
+                  "setpoint": null
+                },
+                {
+                  "startTime": 1050,
+                  "endTime": 1080,
+                  "setpoint": null
+                }
+              ],
+              "THURSDAY": [
+                {
+                  "startTime": 330,
+                  "endTime": 360,
+                  "setpoint": null
+                },
+                {
+                  "startTime": 1050,
+                  "endTime": 1080,
+                  "setpoint": null
+                }
+              ],
+              "FRIDAY": [
+                {
+                  "startTime": 330,
+                  "endTime": 360,
+                  "setpoint": null
+                },
+                {
+                  "startTime": 1050,
+                  "endTime": 1080,
+                  "setpoint": null
+                }
+              ],
+              "SATURDAY": [
+                {
+                  "startTime": 480,
+                  "endTime": 510,
+                  "setpoint": null
+                },
+                {
+                  "startTime": 1050,
+                  "endTime": 1080,
+                  "setpoint": null
+                }
+              ],
+              "SUNDAY": [
+                {
+                  "startTime": 480,
+                  "endTime": 510,
+                  "setpoint": null
+                },
+                {
+                  "startTime": 1050,
+                  "endTime": 1080,
+                  "setpoint": null
+                }
+              ]
+            },
+            "metadata": {
+              "type": "TIME_PERIODS",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527907,
+              "minSlotsPerDay": 0,
+              "maxSlotsPerDay": 12,
+              "setpointRequiredPerSlot": false,
+              "setpointMinimum": null,
+              "setpointMaximum": null,
+              "setpointStepSize": null,
+              "setpointDefaultValue": null
+            },
+            "lastUpdated": 1785207527912
+          },
+          "rechargeTappingTemperatureSetpoint": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "tankLoadingStrategy": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "cylinderPreference": {
+            "value": "COMFORT",
+            "metadata": {
+              "type": "ENUM",
+              "writable": true,
+              "enabled": true,
+              "lastUpdated": 1785207527913,
+              "allowedValues": [
+                "COMFORT",
+                "EFFICIENCY"
+              ]
+            },
+            "lastUpdated": 1785207527912
+          },
+          "holidayEndDateTime": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "holidayStartDateTime": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          }
+        },
+        "properties": {
+          "minimumTemperatureSetpoint": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "maximumTemperatureSetpoint": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "maxSetpoint": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          },
+          "minSetpoint": {
+            "value": null,
+            "metadata": null,
+            "lastUpdated": null
+          }
+        }
+      }
+    },
+    "ventilationSettings": {}
+  }
+}

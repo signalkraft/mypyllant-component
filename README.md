@@ -30,6 +30,7 @@ from Saunier Duval & Bulex).
 * Vaillant EcoCompact VSC206 4-5 boiler + Multimatic VRC700/6 + gateway VR920
 * Saunier Duval DUOMAX F30 90 + MISET Radio + MiLink V3
 * VR42 controllers are also supported
+* Vaillant iQconnect-generation heat pumps, e.g. geoCOMPACT VWS iQ (control identifier `scf`)
 * [More are documented here](https://signalkraft.com/mypyllant-component/#tested-setups)
 
 ## Features

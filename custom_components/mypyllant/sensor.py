@@ -275,11 +275,51 @@ async def create_daily_data_sensors(
     return sensors
 
 
+def create_scf_sensors(
+    hass: HomeAssistant, config: ConfigEntry
+) -> EntityList[SensorEntity]:
+    """Sensors for scf/iQconnect systems (separate data path, see coordinator.scf_systems)."""
+    from custom_components.mypyllant.scf_entity import ScfSensor
+
+    system_coordinator: SystemCoordinator = hass.data[DOMAIN][config.entry_id][
+        "system_coordinator"
+    ]
+    sensors: EntityList[SensorEntity] = EntityList()
+    for system in getattr(system_coordinator, "scf_systems", []):
+        for point in system.by_platform("sensor"):
+            sensors.append(lambda p=point: ScfSensor(system_coordinator, p))
+    return sensors
+
+
+def register_scf_schedule_service(hass: HomeAssistant, config: ConfigEntry) -> None:
+    """Register the mypyllant.scf_set_schedule entity service on the sensor platform.
+
+    Only when scf systems exist. The set_schedule handler lives on ScfSensor; HA resolves
+    the target (the schedule sensor) to the entity itself."""
+    import voluptuous as vol
+    from homeassistant.helpers import entity_platform
+
+    coordinator: SystemCoordinator = hass.data[DOMAIN][config.entry_id][
+        "system_coordinator"
+    ]
+    if not getattr(coordinator, "scf_systems", []):
+        return
+    platform = entity_platform.async_get_current_platform()
+    platform.async_register_entity_service(
+        "scf_set_schedule",
+        {vol.Required("schedule"): dict},
+        "set_schedule",
+    )
+
+
 async def async_setup_entry(
     hass: HomeAssistant, config: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    async_add_entities(await create_system_sensors(hass, config))  # type: ignore
+    entities = await create_system_sensors(hass, config)
+    entities.extend(create_scf_sensors(hass, config))
+    async_add_entities(entities)  # type: ignore
     async_add_entities(await create_daily_data_sensors(hass, config))  # type: ignore
+    register_scf_schedule_service(hass, config)
 
 
 class SystemSensor(SystemCoordinatorEntity, SensorEntity):

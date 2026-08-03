@@ -71,5 +71,12 @@ warn_incomplete_stub = true
 warn_redundant_casts = true
 warn_unused_configs = true
 
+[tool.ruff]
+# Home Assistant ships on Python 3.13 in many installs (Docker/OS images), while this
+# project's requires-python targets 3.14 for dev tooling. Without pinning this, ruff
+# infers py314 and the formatter strips the parentheses from `except (A, B):` per
+# PEP 758 - valid on 3.14, a SyntaxError on 3.13 (see #452/#464).
+target-version = "py313"
+
 [tool.ruff.lint.pycodestyle]
 max-line-length = 80

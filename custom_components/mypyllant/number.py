@@ -30,11 +30,22 @@ async def async_setup_entry(
     coordinator: SystemCoordinator = hass.data[DOMAIN][config.entry_id][
         "system_coordinator"
     ]
+    sensors: EntityList[NumberEntity] = EntityList()
+
+    # scf/iQconnect: controllable numeric values (separate data path)
+    from custom_components.mypyllant.scf_entity import ScfNumber
+
+    for scf_system in getattr(coordinator, "scf_systems", []):
+        for point in scf_system.by_platform("number"):
+            sensors.append(lambda p=point: ScfNumber(coordinator, p))
+
     if not coordinator.data:
-        _LOGGER.warning("No system data, skipping number entities")
+        if not sensors:
+            _LOGGER.warning("No system data, skipping number entities")
+            return
+        async_add_entities(sensors)  # type: ignore
         return
 
-    sensors: EntityList[NumberEntity] = EntityList()
     for index, system in enumerate(coordinator.data):
         sensors.append(lambda: SystemHolidayDurationNumber(index, coordinator))
         if system.is_cooling_allowed:
