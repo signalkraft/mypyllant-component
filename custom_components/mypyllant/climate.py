@@ -1029,7 +1029,11 @@ class AmbisenseClimate(AmbisenseCoordinatorEntity, ClimateEntity):
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
         attr = {
-            "time_program": self.room.time_program,
+            "time_program": asdict(
+                self.room.time_program, dict_factory=RoomTimeProgram.dict_factory
+            )
+            if self.room.time_program
+            else None,
             "quick_veto_end_date_time": self.room.room_configuration.quick_veto_end_time,
             "window_state": self.room.room_configuration.window_state,
             "button_lock": self.room.room_configuration.button_lock,
