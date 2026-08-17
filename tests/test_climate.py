@@ -1,3 +1,4 @@
+import json
 from unittest import mock
 
 import pytest as pytest
@@ -178,6 +179,14 @@ async def test_ambisense_climate(
         assert isinstance(ambisense.current_temperature, float)
         assert isinstance(ambisense.target_temperature, float)
         assert isinstance(ambisense.extra_state_attributes["devices"][0]["name"], str)
+        time_program = ambisense.extra_state_attributes["time_program"]
+        assert isinstance(time_program, dict)
+        assert isinstance(time_program["monday"], list)
+        assert set(time_program["monday"][0]) == {
+            "start_time",
+            "temperature_setpoint",
+        }
+        assert isinstance(json.dumps(time_program), str)
 
         await ambisense.async_turn_on()
         await ambisense.async_turn_off()
