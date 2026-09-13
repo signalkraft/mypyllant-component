@@ -43,6 +43,7 @@ from custom_components.mypyllant.utils import (
     SystemCoordinatorEntity,
     DomesticHotWaterCoordinatorEntity,
     ZoneCoordinatorEntity,
+    AmbisenseCoordinatorEntity,
     EntityList,
 )
 from myPyllant.utils import prepare_field_value_for_dict
@@ -174,6 +175,20 @@ async def create_system_sensors(
             sensors.append(
                 lambda: ZoneCurrentSpecialFunctionSensor(
                     index, zone_index, system_coordinator
+                )
+            )
+
+        # Attach measurements to the same room device as climate and schedule.
+        for room in system.ambisense_rooms:
+            room_index = room.room_index
+            sensors.append(
+                lambda: AmbisenseCurrentRoomTemperatureSensor(
+                    index, room_index, system_coordinator
+                )
+            )
+            sensors.append(
+                lambda: AmbisenseRoomHumiditySensor(
+                    index, room_index, system_coordinator
                 )
             )
 
@@ -567,6 +582,46 @@ class ZoneHumiditySensor(ZoneCoordinatorEntity, SensorEntity):
     @property
     def native_value(self):
         return self.zone.current_room_humidity
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_humidity"
+
+
+class AmbisenseCurrentRoomTemperatureSensor(AmbisenseCoordinatorEntity, SensorEntity):
+    """Expose the current Ambisense room temperature on the room device."""
+
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def name(self) -> str:
+        return f"{self.name_prefix} Temperature"
+
+    @property
+    def native_value(self) -> float | None:
+        return self.room.room_configuration.current_temperature
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_temperature"
+
+
+class AmbisenseRoomHumiditySensor(AmbisenseCoordinatorEntity, SensorEntity):
+    """Expose the current Ambisense room humidity on the room device."""
+
+    _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_device_class = SensorDeviceClass.HUMIDITY
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def name(self) -> str:
+        return f"{self.name_prefix} Humidity"
+
+    @property
+    def native_value(self) -> float | None:
+        return self.room.room_configuration.current_humidity
 
     @property
     def unique_id(self) -> str:

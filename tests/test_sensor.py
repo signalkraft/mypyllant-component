@@ -29,6 +29,8 @@ from custom_components.mypyllant.sensor import (
     ZoneDesiredRoomTemperatureSetpointSensor,
     ZoneHeatingOperatingModeSensor,
     ZoneHumiditySensor,
+    AmbisenseRoomHumiditySensor,
+    AmbisenseCurrentRoomTemperatureSensor,
     SystemDeviceOnOffCyclesSensor,
     SystemDeviceOperationTimeSensor,
     create_system_sensors,
@@ -92,6 +94,46 @@ async def test_system_sensors(
         )
 
         await mocked_api.aiohttp_session.close()
+
+
+async def test_ambisense_room_sensors(
+    hass,
+    mypyllant_aioresponses,
+    mocked_api: MyPyllantAPI,
+    system_coordinator_mock,
+):
+    test_data = load_test_data(DATA_DIR / "ambisense2.yaml")
+    with mypyllant_aioresponses(test_data) as _:
+        system_coordinator_mock.data = (
+            await system_coordinator_mock._async_update_data()
+        )
+        temperature = AmbisenseCurrentRoomTemperatureSensor(
+            0, 0, system_coordinator_mock
+        )
+        humidity = AmbisenseRoomHumiditySensor(0, 0, system_coordinator_mock)
+
+        assert temperature.native_value == 16.9
+        assert humidity.native_value is None
+        assert temperature.device_info["identifiers"] == {
+            (DOMAIN, "e89f1adbbd1d543633bc749643814ea0cc6f_room_0")
+        }
+        assert temperature.unique_id.endswith("_temperature")
+        assert humidity.unique_id.endswith("_humidity")
+
+        config_entry = get_config_entry()
+        hass.data[DOMAIN] = {
+            config_entry.entry_id: {"system_coordinator": system_coordinator_mock}
+        }
+        sensors = await create_system_sensors(hass, config_entry)
+        assert sum(
+            isinstance(sensor, AmbisenseCurrentRoomTemperatureSensor)
+            for sensor in sensors
+        ) == len(system_coordinator_mock.data[0].ambisense_rooms)
+        assert sum(
+            isinstance(sensor, AmbisenseRoomHumiditySensor) for sensor in sensors
+        ) == len(system_coordinator_mock.data[0].ambisense_rooms)
+
+    await mocked_api.aiohttp_session.close()
 
 
 async def test_zone_sensors(
