@@ -9,6 +9,8 @@ from homeassistant.const import UnitOfTime, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from myPyllant.enums import VentilationFanStageType
+
 from custom_components.mypyllant.const import DOMAIN, DEFAULT_HOLIDAY_SETPOINT
 from custom_components.mypyllant.decorators import ensure_token_refresh
 from custom_components.mypyllant.coordinator import SystemCoordinator
@@ -18,6 +20,7 @@ from custom_components.mypyllant.utils import (
     ZoneCoordinatorEntity,
     EntityList,
     CircuitEntity,
+    VentilationEntity,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -56,6 +59,17 @@ async def async_setup_entry(
             sensors.append(
                 lambda: CircuitMinFlowTemperatureSetpoint(
                     index, circuit_index, coordinator
+                )
+            )
+        for ventilation_index, _ in enumerate(system.ventilation):
+            sensors.append(
+                lambda: VentilationMaximumDayFanStageNumber(
+                    index, ventilation_index, coordinator
+                )
+            )
+            sensors.append(
+                lambda: VentilationMaximumNightFanStageNumber(
+                    index, ventilation_index, coordinator
                 )
             )
     async_add_entities(sensors)  # type: ignore
@@ -281,3 +295,57 @@ class CircuitMinFlowTemperatureSetpoint(CircuitEntity, NumberEntity):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN} {self.id_infix}_min_flow_temperature_setpoint"
+
+
+class VentilationMaximumFanStageNumber(VentilationEntity, NumberEntity):
+    """
+    Base class for the maximum day/night fan stage number entities.
+    Mirrors the ``mypyllant.set_ventilation_fan_stage`` entity service on
+    VentilationClimate, but as a directly readable/settable number.
+    """
+
+    _attr_native_min_value = 1.0
+    _attr_native_max_value = 6.0
+    _attr_native_step = 1.0
+    _attr_icon = "mdi:fan"
+
+    fan_stage_type: VentilationFanStageType
+
+    @ensure_token_refresh
+    async def async_set_native_value(self, value: float) -> None:
+        await self.coordinator.api.set_ventilation_fan_stage(
+            self.ventilation, int(value), self.fan_stage_type
+        )
+        await self.coordinator.async_request_refresh_delayed()
+
+
+class VentilationMaximumDayFanStageNumber(VentilationMaximumFanStageNumber):
+    fan_stage_type = VentilationFanStageType.DAY
+
+    @property
+    def name(self) -> str:
+        return f"{self.name_prefix} Maximum Day Fan Stage"
+
+    @property
+    def native_value(self):
+        return self.ventilation.maximum_day_fan_stage
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_maximum_day_fan_stage"
+
+
+class VentilationMaximumNightFanStageNumber(VentilationMaximumFanStageNumber):
+    fan_stage_type = VentilationFanStageType.NIGHT
+
+    @property
+    def name(self) -> str:
+        return f"{self.name_prefix} Maximum Night Fan Stage"
+
+    @property
+    def native_value(self):
+        return self.ventilation.maximum_night_fan_stage
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}_{self.id_infix}_maximum_night_fan_stage"

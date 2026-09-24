@@ -43,6 +43,7 @@ from Saunier Duval & Bulex).
 * Track sensor information of devices, such as temperature, humidity, operating mode, energy usage, or energy efficiency
 * See diagnostic information, such as the current heating curve, flow temperature, firmware versions, or water pressure
 * Custom services to set holiday mode or quick veto temperature overrides, and their duration
+* Read and set the maximum day/night fan stage of ventilation units (e.g. recoVAIR) as number entities
 
 ## Installation
 
