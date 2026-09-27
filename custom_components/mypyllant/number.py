@@ -62,6 +62,9 @@ async def async_setup_entry(
 
 
 class SystemHolidayDurationNumber(HolidayEntity, NumberEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "holiday_duration_remaining"
+
     _attr_native_max_value = 365.0
     _attr_icon = "mdi:hvac-off"
 
@@ -97,9 +100,6 @@ class SystemHolidayDurationNumber(HolidayEntity, NumberEntity):
         else:
             return super().native_step
 
-    @property
-    def name(self):
-        return f"{self.name_prefix} Holiday Duration Remaining"
 
     @property
     def native_value(self):
@@ -136,13 +136,13 @@ class SystemHolidayDurationNumber(HolidayEntity, NumberEntity):
 
 
 class SystemManualCoolingDays(SystemCoordinatorEntity, NumberEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "manual_cooling_duration"
+
     _attr_native_unit_of_measurement = UnitOfTime.DAYS
     _attr_icon = "mdi:snowflake"
     _attr_step = 1  # type: ignore
 
-    @property
-    def name(self):
-        return f"{self.name_prefix} Manual Cooling Duration"
 
     @property
     def native_value(self):
@@ -168,14 +168,14 @@ class SystemManualCoolingDays(SystemCoordinatorEntity, NumberEntity):
 
 
 class ZoneQuickVetoDurationNumber(ZoneCoordinatorEntity, NumberEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "quick_veto_duration"
+
     _attr_native_unit_of_measurement = UnitOfTime.HOURS
     _attr_native_step = 0.5
     _attr_native_max_value = 12.0
     _attr_icon = "mdi:rocket-launch"
 
-    @property
-    def name(self):
-        return f"{self.name_prefix} Quick Veto Duration"
 
     @property
     def native_value(self):
@@ -204,6 +204,9 @@ class ZoneQuickVetoDurationNumber(ZoneCoordinatorEntity, NumberEntity):
 
 
 class CircuitHeatingCurve(CircuitEntity, NumberEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "heating_curve"
+
     _attr_native_min_value = 0.1
     _attr_native_max_value = 5.0
     _attr_native_step = 0.05
@@ -218,9 +221,6 @@ class CircuitHeatingCurve(CircuitEntity, NumberEntity):
         await self.coordinator.api.set_circuit_heating_curve(self.circuit, value)
         await self.coordinator.async_request_refresh_delayed()
 
-    @property
-    def name(self) -> str:
-        return f"{self.name_prefix} Heating Curve"
 
     @property
     def unique_id(self) -> str:
@@ -228,6 +228,9 @@ class CircuitHeatingCurve(CircuitEntity, NumberEntity):
 
 
 class CircuitHeatDemandLimitedByOutsideTemperature(CircuitEntity, NumberEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "heat_demand_limited_by_outside_temperature"
+
     _attr_native_min_value = 0.0
     _attr_native_max_value = 100.0
     _attr_native_step = 0.1
@@ -247,9 +250,6 @@ class CircuitHeatDemandLimitedByOutsideTemperature(CircuitEntity, NumberEntity):
         )
         await self.coordinator.async_request_refresh_delayed()
 
-    @property
-    def name(self) -> str:
-        return f"{self.name_prefix} Heat Demand Limited by Outside Temperature"
 
     @property
     def unique_id(self) -> str:
@@ -257,6 +257,9 @@ class CircuitHeatDemandLimitedByOutsideTemperature(CircuitEntity, NumberEntity):
 
 
 class CircuitMinFlowTemperatureSetpoint(CircuitEntity, NumberEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "min_flow_temperature_setpoint"
+
     _attr_native_min_value = 0.0
     _attr_native_max_value = 100.0
     _attr_native_step = 0.1
@@ -274,9 +277,6 @@ class CircuitMinFlowTemperatureSetpoint(CircuitEntity, NumberEntity):
         )
         await self.coordinator.async_request_refresh_delayed()
 
-    @property
-    def name(self) -> str:
-        return f"{self.name_prefix} Min Flow Temperature Setpoint"
 
     @property
     def unique_id(self) -> str:

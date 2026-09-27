@@ -52,6 +52,9 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
     """
     Used in climate platform
     """
+    _attr_has_entity_name = True
+    _attr_translation_key = "ventilation_climate"
+
 
     coordinator: SystemCoordinator
     _attr_hvac_modes = list(VENTILATION_HVAC_MODE_MAP.keys())
@@ -98,9 +101,6 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
         ].name_display
         return f"{self.system.home.home_name or self.system.home.nomenclature} Ventilation {vname}"
 
-    @property
-    def name(self) -> str:
-        return f"{self.name_prefix} Climate"
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:

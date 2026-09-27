@@ -71,11 +71,11 @@ async def async_setup_entry(
 
 
 class SystemHolidayStartDateTimeEntity(HolidayEntity, DateTimeEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "away_mode_start_date"
+
     _attr_icon = "mdi:hvac"
 
-    @property
-    def name(self):
-        return f"{self.name_prefix} Away Mode Start Date"
 
     @property
     def native_value(self):
@@ -108,11 +108,11 @@ class SystemHolidayStartDateTimeEntity(HolidayEntity, DateTimeEntity):
 
 
 class SystemHolidayEndDateTimeEntity(SystemHolidayStartDateTimeEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "away_mode_end_date"
+
     _attr_icon = "mdi:hvac-off"
 
-    @property
-    def name(self):
-        return f"{self.name_prefix} Away Mode End Date"
 
     @property
     def native_value(self):
@@ -140,11 +140,11 @@ class SystemHolidayEndDateTimeEntity(SystemHolidayStartDateTimeEntity):
 
 
 class SystemManualCoolingStartDateTimeEntity(ManualCoolingEntity, DateTimeEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "manual_cooling_start_date"
+
     _attr_icon = "mdi:snowflake-check"
 
-    @property
-    def name(self):
-        return f"{self.name_prefix} Manual Cooling Start Date"
 
     @property
     def native_value(self):
@@ -175,11 +175,11 @@ class SystemManualCoolingStartDateTimeEntity(ManualCoolingEntity, DateTimeEntity
 
 
 class SystemManualCoolingEndDateTimeEntity(SystemManualCoolingStartDateTimeEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "manual_cooling_end_date"
+
     _attr_icon = "mdi:snowflake-off"
 
-    @property
-    def name(self):
-        return f"{self.name_prefix} Manual Cooling End Date"
 
     @property
     def native_value(self):
@@ -206,6 +206,9 @@ class SystemManualCoolingEndDateTimeEntity(SystemManualCoolingStartDateTimeEntit
 class DomesticHotWaterLegionellaProtectionDateTime(
     DomesticHotWaterCoordinatorEntity, DateTimeEntity
 ):
+    _attr_has_entity_name = True
+    _attr_translation_key = "legionella_protection_temperature_reached"
+
     _attr_icon = "mdi:temperature-water"
     data: datetime | None = None
 
@@ -224,9 +227,6 @@ class DomesticHotWaterLegionellaProtectionDateTime(
         if self.enabled and self.legionella_protection_active:
             self.data = datetime.now(tz=self.system.timezone)
 
-    @property
-    def name(self):
-        return f"{self.name_prefix} Legionella Protection Temperature Reached"
 
     @property
     def legionella_protection_active(self):

@@ -57,11 +57,11 @@ async def async_setup_entry(
 
 
 class SystemHolidaySwitch(HolidayEntity, SwitchEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "away_mode"
+
     _attr_icon = "mdi:account-arrow-right"
 
-    @property
-    def name(self):
-        return f"{self.name_prefix} Away Mode"
 
     @property
     def is_on(self):
@@ -94,11 +94,11 @@ class SystemHolidaySwitch(HolidayEntity, SwitchEntity):
 
 
 class SystemManualCoolingSwitch(ManualCoolingEntity, SwitchEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "manual_cooling"
+
     _attr_icon = "mdi:snowflake-check"
 
-    @property
-    def name(self):
-        return f"{self.name_prefix} Manual Cooling"
 
     @property
     def is_on(self):
@@ -122,11 +122,11 @@ class SystemManualCoolingSwitch(ManualCoolingEntity, SwitchEntity):
 
 
 class SystemEebusSwitch(SystemCoordinatorEntity, SwitchEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "eebus"
+
     _attr_icon = "mdi:check-network"
 
-    @property
-    def name(self):
-        return f"{self.name_prefix} EEBUS"
 
     @property
     def available(self) -> bool:
@@ -160,11 +160,11 @@ class SystemEebusSwitch(SystemCoordinatorEntity, SwitchEntity):
 
 
 class ZoneVentilationBoostSwitch(ZoneCoordinatorEntity, SwitchEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "ventilation_boost"
+
     _attr_icon = "mdi:window-open-variant"
 
-    @property
-    def name(self):
-        return f"{self.name_prefix} Ventilation Boost"
 
     @property
     def is_on(self):
@@ -189,9 +189,9 @@ class ZoneVentilationBoostSwitch(ZoneCoordinatorEntity, SwitchEntity):
 
 
 class DomesticHotWaterBoostSwitch(DomesticHotWaterCoordinatorEntity, SwitchEntity):
-    @property
-    def name(self):
-        return f"{self.name_prefix} Boost"
+    _attr_has_entity_name = True
+    _attr_translation_key = "boost"
+
 
     @property
     def is_on(self):

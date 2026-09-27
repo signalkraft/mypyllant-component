@@ -127,7 +127,7 @@ class BaseCalendarEntity(CalendarEntity, ABC):
         match = re.search(r"([0-9.,]+)°?C?", summary)
         try:
             return float(match.group(1).replace(",", "."))  # type: ignore
-        except ValueError, AttributeError:
+        except (ValueError, AttributeError):
             raise HomeAssistantError("Invalid setpoint, use format '21.5°C' in Summary")
 
     def _check_overlap(self):
@@ -275,6 +275,9 @@ class BaseCalendarEntity(CalendarEntity, ABC):
 
 
 class ZoneHeatingCalendar(ZoneCoordinatorEntity, BaseCalendarEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "heating_schedule"
+
     _attr_icon = "mdi:home-thermometer"
     _has_setpoint = True
 
@@ -282,9 +285,6 @@ class ZoneHeatingCalendar(ZoneCoordinatorEntity, BaseCalendarEntity):
     def time_program(self) -> ZoneTimeProgram:
         return self.zone.heating.time_program_heating  # type: ignore
 
-    @property
-    def name(self) -> str:
-        return self.name_prefix
 
     @property
     def unique_id(self) -> str:
@@ -324,6 +324,9 @@ class ZoneHeatingCalendar(ZoneCoordinatorEntity, BaseCalendarEntity):
 
 
 class ZoneCoolingCalendar(ZoneCoordinatorEntity, BaseCalendarEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "cooling_schedule"
+
     _attr_icon = "mdi:snowflake-thermometer"
     _has_setpoint = True
 
@@ -331,9 +334,6 @@ class ZoneCoolingCalendar(ZoneCoordinatorEntity, BaseCalendarEntity):
     def time_program(self) -> ZoneTimeProgram:
         return self.zone.cooling.time_program_cooling  # type: ignore
 
-    @property
-    def name(self) -> str:
-        return self.name_prefix
 
     @property
     def unique_id(self) -> str:
@@ -368,15 +368,15 @@ class ZoneCoolingCalendar(ZoneCoordinatorEntity, BaseCalendarEntity):
 
 
 class DomesticHotWaterCalendar(DomesticHotWaterCoordinatorEntity, BaseCalendarEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "dhw_schedule"
+
     _attr_icon = "mdi:water-thermometer"
 
     @property
     def time_program(self) -> DHWTimeProgram:
         return self.domestic_hot_water.time_program_dhw
 
-    @property
-    def name(self) -> str:
-        return self.name_prefix
 
     @property
     def unique_id(self) -> str:
@@ -413,15 +413,15 @@ class DomesticHotWaterCalendar(DomesticHotWaterCoordinatorEntity, BaseCalendarEn
 class DomesticHotWaterCirculationCalendar(
     DomesticHotWaterCoordinatorEntity, BaseCalendarEntity
 ):
+    _attr_has_entity_name = True
+    _attr_translation_key = "dhw_circulation_schedule"
+
     _attr_icon = "mdi:pump"
 
     @property
     def time_program(self) -> DHWTimeProgram:
         return self.domestic_hot_water.time_program_circulation_pump
 
-    @property
-    def name(self) -> str:
-        return f"Circulating Water in {self.name_prefix}"
 
     @property
     def unique_id(self) -> str:
@@ -456,6 +456,9 @@ class DomesticHotWaterCirculationCalendar(
 
 
 class AmbisenseCalendar(AmbisenseCoordinatorEntity, BaseCalendarEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "room_schedule"
+
     _attr_icon = "mdi:thermometer-auto"
     _has_setpoint = True
 
@@ -463,9 +466,6 @@ class AmbisenseCalendar(AmbisenseCoordinatorEntity, BaseCalendarEntity):
     def time_program(self) -> RoomTimeProgram:
         return self.room.time_program  # type: ignore
 
-    @property
-    def name(self) -> str:
-        return f"{self.name_prefix} Schedule"
 
     @property
     def unique_id(self) -> str:

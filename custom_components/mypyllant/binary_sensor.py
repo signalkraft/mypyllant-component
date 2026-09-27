@@ -104,10 +104,13 @@ class SystemControlEntity(CoordinatorEntity, BinarySensorEntity):
 
     @property
     def device_info(self) -> DeviceInfo | None:
-        return {"identifiers": {(DOMAIN, self.id_infix)}}
+        return {"identifiers": {(DOMAIN, self.id_infix)}, "name": self.name_prefix}
 
 
 class ControlError(SystemControlEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "trouble_codes"
+
     def __init__(
         self,
         system_index: int,
@@ -126,9 +129,6 @@ class ControlError(SystemControlEntity):
     def is_on(self) -> bool | None:
         return self.system.has_diagnostic_trouble_codes
 
-    @property
-    def name(self) -> str:
-        return f"{self.name_prefix} Trouble Codes"
 
     @property
     def unique_id(self) -> str:
@@ -140,6 +140,9 @@ class ControlError(SystemControlEntity):
 
 
 class ControlOnline(SystemControlEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "online_status"
+
     def __init__(
         self,
         system_index: int,
@@ -151,9 +154,6 @@ class ControlOnline(SystemControlEntity):
     def is_on(self) -> bool:
         return self.system.connected is True
 
-    @property
-    def name(self) -> str:
-        return f"{self.name_prefix} Online Status"
 
     @property
     def unique_id(self) -> str:
@@ -165,6 +165,9 @@ class ControlOnline(SystemControlEntity):
 
 
 class FirmwareUpdateRequired(SystemControlEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "firmware_update_required"
+
     def __init__(
         self,
         system_index: int,
@@ -176,9 +179,6 @@ class FirmwareUpdateRequired(SystemControlEntity):
     def is_on(self) -> bool | None:
         return self.system.home.firmware.get("update_required", None)
 
-    @property
-    def name(self) -> str:
-        return f"{self.name_prefix} Firmware Update Required"
 
     @property
     def unique_id(self) -> str:
@@ -190,6 +190,9 @@ class FirmwareUpdateRequired(SystemControlEntity):
 
 
 class FirmwareUpdateEnabled(SystemControlEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "firmware_update_enabled"
+
     def __init__(
         self,
         system_index: int,
@@ -201,9 +204,6 @@ class FirmwareUpdateEnabled(SystemControlEntity):
     def is_on(self) -> bool | None:
         return self.system.home.firmware.get("update_enabled", None)
 
-    @property
-    def name(self) -> str:
-        return f"{self.name_prefix} Firmware Update Enabled"
 
     @property
     def unique_id(self) -> str:
@@ -211,6 +211,9 @@ class FirmwareUpdateEnabled(SystemControlEntity):
 
 
 class EebusCapable(SystemControlEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "eebus_capable"
+
     _attr_icon = "mdi:check-network"
 
     def __init__(
@@ -228,9 +231,6 @@ class EebusCapable(SystemControlEntity):
             else False
         )
 
-    @property
-    def name(self) -> str:
-        return f"{self.name_prefix} EEBUS Capable"
 
     @property
     def unique_id(self) -> str:
@@ -238,6 +238,9 @@ class EebusCapable(SystemControlEntity):
 
 
 class EebusEnabled(SystemControlEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "eebus_enabled"
+
     _attr_icon = "mdi:check-network"
 
     def __init__(
@@ -255,9 +258,6 @@ class EebusEnabled(SystemControlEntity):
             else False
         )
 
-    @property
-    def name(self) -> str:
-        return f"{self.name_prefix} EEBUS Enabled"
 
     @property
     def unique_id(self) -> str:
@@ -265,13 +265,13 @@ class EebusEnabled(SystemControlEntity):
 
 
 class CircuitIsCoolingAllowed(CircuitEntity, BinarySensorEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "cooling_allowed"
+
     @property
     def is_on(self) -> bool | None:
         return self.circuit.is_cooling_allowed
 
-    @property
-    def name(self) -> str:
-        return f"{self.name_prefix} Cooling Allowed"
 
     @property
     def unique_id(self) -> str:
@@ -279,13 +279,13 @@ class CircuitIsCoolingAllowed(CircuitEntity, BinarySensorEntity):
 
 
 class ZoneIsManualCoolingActive(ZoneCoordinatorEntity, BinarySensorEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "manual_cooling_active"
+
     @property
     def is_on(self) -> bool | None:
         return self.zone.is_manual_cooling_active
 
-    @property
-    def name(self) -> str:
-        return f"{self.name_prefix} Manual Cooling Active"
 
     @property
     def unique_id(self) -> str:
@@ -293,6 +293,9 @@ class ZoneIsManualCoolingActive(ZoneCoordinatorEntity, BinarySensorEntity):
 
 
 class AmbisenseDeviceLowBattery(AmbisenseDeviceCoordinatorEntity, BinarySensorEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "battery_low"
+
     def __init__(
         self,
         system_index: int,
@@ -310,9 +313,6 @@ class AmbisenseDeviceLowBattery(AmbisenseDeviceCoordinatorEntity, BinarySensorEn
     def unique_id(self) -> str:
         return self.unique_id_fragment + "_low_bat"
 
-    @property
-    def name(self) -> str:
-        return f"{self.name_prefix} battery low"
 
     @property
     def device_class(self) -> BinarySensorDeviceClass:
@@ -320,6 +320,9 @@ class AmbisenseDeviceLowBattery(AmbisenseDeviceCoordinatorEntity, BinarySensorEn
 
 
 class AmbisenseDeviceUnreachable(AmbisenseDeviceCoordinatorEntity, BinarySensorEntity):
+    _attr_has_entity_name = True
+    _attr_translation_key = "reachable"
+
     def __init__(
         self,
         system_index: int,
@@ -337,9 +340,6 @@ class AmbisenseDeviceUnreachable(AmbisenseDeviceCoordinatorEntity, BinarySensorE
     def unique_id(self) -> str:
         return self.unique_id_fragment + "_unreach"
 
-    @property
-    def name(self) -> str:
-        return f"{self.name_prefix} reachable"
 
     @property
     def device_class(self) -> BinarySensorDeviceClass:

@@ -90,6 +90,8 @@ async def async_setup_entry(
 class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
     coordinator: SystemCoordinator
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
+    _attr_has_entity_name = True
+    _attr_name = None
 
     def __init__(self, system_index, dhw_index, coordinator, data) -> None:
         """Initialize entity."""
@@ -155,7 +157,8 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
                     self.id_infix,
                 )
             },
-            name=self.name,
+            translation_key="domestic_hot_water",
+            translation_placeholders={"index": str(self.dhw_index)},
             manufacturer=self.system.brand_name,
         )
 
@@ -171,9 +174,6 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_base"
 
-    @property
-    def name(self) -> str:
-        return self.name_prefix
 
     @property
     def supported_features(self) -> WaterHeaterEntityFeature:

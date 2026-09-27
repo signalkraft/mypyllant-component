@@ -343,6 +343,9 @@ async def async_setup_entry(
 
 class ZoneClimate(CoordinatorEntity, ClimateEntity):
     """Climate for a zone."""
+    _attr_has_entity_name = True
+    _attr_translation_key = "mypyllant_zone"
+
 
     coordinator: SystemCoordinator
     _attr_translation_key = "mypyllant_zone"
@@ -471,9 +474,6 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_climate"
 
-    @property
-    def name(self) -> str:
-        return f"{self.name_prefix} Climate"
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
@@ -973,6 +973,9 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
 class AmbisenseClimate(AmbisenseCoordinatorEntity, ClimateEntity):
     """Climate for an ambisense room."""
+    _attr_has_entity_name = True
+    _attr_translation_key = "ambisense_climate"
+
 
     coordinator: SystemCoordinator
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
@@ -1022,9 +1025,6 @@ class AmbisenseClimate(AmbisenseCoordinatorEntity, ClimateEntity):
             * 60  # Ambisense rooms expect minutes, but OPTION_DEFAULT_QUICK_VETO_DURATION is in hours
         )
 
-    @property
-    def name(self) -> str:
-        return self.name_prefix
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any] | None:

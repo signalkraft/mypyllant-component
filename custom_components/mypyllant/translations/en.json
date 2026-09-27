@@ -58,7 +58,212 @@
               "away": "Holiday"
             }
           }
-        }
+        },
+        "name": "Climate"
+      },
+      "ambisense_climate": {
+        "name": "Climate"
+      },
+      "ventilation_climate": {
+        "name": "Climate"
+      }
+    },
+    "sensor": {
+      "outdoor_temperature": {
+        "name": "Outdoor temperature"
+      },
+      "top_dhw_temperature": {
+        "name": "Top DHW cylinder temperature"
+      },
+      "bottom_dhw_temperature": {
+        "name": "Bottom DHW cylinder temperature"
+      },
+      "top_ch_temperature": {
+        "name": "Top central heating cylinder temperature"
+      },
+      "bottom_ch_temperature": {
+        "name": "Bottom central heating cylinder temperature"
+      },
+      "system_water_pressure": {
+        "name": "System water pressure"
+      },
+      "firmware_version": {
+        "name": "Firmware version"
+      },
+      "desired_temperature": {
+        "name": "Desired temperature"
+      },
+      "desired_heating_temperature": {
+        "name": "Desired heating temperature"
+      },
+      "desired_cooling_temperature": {
+        "name": "Desired cooling temperature"
+      },
+      "current_temperature": {
+        "name": "Current temperature"
+      },
+      "humidity": {
+        "name": "Humidity"
+      },
+      "heating_operating_mode": {
+        "name": "Heating operating mode"
+      },
+      "cooling_operating_mode": {
+        "name": "Cooling operating mode"
+      },
+      "heating_state": {
+        "name": "Heating state"
+      },
+      "current_special_function": {
+        "name": "Current special function"
+      },
+      "current_flow_temperature": {
+        "name": "Current flow temperature"
+      },
+      "flow_temperature_setpoint": {
+        "name": "Flow temperature setpoint"
+      },
+      "state": {
+        "name": "State"
+      },
+      "min_flow_temperature_setpoint": {
+        "name": "Min flow temperature setpoint"
+      },
+      "heating_curve": {
+        "name": "Heating curve"
+      },
+      "tank_temperature": {
+        "name": "Tank temperature"
+      },
+      "setpoint": {
+        "name": "Setpoint"
+      },
+      "operation_mode": {
+        "name": "Operation mode"
+      },
+      "water_pressure": {
+        "name": "Water pressure"
+      },
+      "operation_time": {
+        "name": "Operation time"
+      },
+      "on_off_cycles": {
+        "name": "On/off cycles"
+      },
+      "current_power": {
+        "name": "Current power"
+      },
+      "api_request_count": {
+        "name": "Vaillant API request count"
+      },
+      "system_flow_temperature": {
+        "name": "System flow temperature"
+      },
+      "energy_manager_state": {
+        "name": "Energy manager state"
+      }
+    },
+    "binary_sensor": {
+      "trouble_codes": {
+        "name": "Trouble codes"
+      },
+      "online_status": {
+        "name": "Online status"
+      },
+      "firmware_update_required": {
+        "name": "Firmware update required"
+      },
+      "firmware_update_enabled": {
+        "name": "Firmware update enabled"
+      },
+      "eebus_capable": {
+        "name": "EEBUS capable"
+      },
+      "eebus_enabled": {
+        "name": "EEBUS enabled"
+      },
+      "cooling_allowed": {
+        "name": "Cooling allowed"
+      },
+      "manual_cooling_active": {
+        "name": "Manual cooling active"
+      },
+      "battery_low": {
+        "name": "Battery low"
+      },
+      "reachable": {
+        "name": "Reachable"
+      }
+    },
+    "switch": {
+      "away_mode": {
+        "name": "Away mode"
+      },
+      "manual_cooling": {
+        "name": "Manual cooling"
+      },
+      "eebus": {
+        "name": "EEBUS"
+      },
+      "ventilation_boost": {
+        "name": "Ventilation boost"
+      },
+      "boost": {
+        "name": "Quick Veto"
+      }
+    },
+    "number": {
+      "holiday_duration_remaining": {
+        "name": "Holiday duration remaining"
+      },
+      "manual_cooling_duration": {
+        "name": "Manual cooling duration"
+      },
+      "quick_veto_duration": {
+        "name": "Quick Veto duration"
+      },
+      "heating_curve": {
+        "name": "Heating curve"
+      },
+      "heat_demand_limited_by_outside_temperature": {
+        "name": "Heat demand limited by outside temperature"
+      },
+      "min_flow_temperature_setpoint": {
+        "name": "Min flow temperature setpoint"
+      }
+    },
+    "datetime": {
+      "away_mode_start_date": {
+        "name": "Away mode start date"
+      },
+      "away_mode_end_date": {
+        "name": "Away mode end date"
+      },
+      "manual_cooling_start_date": {
+        "name": "Manual cooling start date"
+      },
+      "manual_cooling_end_date": {
+        "name": "Manual cooling end date"
+      },
+      "legionella_protection_temperature_reached": {
+        "name": "Legionella protection temperature reached"
+      }
+    },
+    "calendar": {
+      "heating_schedule": {
+        "name": "Heating schedule"
+      },
+      "cooling_schedule": {
+        "name": "Cooling schedule"
+      },
+      "dhw_schedule": {
+        "name": "DHW schedule"
+      },
+      "dhw_circulation_schedule": {
+        "name": "DHW circulation schedule"
+      },
+      "room_schedule": {
+        "name": "Room schedule"
       }
     }
   },
@@ -87,6 +292,11 @@
           "fetch_eebus": "Fetch EEBUS Data"
         }
       }
+    }
+  },
+  "device": {
+    "domestic_hot_water": {
+      "name": "Domestic hot water {index}"
     }
   }
 }

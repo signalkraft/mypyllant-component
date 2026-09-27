@@ -10,13 +10,40 @@
         },
         "title": "Login Information",
         "description": "Aus der myVAILLANT App"
+      },
+      "reauth_confirm": {
+        "data": {
+          "password": "Passwort",
+          "username": "Benutzername",
+          "country": "Land",
+          "brand": "Hersteller"
+        },
+        "title": "Erneut bei myVAILLANT authentifizieren",
+        "description": "Wie in der myVAILLANT App"
+      },
+      "reconfigure": {
+        "data": {
+          "password": "Passwort",
+          "username": "Benutzername",
+          "country": "Land",
+          "brand": "Hersteller"
+        },
+        "title": "myVAILLANT neu konfigurieren",
+        "description": "Wie in der myVAILLANT App"
       }
     },
     "error": {
-      "login_endpoint_invalid": "Kein Login möglich mit diesem Land und Hersteller",
-      "realm_invalid": "Für diesen Hersteller wird ein Land benötigt",
-      "authentication_failed": "Login fehlgeschlagen, stimmen Benutzername & Passwort?",
-      "unknown": "Unerwarteter Fehler, siehe Logs"
+      "login_endpoint_invalid": "Keine Anmeldemethode für diese Kombination aus Hersteller und Land gefunden",
+      "realm_invalid": "Für diesen Hersteller muss ein Land ausgewählt werden",
+      "authentication_failed": "Authentifizierung fehlgeschlagen. Überprüfe Benutzername und Passwort und stelle sicher, dass das richtige Land und der richtige Hersteller ausgewählt sind",
+      "already_configured": "Für diesen Benutzer ist bereits eine Zentrale konfiguriert",
+      "another_user": "Für diesen Benutzer ist bereits eine Zentrale konfiguriert",
+      "unknown": "Unerwarteter Fehler"
+    },
+    "abort": {
+      "entry_not_found": "Für diesen Benutzer wurde kein Konfigurationseintrag gefunden",
+      "reauth_successful": "Neukonfiguration erfolgreich abgeschlossen.",
+      "wrong_account": "Das Konto, das du neu konfigurieren möchtest, entspricht nicht dem Konto, mit dem du dich angemeldet hast."
     }
   },
   "entity": {
@@ -31,7 +58,212 @@
               "away": "Abwesenheitsmodus"
             }
           }
-        }
+        },
+        "name": "Klima"
+      },
+      "ambisense_climate": {
+        "name": "Klima"
+      },
+      "ventilation_climate": {
+        "name": "Klima"
+      }
+    },
+    "sensor": {
+      "outdoor_temperature": {
+        "name": "Außentemperatur"
+      },
+      "top_dhw_temperature": {
+        "name": "Obere Warmwassertemperatur"
+      },
+      "bottom_dhw_temperature": {
+        "name": "Untere Warmwassertemperatur"
+      },
+      "top_ch_temperature": {
+        "name": "Obere Heizwassertemperatur"
+      },
+      "bottom_ch_temperature": {
+        "name": "Untere Heizwassertemperatur"
+      },
+      "system_water_pressure": {
+        "name": "Systemwasserdruck"
+      },
+      "firmware_version": {
+        "name": "Firmware-Version"
+      },
+      "desired_temperature": {
+        "name": "Solltemperatur"
+      },
+      "desired_heating_temperature": {
+        "name": "Solltemperatur Heizen"
+      },
+      "desired_cooling_temperature": {
+        "name": "Solltemperatur Kühlen"
+      },
+      "current_temperature": {
+        "name": "Aktuelle Temperatur"
+      },
+      "humidity": {
+        "name": "Luftfeuchtigkeit"
+      },
+      "heating_operating_mode": {
+        "name": "Heizbetriebsart"
+      },
+      "cooling_operating_mode": {
+        "name": "Kühlbetriebsart"
+      },
+      "heating_state": {
+        "name": "Heizstatus"
+      },
+      "current_special_function": {
+        "name": "Aktuelle Sonderfunktion"
+      },
+      "current_flow_temperature": {
+        "name": "Aktuelle Vorlauftemperatur"
+      },
+      "flow_temperature_setpoint": {
+        "name": "Vorlauf-Solltemperatur"
+      },
+      "state": {
+        "name": "Status"
+      },
+      "min_flow_temperature_setpoint": {
+        "name": "Minimale Vorlauf-Solltemperatur"
+      },
+      "heating_curve": {
+        "name": "Heizkurve"
+      },
+      "tank_temperature": {
+        "name": "Speichertemperatur"
+      },
+      "setpoint": {
+        "name": "Sollwert"
+      },
+      "operation_mode": {
+        "name": "Betriebsart"
+      },
+      "water_pressure": {
+        "name": "Wasserdruck"
+      },
+      "operation_time": {
+        "name": "Betriebszeit"
+      },
+      "on_off_cycles": {
+        "name": "Ein-/Aus-Zyklen"
+      },
+      "current_power": {
+        "name": "Aktuelle Leistung"
+      },
+      "api_request_count": {
+        "name": "Vaillant-API-Anfragen"
+      },
+      "system_flow_temperature": {
+        "name": "Systemvorlauftemperatur"
+      },
+      "energy_manager_state": {
+        "name": "Status des Energiemanagers"
+      }
+    },
+    "binary_sensor": {
+      "trouble_codes": {
+        "name": "Fehler Codes"
+      },
+      "online_status": {
+        "name": "Online-Status"
+      },
+      "firmware_update_required": {
+        "name": "Firmware-Update erforderlich"
+      },
+      "firmware_update_enabled": {
+        "name": "Firmware-Update aktiviert"
+      },
+      "eebus_capable": {
+        "name": "EEBUS-fähig"
+      },
+      "eebus_enabled": {
+        "name": "EEBUS aktiviert"
+      },
+      "cooling_allowed": {
+        "name": "Kühlung erlaubt"
+      },
+      "manual_cooling_active": {
+        "name": "Manuelle Kühlung aktiv"
+      },
+      "battery_low": {
+        "name": "Batterie schwach"
+      },
+      "reachable": {
+        "name": "Erreichbar"
+      }
+    },
+    "switch": {
+      "away_mode": {
+        "name": "Abwesenheitsmodus"
+      },
+      "manual_cooling": {
+        "name": "Manuelle Kühlung"
+      },
+      "eebus": {
+        "name": "EEBUS"
+      },
+      "ventilation_boost": {
+        "name": "Lüftungs-Boost"
+      },
+      "boost": {
+        "name": "Quick Veto"
+      }
+    },
+    "number": {
+      "holiday_duration_remaining": {
+        "name": "Verbleibende Abwesenheitsdauer"
+      },
+      "manual_cooling_duration": {
+        "name": "Dauer der manuellen Kühlung"
+      },
+      "quick_veto_duration": {
+        "name": "Quick-Veto-Dauer"
+      },
+      "heating_curve": {
+        "name": "Heizkurve"
+      },
+      "heat_demand_limited_by_outside_temperature": {
+        "name": "Heizbedarf durch Außentemperatur begrenzt"
+      },
+      "min_flow_temperature_setpoint": {
+        "name": "Minimale Vorlauf-Solltemperatur"
+      }
+    },
+    "datetime": {
+      "away_mode_start_date": {
+        "name": "Beginn des Abwesenheitsmodus"
+      },
+      "away_mode_end_date": {
+        "name": "Ende des Abwesenheitsmodus"
+      },
+      "manual_cooling_start_date": {
+        "name": "Beginn der manuellen Kühlung"
+      },
+      "manual_cooling_end_date": {
+        "name": "Ende der manuellen Kühlung"
+      },
+      "legionella_protection_temperature_reached": {
+        "name": "Legionellen-Schutztemperatur erreicht"
+      }
+    },
+    "calendar": {
+      "heating_schedule": {
+        "name": "Heizzeitplan"
+      },
+      "cooling_schedule": {
+        "name": "Kühlzeitplan"
+      },
+      "dhw_schedule": {
+        "name": "Warmwasser-Zeitplan"
+      },
+      "dhw_circulation_schedule": {
+        "name": "Warmwasser-Zirkulationszeitplan"
+      },
+      "room_schedule": {
+        "name": "Raum-Zeitplan"
       }
     }
   },
@@ -53,9 +285,18 @@
           "fetch_mpc": "Echtzeit-Stromverbrauch abrufen (nicht auf jedem System unterstützt)",
           "fetch_ambisense_rooms": "Ambisense Raumthermostate abrufen",
           "fetch_energy_management": "Energiemanagement-Daten abrufen",
-          "fetch_eebus": "EEBUS-Daten abrufen"
+          "fetch_eebus": "EEBUS-Daten abrufen",
+          "dhw_legionella_protection_temperature": "Temperatur, ab der der Legionellenschutz als aktiv gilt",
+          "fetch_connection_status": "Verbindungsstatus des Systems abrufen",
+          "fetch_dtc": "Diagnose-Störcodes abrufen",
+          "fetch_ambisense_capability": "Ambisense-Fähigkeit abrufen"
         }
       }
+    }
+  },
+  "device": {
+    "domestic_hot_water": {
+      "name": "Warmwasser {index}"
     }
   }
 }
