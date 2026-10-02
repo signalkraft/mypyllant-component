@@ -3,8 +3,9 @@
 import logging
 from unittest import mock
 
+from aiohttp import ClientConnectionError
 from homeassistant import data_entry_flow
-from homeassistant.config_entries import SOURCE_USER
+from homeassistant.config_entries import SOURCE_USER, ConfigEntryState
 from homeassistant.core import HomeAssistant
 
 from myPyllant.api import MyPyllantAPI
@@ -81,3 +82,16 @@ async def test_async_setup(
         assert result, "Component did not unload successfully"
 
     await mocked_api.aiohttp_session.close()
+
+
+async def test_async_setup_network_error_retries(hass: HomeAssistant):
+    """A network error during login (e.g. DNS not ready at boot) must lead to setup_retry, not setup_error"""
+    config_entry = get_config_entry()
+    config_entry.add_to_hass(hass)
+    with mock.patch(
+        "custom_components.mypyllant.MyPyllantAPI.login",
+        side_effect=ClientConnectionError("DNS server returned general failure"),
+    ):
+        await hass.config_entries.async_setup(config_entry.entry_id)
+        await hass.async_block_till_done()
+    assert config_entry.state is ConfigEntryState.SETUP_RETRY

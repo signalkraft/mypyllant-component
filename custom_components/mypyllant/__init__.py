@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime as dt, timedelta
 import voluptuous as vol
+from aiohttp import ClientConnectionError
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import (
@@ -11,7 +12,7 @@ from homeassistant.core import (
     ServiceCall,
     ServiceResponse,
 )
-from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers import selector
 
 from myPyllant import export, report
@@ -108,6 +109,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await api.login()
     except (AuthenticationFailed, LoginEndpointInvalid, RealmInvalid) as e:
         raise ConfigEntryAuthFailed from e
+    except (ClientConnectionError, TimeoutError) as e:
+        # Network not ready yet (e.g. DNS failing right after a reboot), let HA retry setup with back-off
+        await api.aiohttp_session.close()
+        raise ConfigEntryNotReady(
+            f"Could not connect to the myVAILLANT API: {e}"
+        ) from e
 
     system_coordinator = SystemCoordinator(
         hass, api, entry, timedelta(seconds=update_interval)
