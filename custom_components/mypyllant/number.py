@@ -18,7 +18,9 @@ from custom_components.mypyllant.utils import (
     ZoneCoordinatorEntity,
     EntityList,
     CircuitEntity,
+    VentilationEntity,
 )
+from myPyllant.enums import VentilationFanStageType
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -56,6 +58,17 @@ async def async_setup_entry(
             sensors.append(
                 lambda: CircuitMinFlowTemperatureSetpoint(
                     index, circuit_index, coordinator
+                )
+            )
+        for ventilation_index, ventilation in enumerate(system.ventilation):
+            sensors.append(
+                lambda: VentilationMaximumDayFanStage(
+                    index, ventilation_index, coordinator
+                )
+            )
+            sensors.append(
+                lambda: VentilationMaximumNightFanStage(
+                    index, ventilation_index, coordinator
                 )
             )
     async_add_entities(sensors)  # type: ignore
@@ -281,3 +294,42 @@ class CircuitMinFlowTemperatureSetpoint(CircuitEntity, NumberEntity):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN} {self.id_infix}_min_flow_temperature_setpoint"
+
+
+class VentilationMaximumFanStage(VentilationEntity, NumberEntity):
+    _attr_native_min_value = 1
+    _attr_native_max_value = 6
+    _attr_native_step = 1
+    _attr_icon = "mdi:fan"
+    fan_stage_type: VentilationFanStageType
+
+    @property
+    def native_value(self) -> int:
+        return getattr(
+            self.ventilation, f"maximum_{self.fan_stage_type.lower()}_fan_stage"
+        )
+
+    @ensure_token_refresh
+    async def async_set_native_value(self, value: float) -> None:
+        await self.coordinator.api.set_ventilation_fan_stage(
+            self.ventilation, int(value), self.fan_stage_type
+        )
+        await self.coordinator.async_request_refresh_delayed()
+
+    @property
+    def name(self) -> str:
+        return f"{self.name_prefix} Maximum {self.fan_stage_type.title()} Fan Stage"
+
+    @property
+    def unique_id(self) -> str:
+        return (
+            f"{DOMAIN}_{self.id_infix}_maximum_{self.fan_stage_type.lower()}_fan_stage"
+        )
+
+
+class VentilationMaximumDayFanStage(VentilationMaximumFanStage):
+    fan_stage_type = VentilationFanStageType.DAY
+
+
+class VentilationMaximumNightFanStage(VentilationMaximumFanStage):
+    fan_stage_type = VentilationFanStageType.NIGHT

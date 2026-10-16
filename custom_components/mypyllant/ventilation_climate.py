@@ -13,18 +13,15 @@ from homeassistant.components.climate import (
 )
 from homeassistant.const import UnitOfTemperature
 from homeassistant.helpers import selector
-from homeassistant.helpers.device_registry import DeviceInfo
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from custom_components.mypyllant.const import DOMAIN
 from custom_components.mypyllant.decorators import ensure_token_refresh
-from custom_components.mypyllant.coordinator import SystemCoordinator
+from custom_components.mypyllant.utils import VentilationEntity
 from myPyllant.enums import (
     VentilationOperationMode,
     VentilationFanStageType,
     VentilationOperationModeVRC700,
 )
-from myPyllant.models import System, Ventilation
 
 VENTILATION_HVAC_MODE_MAP = {
     HVACMode.FAN_ONLY: VentilationOperationMode.NORMAL,
@@ -48,55 +45,17 @@ VRC700_FAN_MODE_WRITE_MAP = {
 }
 
 
-class VentilationClimate(CoordinatorEntity, ClimateEntity):
+class VentilationClimate(VentilationEntity, ClimateEntity):
     """
     Used in climate platform
     """
 
-    coordinator: SystemCoordinator
     _attr_hvac_modes = list(VENTILATION_HVAC_MODE_MAP.keys())
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
-
-    def __init__(
-        self,
-        system_index: int,
-        ventilation_index: int,
-        coordinator: SystemCoordinator,
-    ) -> None:
-        super().__init__(coordinator)
-        self.system_index = system_index
-        self.ventilation_index = ventilation_index
-
-    @property
-    def system(self) -> System:
-        return self.coordinator.data[self.system_index]
-
-    @property
-    def ventilation(self) -> Ventilation:
-        return self.system.ventilation[self.ventilation_index]
-
-    @property
-    def device_info(self) -> DeviceInfo:
-        return DeviceInfo(
-            identifiers={(DOMAIN, self.id_infix)},
-            name=self.name_prefix,
-            manufacturer=self.system.brand_name,
-        )
 
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.id_infix}_climate"
-
-    @property
-    def id_infix(self) -> str:
-        return f"{self.system.id}_ventilation_{self.ventilation_index}"
-
-    @property
-    def name_prefix(self) -> str:
-        vname = [d for d in self.system.devices if d.type == "ventilation"][
-            0
-        ].name_display
-        return f"{self.system.home.home_name or self.system.home.nomenclature} Ventilation {vname}"
 
     @property
     def name(self) -> str:
@@ -106,6 +65,8 @@ class VentilationClimate(CoordinatorEntity, ClimateEntity):
     def extra_state_attributes(self) -> Mapping[str, Any] | None:
         attr = {
             "time_program_ventilation": self.ventilation.time_program_ventilation,
+            "maximum_day_fan_stage": self.ventilation.maximum_day_fan_stage,
+            "maximum_night_fan_stage": self.ventilation.maximum_night_fan_stage,
         }
         return attr
 

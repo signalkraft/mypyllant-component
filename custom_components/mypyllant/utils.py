@@ -28,6 +28,7 @@ if typing.TYPE_CHECKING:
         AmbisenseRoom,
         AmbisenseDevice,
         Circuit,
+        Ventilation,
     )
 
 logger = logging.getLogger(__name__)
@@ -451,6 +452,47 @@ class CircuitEntity(CoordinatorEntity):
 
     @property
     def device_info(self) -> DeviceInfo | None:
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.id_infix)},
+            name=self.name_prefix,
+            manufacturer=self.system.brand_name,
+        )
+
+
+class VentilationEntity(CoordinatorEntity):
+    coordinator: SystemCoordinator
+
+    def __init__(
+        self,
+        system_index: int,
+        ventilation_index: int,
+        coordinator: SystemCoordinator,
+    ) -> None:
+        super().__init__(coordinator)
+        self.system_index = system_index
+        self.ventilation_index = ventilation_index
+
+    @property
+    def system(self) -> System:
+        return self.coordinator.data[self.system_index]
+
+    @property
+    def ventilation(self) -> Ventilation:
+        return self.system.ventilation[self.ventilation_index]
+
+    @property
+    def id_infix(self) -> str:
+        return f"{self.system.id}_ventilation_{self.ventilation_index}"
+
+    @property
+    def name_prefix(self) -> str:
+        vname = [d for d in self.system.devices if d.type == "ventilation"][
+            0
+        ].name_display
+        return f"{self.system.home.home_name or self.system.home.nomenclature} Ventilation {vname}"
+
+    @property
+    def device_info(self) -> DeviceInfo:
         return DeviceInfo(
             identifiers={(DOMAIN, self.id_infix)},
             name=self.name_prefix,
