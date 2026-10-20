@@ -57,5 +57,13 @@
         }
       }
     }
+  },
+  "exceptions": {
+    "dhw_temperature_out_of_range": {
+      "message": "{temperature} °C liegt außerhalb des erlaubten Bereichs für die Warmwassertemperatur ({min_temp}–{max_temp} °C)."
+    },
+    "dhw_temperature_during_boost": {
+      "message": "Die Warmwassertemperatur kann während der Speicher-Schnellaufheizung (Cylinder Boost) nicht geändert werden. Warte, bis die Schnellaufheizung beendet ist, oder wechsle vorher in eine andere Betriebsart."
+    }
   }
 }

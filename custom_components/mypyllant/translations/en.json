@@ -88,5 +88,13 @@
         }
       }
     }
+  },
+  "exceptions": {
+    "dhw_temperature_out_of_range": {
+      "message": "{temperature} °C is outside of the allowed hot water temperature range of {min_temp}–{max_temp} °C."
+    },
+    "dhw_temperature_during_boost": {
+      "message": "The hot water temperature can't be changed while cylinder boost is active. Wait until the boost has finished, or switch to another operation mode first."
+    }
   }
 }
