@@ -41,6 +41,12 @@ DEFAULT_MANUAL_SETPOINT_TYPE = ZoneOperatingType.HEATING
 DEFAULT_DHW_LEGIONELLA_PROTECTION_TEMPERATURE = 70.0
 QUOTA_PAUSE_INTERVAL = 3 * 3600  # in seconds
 API_DOWN_PAUSE_INTERVAL = 15 * 60  # in seconds
+# Energy statistics: how far back the daily coordinator fills gaps in hourly data
+# (e.g. after quota pauses or outages), and the API limit per HOUR request.
+STATISTICS_BACKFILL_MAX_DAYS = 7
+STATISTICS_HOUR_REQUEST_MAX_DAYS = 2  # API allows 3 days, 2 leaves room for DST
+# How far back DataSensor looks for the last published sum before a data window.
+STATISTICS_BASELINE_MAX_LOOKBACK_DAYS = 3650
 HVAC_MODE_COOLING_FOR_DAYS = "COOLING_FOR_DAYS"
 DHW_LEGIONELLA_PROTECTION_DATETIME = "dhw_legionella_protection_datetime"
 

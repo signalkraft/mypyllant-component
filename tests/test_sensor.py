@@ -811,3 +811,33 @@ def test_today_total_consumption_all_none_values(hass):
         mock_datetime.now.return_value = _MIDNIGHT + timedelta(hours=1)
         sensor = _make_sensor(hass, buckets)
         assert sensor.today_total_consumption == 0.0
+
+
+async def test_write_hourly_statistics_baseline_survives_gap_longer_than_a_week(hass):
+    """Regression test: when nothing was published in the 7 days before the window
+    (daily coordinator failed for longer), the baseline must still be the last sum
+    before the window instead of 0, otherwise the statistic drops and the energy
+    dashboard shows a large negative consumption."""
+    buckets = _make_buckets([100.0, 200.0])
+    sensor = _make_sensor(hass, buckets)
+    stat_id = f"{DOMAIN}:{sensor.unique_id}".lower().replace("-", "_")
+
+    async def fake_job(func, hass, start_time, end_time, ids, period, *rest):
+        if end_time == buckets[0].start_date and period == "month":
+            return {stat_id: [{"sum": 1000.0}, {"sum": 65221.0}]}
+        # 7-day hourly lookup and existing-stats lookup: nothing there
+        return {}
+
+    with (
+        patch("custom_components.mypyllant.sensor.get_instance") as mock_recorder,
+        patch(
+            "custom_components.mypyllant.sensor.async_add_external_statistics"
+        ) as mock_stats,
+    ):
+        mock_recorder.return_value.async_add_executor_job = AsyncMock(
+            side_effect=fake_job
+        )
+        await sensor._write_hourly_statistics()
+
+    _, _, stats = mock_stats.call_args[0]
+    assert [s["sum"] for s in stats] == [65321.0, 65521.0]
