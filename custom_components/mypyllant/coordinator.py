@@ -7,6 +7,8 @@ from datetime import timedelta, datetime as dt, timezone
 from typing import TypedDict
 
 from aiohttp import ClientResponseError
+from homeassistant.components.recorder import get_instance
+from homeassistant.components.recorder.statistics import get_last_statistics
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -34,6 +36,8 @@ from custom_components.mypyllant.const import (
     DEFAULT_FETCH_CONNECTION_STATUS,
     OPTION_FETCH_DTC,
     DEFAULT_FETCH_DTC,
+    STATISTICS_BACKFILL_MAX_DAYS,
+    STATISTICS_HOUR_REQUEST_MAX_DAYS,
 )
 from custom_components.mypyllant.utils import (
     is_quota_exceeded_exception,
@@ -44,6 +48,40 @@ from myPyllant.enums import DeviceDataBucketResolution
 from myPyllant.models import System, DeviceData, Home
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def local_midnight(value: dt, tz) -> dt:
+    """Local midnight of value's date in tz, constructed from the date so it stays
+    on midnight across DST transitions."""
+    day = value.astimezone(tz).date()
+    return dt(day.year, day.month, day.day, tzinfo=tz)
+
+
+def backfill_ranges(start: dt, end: dt, max_days: int) -> list[tuple[dt, dt]]:
+    """Split [start, end) into ranges the HOUR resolution of the API accepts."""
+    ranges = []
+    while start < end:
+        range_end = min(start + timedelta(days=max_days), end)
+        ranges.append((start, range_end))
+        start = range_end
+    return ranges
+
+
+def merge_device_data(target: list[DeviceData], earlier: list[DeviceData]) -> None:
+    """Merge buckets fetched for an earlier range into the matching DeviceData,
+    keeping buckets sorted by start and the newer fetch's values on overlap."""
+    for current, extra in zip(target, earlier):
+        if (current.operation_mode, current.energy_type) != (
+            extra.operation_mode,
+            extra.energy_type,
+        ):
+            continue
+        known = {bucket.start_date for bucket in current.data}
+        current.data = sorted(
+            [bucket for bucket in extra.data if bucket.start_date not in known]
+            + list(current.data),
+            key=lambda bucket: bucket.start_date,
+        )
 
 
 class MyPyllantCoordinator(DataUpdateCoordinator):
@@ -356,6 +394,41 @@ class DailyDataCoordinator(MyPyllantCoordinator):
             return entity_entry is not None and bool(entity_entry.disabled)
         return False
 
+    async def statistics_gap_start(
+        self, device, de_index: int, start: dt, tz
+    ) -> dt | None:
+        """
+        Start of hourly data that has not been published as statistics yet
+
+        The regular fetch only covers yesterday + today, so hours missed while
+        updates failed for longer (quota pause, API outage, HA downtime) would
+        never be published. Returns local midnight of the oldest "last published
+        statistic" across the device's enabled data sensors if it lies before
+        `start`, capped at STATISTICS_BACKFILL_MAX_DAYS. Series that never
+        published anything are ignored, so a fresh install does not backfill.
+        """
+        if "recorder" not in self.hass.config.components:
+            return None
+        oldest: float | None = None
+        for da_index, device_data in enumerate(device.data):
+            if device_data.skip_data_update:
+                continue
+            sensor_id = f"{DOMAIN}_{device.system_id}_{device.device_uuid}_{da_index}_{de_index}"
+            statistic_id = f"{DOMAIN}:{sensor_id}".lower().replace("-", "_")
+            last_stats = await get_instance(self.hass).async_add_executor_job(
+                get_last_statistics, self.hass, 1, statistic_id, False, {"sum"}
+            )
+            rows = last_stats.get(statistic_id)
+            if rows and (oldest is None or rows[0]["start"] < oldest):
+                oldest = rows[0]["start"]
+        if oldest is None:
+            return None
+        gap_start = max(
+            local_midnight(dt.fromtimestamp(oldest, tz), tz),
+            local_midnight(start - timedelta(days=STATISTICS_BACKFILL_MAX_DAYS), tz),
+        )
+        return gap_start if gap_start < start else None
+
     async def _async_update_data(self) -> dict[str, SystemWithDeviceData]:
         self._raise_if_quota_hit()
         _LOGGER.debug("Starting async update data for DailyDataCoordinator")
@@ -398,12 +471,38 @@ class DailyDataCoordinator(MyPyllantCoordinator):
                         sensor_id = f"{DOMAIN}_{device.system_id}_{device.device_uuid}_{da_index}_{de_index}"
                         if await self.is_sensor_disabled(sensor_id):
                             device.data[da_index].skip_data_update = True
-                    device_data = self.api.get_data_by_device(
-                        device, DeviceDataBucketResolution.HOUR, start, end
+                    device_data = [
+                        da
+                        async for da in self.api.get_data_by_device(
+                            device, DeviceDataBucketResolution.HOUR, start, end
+                        )
+                    ]
+                    gap_start = await self.statistics_gap_start(
+                        device, de_index, start, system.timezone
                     )
-                    data[system.id]["devices_data"].append(
-                        [da async for da in device_data]
-                    )
+                    if gap_start is not None:
+                        _LOGGER.debug(
+                            "Backfilling hourly data for %s from %s to %s",
+                            device.device_uuid,
+                            gap_start,
+                            start,
+                        )
+                        for range_start, range_end in backfill_ranges(
+                            gap_start, start, STATISTICS_HOUR_REQUEST_MAX_DAYS
+                        ):
+                            merge_device_data(
+                                device_data,
+                                [
+                                    da
+                                    async for da in self.api.get_data_by_device(
+                                        device,
+                                        DeviceDataBucketResolution.HOUR,
+                                        range_start,
+                                        range_end,
+                                    )
+                                ],
+                            )
+                    data[system.id]["devices_data"].append(device_data)
             # Clear quota state on successful fetch so future updates aren't blocked
             self._clear_quota_state()
             return data

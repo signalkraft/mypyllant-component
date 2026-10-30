@@ -48,7 +48,7 @@ from custom_components.mypyllant.utils import (
 from myPyllant.utils import prepare_field_value_for_dict
 
 from . import DailyDataCoordinator, SystemCoordinator
-from .const import DOMAIN
+from .const import DOMAIN, STATISTICS_BASELINE_MAX_LOOKBACK_DAYS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -1019,6 +1019,35 @@ class DataSensor(CoordinatorEntity, SensorEntity):
                 exc_info=True,
             )
 
+    async def _baseline_sum(self, statistic_id: str, window_start: datetime) -> float:
+        """Last published sum strictly before window_start.
+
+        The 7 days before the window are checked first, which covers the normal
+        case cheaply. If nothing was published there - e.g. because the daily
+        coordinator could not fetch data for more than a week (quota, outage) -
+        fall back to monthly rows over a long range. Those are still bounded by
+        window_start, so their last sum is the last hourly sum before the window.
+        Without the fallback the baseline drops to 0 after such a gap and the
+        statistic gets a large negative delta.
+        """
+        for lookback, period in (
+            (timedelta(days=7), "hour"),
+            (timedelta(days=STATISTICS_BASELINE_MAX_LOOKBACK_DAYS), "month"),
+        ):
+            last_stats = await get_instance(self.hass).async_add_executor_job(
+                statistics_during_period,
+                self.hass,
+                window_start - lookback,
+                window_start,
+                {statistic_id},
+                period,
+                None,
+                {"sum"},
+            )
+            if last_stats.get(statistic_id):
+                return last_stats[statistic_id][-1]["sum"] or 0.0
+        return 0.0
+
     async def _write_hourly_statistics(self) -> None:
         if (
             self.unique_id is None
@@ -1040,21 +1069,7 @@ class DataSensor(CoordinatorEntity, SensorEntity):
         # window_start keeps the baseline stable across repeated polls of the
         # same window, so the existing-buckets dedup guard below can actually
         # recognize unchanged buckets instead of rewriting everything every time.
-        last_stats = await get_instance(self.hass).async_add_executor_job(
-            statistics_during_period,
-            self.hass,
-            window_start - timedelta(days=7),
-            window_start,
-            {statistic_id},
-            "hour",
-            None,
-            {"sum"},
-        )
-        baseline_sum = (
-            last_stats[statistic_id][-1]["sum"] or 0.0
-            if statistic_id in last_stats and last_stats[statistic_id]
-            else 0.0
-        )
+        baseline_sum = await self._baseline_sum(statistic_id, window_start)
 
         # Buckets already published for this window, keyed by start timestamp, so we
         # only (re)write buckets that are new or whose value actually changed (a
