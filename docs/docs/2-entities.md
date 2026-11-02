@@ -378,10 +378,11 @@ so the only new row added is the previously-missing hour.
 
 !!! danger "important"
 
-    To avoid hitting the myVAILLANT API quota, the **daily energy data is *not* refreshed
-    automatically**: it is only fetched once when the integration loads. You therefore need to
-    trigger a refresh yourself to keep the hourly statistics current. There are two recommended
-    approaches depending on whether you have hourly electricity metering in Home Assistant.
+    To avoid hitting the myVAILLANT API quota, daily energy data is **not refreshed automatically
+    by default**: it is only fetched once when the integration loads. Set the
+    `update_interval_daily` option to enable periodic polling, or trigger a refresh yourself to
+    keep the hourly statistics current. There are two recommended approaches depending on whether
+    you have hourly electricity metering in Home Assistant.
 
 A refresh is triggered by calling `homeassistant.update_entity` on **any** of the integration's
 energy / efficiency sensors (e.g. `sensor.home_device_0_arotherm_plus_heating_energy_efficiency`).

@@ -66,6 +66,7 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         super().__init__(
             hass,
             _LOGGER,
+            config_entry=entry,
             name="myVAILLANT",
             update_interval=update_interval,
         )
