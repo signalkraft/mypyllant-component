@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.const import ATTR_TEMPERATURE
 from homeassistant.helpers.entity_registry import DATA_REGISTRY, EntityRegistry
 from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
@@ -62,7 +63,7 @@ async def test_water_heater(
         )
 
         dhw = DomesticHotWaterEntity(0, 0, system_coordinator_mock, {})
-        assert isinstance(dhw.device_info, dict)
+        assert isinstance(dhw.device_info, DeviceInfo)
         assert isinstance(dhw.min_temp, (int, float, complex))
         assert isinstance(dhw.max_temp, (int, float, complex))
         if "currentTemperature" in test_data:

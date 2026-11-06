@@ -1,3 +1,4 @@
+from homeassistant.helpers.device_registry import DeviceInfo
 from unittest import mock
 
 import pytest as pytest
@@ -81,7 +82,7 @@ async def test_zone_climate(
             get_config_entry(),
             {},
         )
-        assert isinstance(climate.device_info, dict)
+        assert isinstance(climate.device_info, DeviceInfo)
         assert isinstance(climate.extra_state_attributes, dict)
         assert isinstance(climate.target_temperature, float | int)
         assert isinstance(climate.extra_state_attributes, dict)
@@ -127,7 +128,7 @@ async def test_ventilation_climate(
             0,
             system_coordinator_mock,
         )
-        assert isinstance(ventilation.device_info, dict)
+        assert isinstance(ventilation.device_info, DeviceInfo)
         assert isinstance(ventilation.extra_state_attributes, dict)
         assert isinstance(ventilation.hvac_mode, HVACMode)
         assert isinstance(ventilation.fan_mode, str)
@@ -172,7 +173,7 @@ async def test_ambisense_climate(
             get_config_entry(),
             {},
         )
-        assert isinstance(ambisense.device_info, dict)
+        assert isinstance(ambisense.device_info, DeviceInfo)
         assert isinstance(ambisense.extra_state_attributes, dict)
         assert isinstance(ambisense.hvac_mode, HVACMode)
         assert isinstance(ambisense.current_temperature, float)

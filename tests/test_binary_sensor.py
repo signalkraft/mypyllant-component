@@ -1,6 +1,7 @@
 from unittest.mock import Mock
 
 import pytest
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_registry import DATA_REGISTRY, EntityRegistry
 from homeassistant.loader import DATA_COMPONENTS, DATA_INTEGRATIONS
 
@@ -62,7 +63,7 @@ async def test_system_binary_sensors(
         assert isinstance(system.device_info, dict)
 
         circuit = CircuitEntity(0, 0, system_coordinator_mock)
-        assert isinstance(circuit.device_info, dict)
+        assert isinstance(circuit.device_info, DeviceInfo)
         assert isinstance(circuit.system, System)
 
         assert isinstance(ControlError(0, system_coordinator_mock).is_on, bool)
