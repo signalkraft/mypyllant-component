@@ -67,6 +67,10 @@ async def test_water_heater(
         assert isinstance(dhw.max_temp, (int, float, complex))
         if "currentTemperature" in test_data:
             assert isinstance(dhw.current_temperature, (int, float, complex))
+        # HA 2026.11 reads the native_* names, older releases the old ones
+        assert dhw.native_current_temperature == dhw.current_temperature
+        assert dhw.native_target_temperature == dhw.target_temperature
+        assert dhw._attr_native_temperature_unit == dhw.temperature_unit
         assert isinstance(dhw.operation_list, list)
         assert isinstance(dhw.extra_state_attributes, dict)
         assert dhw.current_operation in dhw.operation_list

@@ -84,6 +84,12 @@ async def test_zone_climate(
         assert isinstance(climate.device_info, dict)
         assert isinstance(climate.extra_state_attributes, dict)
         assert isinstance(climate.target_temperature, float | int)
+        # HA 2026.11 reads the native_* names, older releases the old ones
+        assert climate.native_target_temperature == climate.target_temperature
+        assert climate.native_target_temperature_low == climate.target_temperature_low
+        assert climate.native_target_temperature_high == climate.target_temperature_high
+        assert climate.native_current_temperature == climate.current_temperature
+        assert climate._attr_native_temperature_unit == climate.temperature_unit
         assert isinstance(climate.extra_state_attributes, dict)
 
         await climate.set_holiday()
@@ -177,6 +183,9 @@ async def test_ambisense_climate(
         assert isinstance(ambisense.hvac_mode, HVACMode)
         assert isinstance(ambisense.current_temperature, float)
         assert isinstance(ambisense.target_temperature, float)
+        assert ambisense.native_current_temperature == ambisense.current_temperature
+        assert ambisense.native_target_temperature == ambisense.target_temperature
+        assert ambisense._attr_native_temperature_unit == ambisense.temperature_unit
         assert isinstance(ambisense.extra_state_attributes["devices"][0]["name"], str)
 
         await ambisense.async_turn_on()
