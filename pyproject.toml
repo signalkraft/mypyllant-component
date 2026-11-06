@@ -20,8 +20,8 @@ test = [
     "polyfactory~=3.3.0",
     "PyYAML~=6.0.1",
     # Need specific versions
-    "pytest-homeassistant-custom-component==0.13.338",
-    # Versions handled by pytest-homeassistant-custom-component
+    "pytest-homeassistant==2026.11.0",
+    # Test tooling
     "freezegun",
     "pytest",
     "pytest-asyncio",
@@ -52,6 +52,7 @@ show_missing = true
 testpaths = ["tests"]
 norecursedirs = [".git"]
 addopts = """
+-p no:respx
 -n4
 --strict-markers
 --cov=custom_components"""

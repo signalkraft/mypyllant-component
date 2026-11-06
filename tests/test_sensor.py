@@ -1,3 +1,4 @@
+from homeassistant.helpers.device_registry import DeviceInfo
 import pytest as pytest
 from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -85,7 +86,7 @@ async def test_system_sensors(
         # )
 
         home = HomeEntity(0, system_coordinator_mock)
-        assert isinstance(home.device_info, dict)
+        assert isinstance(home.device_info, DeviceInfo)
         assert (
             home.extra_state_attributes
             and "controller_type" in home.extra_state_attributes
