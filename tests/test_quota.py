@@ -74,6 +74,27 @@ async def test_quota_time_extraction(
     assert extract_quota_duration(quota_exception) == 30 * 60 + 2
 
 
+async def test_quota_duration_parses_day_prefixed_timespan():
+    """Day-prefixed .NET TimeSpan messages include the day in the backoff.
+
+    ``1.02:02:00`` is 1 day, 2 hours and 2 minutes (93720 s). A regex that
+    only matches ``hh:mm:ss`` skips the day prefix via ``re.search`` and
+    returns 2 hours 2 minutes instead.
+    See https://github.com/signalkraft/mypyllant-component/issues/514
+    """
+    exc = ClientResponseError(
+        request_info=RequestInfo(
+            url="https://api.vaillant-group.com/service-connected-control/end-user-app-api/v1/homes",  # type: ignore
+            method="GET",
+            headers=None,  # type: ignore
+        ),
+        history=None,  # type: ignore
+        status=403,
+        message='{ "statusCode": 403, "message": "Out of call volume quota. Quota will be replenished in 1.02:02:00." }',
+    )
+    assert extract_quota_duration(exc) == 93720
+
+
 async def test_quota_duration_from_retry_after_header():
     """Retry-After header should be preferred over parsing the body text.
 
