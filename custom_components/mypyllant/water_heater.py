@@ -89,6 +89,11 @@ async def async_setup_entry(
 
 class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
     coordinator: SystemCoordinator
+    # Home Assistant 2026.11 renamed the temperature API to native_* (the old
+    # names stop working in 2027.11). The entity provides both: 2026.11+ uses
+    # the native_* members and does not flag a class providing both, older
+    # releases (hacs.json allows 2026.3+) still read the old names.
+    _attr_native_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
 
     def __init__(self, system_index, dhw_index, coordinator, data) -> None:
@@ -183,15 +188,19 @@ class DomesticHotWaterEntity(CoordinatorEntity, WaterHeaterEntity):
         )
 
     @property
-    def target_temperature(self) -> float | None:
+    def native_target_temperature(self) -> float | None:
         return self.domestic_hot_water.tapping_setpoint
 
     @property
-    def current_temperature(self) -> float | None:
+    def native_current_temperature(self) -> float | None:
         if isinstance(self.domestic_hot_water.current_dhw_temperature, float):
             return round(self.domestic_hot_water.current_dhw_temperature, 1)
         else:
             return None
+
+    # Names read by Home Assistant < 2026.11 (see _attr_native_temperature_unit)
+    target_temperature = native_target_temperature
+    current_temperature = native_current_temperature
 
     @property
     def min_temp(self) -> float:

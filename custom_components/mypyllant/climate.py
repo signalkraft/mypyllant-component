@@ -346,6 +346,11 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
 
     coordinator: SystemCoordinator
     _attr_translation_key = "mypyllant_zone"
+    # Home Assistant 2026.11 renamed the temperature API to native_* (the old
+    # names stop working in 2027.11). The entities provide both: 2026.11+ uses
+    # the native_* members and does not flag a class providing both, older
+    # releases (hacs.json allows 2026.3+) still read the old names.
+    _attr_native_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_target_temperature_step = 0.5
     _enable_turn_on_off_backwards_compatibility = False
@@ -648,26 +653,32 @@ class ZoneClimate(CoordinatorEntity, ClimateEntity):
         )
 
     @property
-    def target_temperature(self) -> float | None:
+    def native_target_temperature(self) -> float | None:
         return self.zone.desired_room_temperature_setpoint
 
     @property
-    def target_temperature_low(self) -> float | None:
+    def native_target_temperature_low(self) -> float | None:
         if self.supports_target_temperature_range:
             return self.zone.desired_room_temperature_setpoint_heating
         else:
             return None
 
     @property
-    def target_temperature_high(self) -> float | None:
+    def native_target_temperature_high(self) -> float | None:
         if self.supports_target_temperature_range:
             return self.zone.desired_room_temperature_setpoint_cooling
         else:
             return None
 
     @property
-    def current_temperature(self) -> float | None:
+    def native_current_temperature(self) -> float | None:
         return self.zone.current_room_temperature
+
+    # Names read by Home Assistant < 2026.11 (see _attr_native_temperature_unit)
+    target_temperature = native_target_temperature
+    target_temperature_low = native_target_temperature_low
+    target_temperature_high = native_target_temperature_high
+    current_temperature = native_current_temperature
 
     @property
     def current_humidity(self) -> float | None:
@@ -975,6 +986,8 @@ class AmbisenseClimate(AmbisenseCoordinatorEntity, ClimateEntity):
     """Climate for an ambisense room."""
 
     coordinator: SystemCoordinator
+    # Both names, see ZoneClimate
+    _attr_native_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_hvac_modes = list(
         set([v for v in AMBISENSE_ROOM_OPERATION_MODE_MAP.values()])
@@ -1080,12 +1093,16 @@ class AmbisenseClimate(AmbisenseCoordinatorEntity, ClimateEntity):
         )
 
     @property
-    def target_temperature(self) -> float | None:
+    def native_target_temperature(self) -> float | None:
         return self.room.room_configuration.temperature_setpoint
 
     @property
-    def current_temperature(self) -> float | None:
+    def native_current_temperature(self) -> float | None:
         return self.room.room_configuration.current_temperature
+
+    # Names read by Home Assistant < 2026.11 (see ZoneClimate)
+    target_temperature = native_target_temperature
+    current_temperature = native_current_temperature
 
     @property
     def current_humidity(self) -> float | None:
