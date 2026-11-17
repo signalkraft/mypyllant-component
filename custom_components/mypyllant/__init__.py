@@ -85,6 +85,11 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     return True
 
 
+async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Reload the config entry after its options were changed."""
+    await hass.config_entries.async_reload(entry.entry_id)
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     username: str = entry.data.get("username")  # type: ignore
     password: str = entry.data.get("password")  # type: ignore
@@ -129,6 +134,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN][entry.entry_id]["daily_data_coordinator"] = daily_data_coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    # Reload the entry when options change, so e.g. a new update_interval_daily
+    # takes effect immediately instead of only after the next Home Assistant restart
+    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
 
     async def handle_export(call: ServiceCall) -> ServiceResponse:
         _LOGGER.debug("Exporting data with params %s", call.data)
