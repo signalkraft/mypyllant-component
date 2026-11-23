@@ -5,7 +5,9 @@ from datetime import datetime as dt, timedelta
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
+from homeassistant.helpers.event import async_call_later
 from homeassistant.core import (
+    callback,
     HomeAssistant,
     SupportsResponse,
     ServiceCall,
@@ -129,6 +131,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN][entry.entry_id]["daily_data_coordinator"] = daily_data_coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    if not system_coordinator.last_update_success:
+        # Entities are created from the first fetch, so reload once the API is
+        # usable again. ConfigEntryNotReady would retry during a quota block.
+        retry_delay = system_coordinator.setup_retry_delay()
+        _LOGGER.warning(
+            "No system data during setup, reloading myVAILLANT in %ss", retry_delay
+        )
+
+        @callback
+        def reload_entry(_now: dt) -> None:
+            hass.config_entries.async_schedule_reload(entry.entry_id)
+
+        entry.async_on_unload(async_call_later(hass, retry_delay, reload_entry))
 
     async def handle_export(call: ServiceCall) -> ServiceResponse:
         _LOGGER.debug("Exporting data with params %s", call.data)

@@ -250,14 +250,17 @@ def extract_quota_duration(exc_info: BaseException | None) -> int | None:
 
     import re
 
+    # The API formats the duration like a .NET TimeSpan: [d.]hh:mm:ss
     match = re.search(
-        r"Quota will be replenished in (\d{2}):(\d{2}):(\d{2})", exc_info.message
+        r"Quota will be replenished in (?:(\d+)\.)?(\d{1,2}):(\d{2}):(\d{2})",
+        exc_info.message,
     )
     if match:
-        hours = int(match.group(1))
-        minutes = int(match.group(2))
-        seconds = int(match.group(3))
-        return hours * 3600 + minutes * 60 + seconds
+        days = int(match.group(1) or 0)
+        hours = int(match.group(2))
+        minutes = int(match.group(3))
+        seconds = int(match.group(4))
+        return days * 86400 + hours * 3600 + minutes * 60 + seconds
     return None
 
 

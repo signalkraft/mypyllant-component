@@ -131,6 +131,18 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         self._quota_end_time = None
         self._quota_exc_info = None
 
+    def setup_retry_delay(self) -> int:
+        """
+        Seconds to wait before retrying a failed first refresh, respecting an
+        active quota block so that a retry doesn't spend more of the quota
+        """
+        if self._quota_end_time:
+            remaining = (self._quota_end_time - dt.now(timezone.utc)).total_seconds()
+            return max(int(remaining) + 60, API_DOWN_PAUSE_INTERVAL)
+        if is_quota_exceeded_exception(self._quota_exc_info):
+            return QUOTA_PAUSE_INTERVAL
+        return API_DOWN_PAUSE_INTERVAL
+
     async def _refresh_session(self):
         if (
             self.api.oauth_session_expires is None
