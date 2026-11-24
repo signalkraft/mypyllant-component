@@ -219,7 +219,8 @@ def is_quota_exceeded_exception(exc_info: BaseException | None) -> bool:
         isinstance(exc_info, ClientResponseError)
         and 500 > exc_info.status >= 400
         and (
-            "quota exceeded" in exc_info.message.lower()
+            exc_info.status == 429
+            or "quota exceeded" in exc_info.message.lower()
             or "out of call volume quota" in exc_info.message.lower()
         )
     )
@@ -231,7 +232,7 @@ def extract_quota_duration(exc_info: BaseException | None) -> int | None:
 
     Prefers the standard Retry-After response header (RFC 7231 §7.1.3) when
     present, then falls back to parsing the body text for the Vaillant-specific
-    "Quota will be replenished in HH:MM:SS" message.
+    "Quota will be replenished in [d.]hh:mm:ss" message.
     """
     if not isinstance(exc_info, ClientResponseError) or not is_quota_exceeded_exception(
         exc_info

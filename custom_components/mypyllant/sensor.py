@@ -292,8 +292,11 @@ def async_add_daily_sensors_when_ready(
     The rest of the integration stays available in the meantime.
     """
     original_interval = coordinator.update_interval
-    if original_interval is None:
-        coordinator.update_interval = DAILY_SENSORS_RETRY_INTERVAL
+    coordinator.update_interval = (
+        min(original_interval, DAILY_SENSORS_RETRY_INTERVAL)
+        if original_interval
+        else DAILY_SENSORS_RETRY_INTERVAL
+    )
     unsubscribe: CALLBACK_TYPE | None = None
 
     @callback
@@ -308,11 +311,12 @@ def async_add_daily_sensors_when_ready(
 
     @callback
     def on_update() -> None:
-        if not coordinator.data:
+        if not coordinator.last_update_success:
             return
         stop_listening()
         coordinator.update_interval = original_interval
-        config.async_create_task(hass, add_sensors())
+        if coordinator.data:
+            config.async_create_task(hass, add_sensors())
 
     unsubscribe = coordinator.async_add_listener(on_update)
     config.async_on_unload(stop_listening)
