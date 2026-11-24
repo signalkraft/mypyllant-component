@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime as dt, timedelta
 import voluptuous as vol
+from aiohttp.client_exceptions import ClientResponseError
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import (
@@ -11,10 +12,12 @@ from homeassistant.core import (
     ServiceCall,
     ServiceResponse,
 )
-from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers import selector
 
 from myPyllant import export, report
+
+from .recovery import SetupRecovery
 
 from myPyllant.api import MyPyllantAPI
 from myPyllant.const import DEFAULT_BRAND
@@ -85,6 +88,16 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     return True
 
 
+def _is_transient_login_error(exc: Exception) -> bool:
+    """Outages must not ask the user to re-enter valid credentials"""
+    if isinstance(exc, AuthenticationFailed):
+        return str(exc) == "Could not get login URL"
+    cause = exc.__cause__
+    return isinstance(cause, ClientResponseError) and (
+        cause.status >= 500 or cause.status == 429
+    )
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     username: str = entry.data.get("username")  # type: ignore
     password: str = entry.data.get("password")  # type: ignore
@@ -98,7 +111,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     brand = entry.options.get(OPTION_BRAND, entry.data.get(OPTION_BRAND, DEFAULT_BRAND))
 
     hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = {}
+    recovery = await SetupRecovery.async_get(hass, entry.entry_id)
+    if next_attempt := recovery.next_setup_attempt():
+        raise ConfigEntryNotReady(
+            f"myVAILLANT API paused until {next_attempt.isoformat()}"
+        )
+    hass.data[DOMAIN][entry.entry_id] = {"recovery": recovery}
 
     _LOGGER.debug("Creating API and logging in with %s in realm %s", username, country)
     api = MyPyllantAPI(
@@ -106,14 +124,31 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
     try:
         await api.login()
-    except (AuthenticationFailed, LoginEndpointInvalid, RealmInvalid) as e:
-        raise ConfigEntryAuthFailed from e
+    except Exception as e:
+        await api.aiohttp_session.close()
+        hass.data[DOMAIN].pop(entry.entry_id, None)
+        if isinstance(
+            e, (AuthenticationFailed, LoginEndpointInvalid, RealmInvalid)
+        ) and not _is_transient_login_error(e):
+            raise ConfigEntryAuthFailed from e
+        delay = recovery.record_setup_failure()
+        raise ConfigEntryNotReady(
+            f"myVAILLANT login failed, next attempt in {delay}s"
+        ) from e
 
     system_coordinator = SystemCoordinator(
         hass, api, entry, timedelta(seconds=update_interval)
     )
     _LOGGER.debug("Refreshing SystemCoordinator")
     await system_coordinator.async_refresh()
+    if not system_coordinator.last_update_success:
+        await api.aiohttp_session.close()
+        hass.data[DOMAIN].pop(entry.entry_id, None)
+        delay = recovery.record_setup_failure()
+        raise ConfigEntryNotReady(
+            f"No myVAILLANT system data, next attempt in {delay}s"
+        )
+    recovery.record_setup_success()
     hass.data[DOMAIN][entry.entry_id]["system_coordinator"] = system_coordinator
 
     # Daily data coordinator is fetched once by default (to get all entities), but not updated on a regular basis
@@ -204,6 +239,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         supports_response=SupportsResponse.ONLY,
     )
     return True
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Remove the stored quota and backoff state with the config entry."""
+    await SetupRecovery.async_remove(hass, entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

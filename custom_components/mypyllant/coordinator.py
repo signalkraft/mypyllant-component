@@ -6,6 +6,7 @@ from asyncio import CancelledError
 from datetime import timedelta, datetime as dt, timezone
 from typing import TypedDict
 
+from aiohttp import RequestInfo
 from aiohttp import ClientResponseError
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -39,7 +40,10 @@ from custom_components.mypyllant.utils import (
     is_quota_exceeded_exception,
     extract_quota_duration,
 )
+from custom_components.mypyllant.recovery import SetupRecovery
+from multidict import CIMultiDict, CIMultiDictProxy
 from myPyllant.api import AmbisenseNoFacilityError, MyPyllantAPI
+from yarl import URL
 from myPyllant.enums import DeviceDataBucketResolution
 from myPyllant.models import System, DeviceData, Home
 
@@ -68,6 +72,33 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
             _LOGGER,
             name="myVAILLANT",
             update_interval=update_interval,
+        )
+        self._restore_quota_state()
+
+    @property
+    def _recovery(self) -> SetupRecovery | None:
+        return (
+            self.hass.data.get(DOMAIN, {}).get(self.entry.entry_id, {}).get("recovery")
+        )
+
+    def _restore_quota_state(self) -> None:
+        """Keeps honoring a quota block that started before a reload or restart"""
+        if not self._recovery:
+            return
+        blocked_until = self._recovery.blocked_until(self.__class__.__name__)
+        if not blocked_until:
+            return
+        self._quota_hit_time = dt.now(timezone.utc)
+        self._quota_end_time = blocked_until
+        self._quota_exc_info = ClientResponseError(
+            request_info=RequestInfo(
+                url=URL("https://api.vaillant-group.com/"),
+                method="GET",
+                headers=CIMultiDictProxy(CIMultiDict()),
+            ),
+            history=(),
+            status=403,
+            message="Out of call volume quota (restored after restart)",
         )
 
     @property
@@ -130,6 +161,8 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         self._quota_hit_time = None
         self._quota_end_time = None
         self._quota_exc_info = None
+        if self._recovery:
+            self._recovery.clear_blocked(self.__class__.__name__)
 
     async def _refresh_session(self):
         if (
@@ -186,11 +219,17 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
         if is_quota_exceeded_exception(exc_info):
             duration = extract_quota_duration(exc_info)
             self._quota_hit_time = dt.now(timezone.utc)
-            if duration:
+            if duration is not None:
                 self._quota_end_time = dt.now(timezone.utc) + timedelta(
                     seconds=duration
                 )
             self._quota_exc_info = exc_info
+            if self._recovery:
+                self._recovery.set_blocked(
+                    self.__class__.__name__,
+                    self._quota_end_time
+                    or self._quota_hit_time + timedelta(seconds=QUOTA_PAUSE_INTERVAL),
+                )
             self._raise_if_quota_hit()
 
     def _raise_if_quota_hit(self) -> None:
@@ -270,6 +309,7 @@ class MyPyllantCoordinator(DataUpdateCoordinator):
 class SystemCoordinator(MyPyllantCoordinator):
     data: list[System]  # type: ignore
     homes: list[Home] = []
+    _ambisense_unavailable: bool = False
 
     async def _async_update_data(self) -> list[System]:  # type: ignore
         self._raise_if_quota_hit()
@@ -281,8 +321,11 @@ class SystemCoordinator(MyPyllantCoordinator):
         )
         include_rts = self.entry.options.get(OPTION_FETCH_RTS, DEFAULT_FETCH_RTS)
         include_mpc = self.entry.options.get(OPTION_FETCH_MPC, DEFAULT_FETCH_MPC)
-        include_ambisense_rooms = self.entry.options.get(
-            OPTION_FETCH_AMBISENSE_ROOMS, DEFAULT_FETCH_AMBISENSE_ROOMS
+        include_ambisense_rooms = (
+            self.entry.options.get(
+                OPTION_FETCH_AMBISENSE_ROOMS, DEFAULT_FETCH_AMBISENSE_ROOMS
+            )
+            and not self._ambisense_unavailable
         )
         include_energy_management = self.entry.options.get(
             OPTION_FETCH_ENERGY_MANAGEMENT, DEFAULT_FETCH_ENERGY_MANAGEMENT
@@ -328,6 +371,10 @@ class SystemCoordinator(MyPyllantCoordinator):
                 "consider disabling the Ambisense rooms option: %s",
                 e,
             )
+            if include_ambisense_rooms:
+                # Keep the boiler entities: fetch again without the failing rooms
+                self._ambisense_unavailable = True
+                return await self._async_update_data()
             return []
         except ClientResponseError as e:
             self._set_quota_and_raise(e)
@@ -360,13 +407,13 @@ class DailyDataCoordinator(MyPyllantCoordinator):
         self._raise_if_quota_hit()
         _LOGGER.debug("Starting async update data for DailyDataCoordinator")
         try:
-            await self._refresh_session()
-            data: dict[str, SystemWithDeviceData] = {}
             if (
                 "system_coordinator" not in self.hass_data
                 or not self.hass_data["system_coordinator"].data
             ):
                 raise UpdateFailed("No systems available for daily data fetch")
+            await self._refresh_session()
+            data: dict[str, SystemWithDeviceData] = {}
             for system in self.hass_data["system_coordinator"].data:
                 today = dt.now(system.timezone).replace(
                     microsecond=0, second=0, minute=0, hour=0

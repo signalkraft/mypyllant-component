@@ -52,6 +52,8 @@ from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
+DAILY_SENSORS_RETRY_INTERVAL = timedelta(hours=1)
+
 
 async def create_system_sensors(
     hass: HomeAssistant, config: ConfigEntry
@@ -275,11 +277,66 @@ async def create_daily_data_sensors(
     return sensors
 
 
+@callback
+def async_add_daily_sensors_when_ready(
+    hass: HomeAssistant,
+    config: ConfigEntry,
+    coordinator: DailyDataCoordinator,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """
+    Creates the daily data sensors once the first fetch succeeds
+
+    Without entities the coordinator has no listeners and never refreshes again,
+    so a quota block during startup would otherwise last until the next reload.
+    The rest of the integration stays available in the meantime.
+    """
+    original_interval = coordinator.update_interval
+    coordinator.update_interval = (
+        min(original_interval, DAILY_SENSORS_RETRY_INTERVAL)
+        if original_interval
+        else DAILY_SENSORS_RETRY_INTERVAL
+    )
+    unsubscribe: CALLBACK_TYPE | None = None
+
+    @callback
+    def stop_listening() -> None:
+        nonlocal unsubscribe
+        if unsubscribe:
+            unsubscribe()
+            unsubscribe = None
+
+    async def add_sensors() -> None:
+        async_add_entities(await create_daily_data_sensors(hass, config))  # type: ignore
+
+    @callback
+    def on_update() -> None:
+        if not coordinator.last_update_success:
+            return
+        stop_listening()
+        coordinator.update_interval = original_interval
+        if coordinator.data:
+            config.async_create_task(hass, add_sensors())
+
+    unsubscribe = coordinator.async_add_listener(on_update)
+    config.async_on_unload(stop_listening)
+
+
 async def async_setup_entry(
     hass: HomeAssistant, config: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     async_add_entities(await create_system_sensors(hass, config))  # type: ignore
     async_add_entities(await create_daily_data_sensors(hass, config))  # type: ignore
+    daily_data_coordinator = hass.data[DOMAIN][config.entry_id][
+        "daily_data_coordinator"
+    ]
+    if (
+        not daily_data_coordinator.data
+        and not daily_data_coordinator.last_update_success
+    ):
+        async_add_daily_sensors_when_ready(
+            hass, config, daily_data_coordinator, async_add_entities
+        )
 
 
 class SystemSensor(SystemCoordinatorEntity, SensorEntity):
